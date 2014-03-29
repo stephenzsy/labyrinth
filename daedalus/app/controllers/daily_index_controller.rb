@@ -1,0 +1,2 @@
+class DailyIndexController < ApplicationController
+end

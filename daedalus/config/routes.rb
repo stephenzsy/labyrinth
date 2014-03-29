@@ -1,5 +1,7 @@
 Daedalus::Application.routes.draw do
-  resources :article_source
+  resources :article_source do
+    resources :daily_index
+  end
 
   get "welcome/index"
   # The priority is based upon order of creation: first created -> highest priority.

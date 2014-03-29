@@ -1,24 +1,17 @@
-require_relative '../models/article_sources/bloomberg'
-require_relative '../models/article_sources/wsj'
+require 'daedalus/common/html/web_page'
+require 'daedalus/common/util/http_client'
+
 
 module ArticleSourceHelper
 
-  ARTICLE_SOURCES = [
-      Bloomberg.new,
-      WSJ.new
-  ]
+  HTTP_CLIENT = Daedalus::Common::Util::HttpClient.new
 
-  ARTICLE_SOURCES_MAP = {}
-  ARTICLE_SOURCES.each do |article_source|
-    ARTICLE_SOURCES_MAP[article_source.id.to_s] = article_source
+  def get_web_page(url)
+    Daedalus::Common::Html::WebPage.new(HTTP_CLIENT.get(url));
   end
 
-  def all_article_sources
-    ARTICLE_SOURCES
-  end
-
-  def self.get_article_source_by_id(id)
-    ARTICLE_SOURCES_MAP[id]
+  def get_current_datetime()
+    DateTime.now
   end
 
 end
