@@ -1,5 +1,5 @@
 %ul
-  - all_article_sources.each do |article_source|
+  - ArticleSource.all_article_sources.each do |article_source|
     %li
       = link_to article_source.display_name, :controller => :article_source, :action => :show, :id => article_source.id
 %p

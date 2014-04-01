@@ -20,6 +20,10 @@ module Daedalus
         'http://www.bloomberg.com'
       end
 
+      def daily_index_url(local_date)
+        "http://www.bloomberg.com/archive/news/#{local_date.strftime('%Y-%m-%d')}/"
+      end
+
     end
   end
 end

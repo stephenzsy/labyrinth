@@ -43,4 +43,8 @@ class ArticleSource
     @@MAPPING.to_s
   end
 
+  def self.all_article_sources
+    @@MAPPING.values
+  end
+
 end

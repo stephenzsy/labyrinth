@@ -1,0 +1,23 @@
+.row-fluid
+  .span9
+    %ul.breadcrumb
+      %li
+        = link_to 'Home', :root
+        %span.divider /
+      %li
+        = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id
+  .span3.well
+    %table.table
+      %tbody
+        %tr
+          %td.metadata-label Source
+          %td= @article_source.display_name
+        %tr
+          %td.metadata-label Date
+          %td= @daily_index.date.strftime('%Y-%m-%d')
+        %tr
+          %td.metadata-label URL
+          %td= link_to 'Link', @daily_index.url, {:target => '_blank'}
+.row
+  %p.span12
+    Find me in app/views/daily_index/show.html.erb
