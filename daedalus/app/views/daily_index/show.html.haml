@@ -6,6 +6,15 @@
         %span.divider /
       %li
         = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id
+    %ul.nav.nav-tabs
+      %li
+        = link_to 'Cached JSON', '#'
+      %li
+        = link_to 'Cached', '#'
+      %li
+        = link_to 'Live JSON', '#'
+      %li.active
+        = link_to 'Live', '#'
   .span3.well
     %table.table
       %tbody

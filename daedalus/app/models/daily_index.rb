@@ -1,6 +1,6 @@
 require 'daedalus/document'
 
-class DailyIndex < Daedalus::Document
+class DailyIndex < Daedalus::DocumentBase
   attr_accessor :article_source, :date, :url
 
   def initialize(article_source, date)

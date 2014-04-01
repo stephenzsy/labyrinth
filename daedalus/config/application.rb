@@ -12,6 +12,8 @@ Bundler.require(*Rails.groups)
 require_relative '../app/models/article_sources/bloomberg'
 require_relative '../app/models/article_sources/wsj'
 
+require_relative '../lib/daedalus/repository/s3_document_repository'
+
 module Daedalus
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -26,7 +28,17 @@ module Daedalus
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
 
-    Daedalus::ArticleSources::Bloomberg.new.register
-    Daedalus::ArticleSources::WSJ.new.register
+    # register article sources
+    begin
+      Daedalus::ArticleSources::Bloomberg.new.register
+      Daedalus::ArticleSources::WSJ.new.register
+    end
+
+    # initialize document repository
+    begin
+      Daedalus::Repository::S3DocumentRepository.new.register
+    end
   end
+
+
 end
