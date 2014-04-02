@@ -11,10 +11,12 @@
         = link_to 'Cached JSON', '#'
       %li
         = link_to 'Cached', '#'
-      %li
+      %li.active{:data => {:document_type => 'live-json'}}
         = link_to 'Live JSON', '#'
-      %li.active{:data => {:document_type => 'live'}}
+      %li{:data => {:document_type => 'live'}}
         = link_to 'Live', '#'
+    .daily-index-content.live-json
+      %pre.pre-scrollable.prettyprint
     .daily-index-content.live
       %pre.pre-scrollable.prettyprint
   .span3.well

@@ -1,5 +1,7 @@
 require_relative '../article_source'
 
+require_relative '../../../lib/daedalus/document/vendor/bloomberg'
+
 module Daedalus
   module ArticleSources
     class Bloomberg < ArticleSource
@@ -35,6 +37,9 @@ module Daedalus
       def daily_index_id_to_date(daily_index_id)
         @timezone.parse(daily_index_id)
       end
+
+      include Daedalus::Document::Vendor::Bloomberg
+
     end
   end
 end

@@ -13,6 +13,10 @@ module Daedalus
         def html
           @document.to_html
         end
+
+        def document
+          @document
+        end
       end
     end
   end
