@@ -10,11 +10,8 @@ module Daedalus
           @document = Nokogiri::HTML(document_str)
         end
 
-        def header
-        end
-
-        def body
-          @document.css('body')
+        def html
+          @document.to_html
         end
       end
     end

@@ -3,10 +3,10 @@
 .row-fluid
   .span9
     %h3 Daily Index (Last 5 Days)
-    - current_local_date = @article_source.get_local_date(get_current_datetime())
+    - current_local_date = @article_source.get_local_date get_current_datetime()
     %ul
       - (0..4).each do |i|
-        %li= link_to (current_local_date - i.day).strftime('%Y-%m-%d'), :controller => :daily_index, :action => :show, :article_source_id => @article_source.id, |
+        %li= link_to (current_local_date - i.day).strftime('%Y-%m-%d'), :controller => :daily_index, :action => :show, :article_source_id => @article_source.id, :id => nil, |
           :params => {:date=>(current_local_date - i.day).iso8601}
   -#%h3
       Homepage Preview

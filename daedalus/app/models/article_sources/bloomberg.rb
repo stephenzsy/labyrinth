@@ -20,10 +20,21 @@ module Daedalus
         'http://www.bloomberg.com'
       end
 
-      def daily_index_url(local_date)
-        "http://www.bloomberg.com/archive/news/#{local_date.strftime('%Y-%m-%d')}/"
+      def daily_index_url(opt={})
+        if (opt[:date])
+          "http://www.bloomberg.com/archive/news/#{opt[:date].strftime('%Y-%m-%d')}/"
+        elsif opt[:id]
+          "http://www.bloomberg.com/archive/news/#{opt[:id]}/"
+        end
       end
 
+      def get_id(local_date)
+        local_date.strftime('%Y-%m-%d')
+      end
+
+      def daily_index_id_to_date(daily_index_id)
+        @timezone.parse(daily_index_id)
+      end
     end
   end
 end

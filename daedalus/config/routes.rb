@@ -1,7 +1,11 @@
 Daedalus::Application.routes.draw do
-  resources :article_source do
-    resources :daily_index
-  end
+
+  #API uses POST
+  post 'daily_index/:article_source_id/:id' => 'daily_index#api'
+
+  get 'article_source/:id' => 'article_source#show'
+  get 'daily_index/:article_source_id' => 'daily_index#show'
+  get 'daily_index/:article_source_id/:id' => 'daily_index#show'
 
   get "welcome/index"
   # The priority is based upon order of creation: first created -> highest priority.

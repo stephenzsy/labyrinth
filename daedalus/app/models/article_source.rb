@@ -27,7 +27,7 @@ class ArticleSource
     time.in_time_zone(@timezone)
   end
 
-  def daily_index_url(local_date)
+  def daily_index_url(opt = {})
     raise 'Abstract method'
   end
 
