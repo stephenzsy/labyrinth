@@ -1,4 +1,5 @@
 class DailyIndexController < ApplicationController
+
   def show
     @article_source = ArticleSource.from_id(params[:article_source_id])
     if params[:id].nil?
@@ -20,8 +21,18 @@ class DailyIndexController < ApplicationController
       when 'live-json'
         web_page = Daedalus::Common::Html::WebPage.new(Daedalus::Common::Util::HttpClient.new.get(@daily_index.url))
         result[:url] = @daily_index.url
-        result[:data] = @article_source.process_daily_index(web_page.document)
+        result[:processor]
+        result[:data] = @article_source.process_daily_index(web_page)[:document]
     end
     render json: result
+  end
+
+  protect_from_forgery
+  skip_before_action :verify_authenticity_token, if: :json_request?
+
+  protected
+
+  def json_request?
+    request.format.json?
   end
 end

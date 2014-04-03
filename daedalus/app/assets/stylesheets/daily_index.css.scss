@@ -9,3 +9,22 @@ table {
     font-weight: bold;
   }
 }
+
+.nav-tabs {
+  a {
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  li.active {
+    a {
+      &:hover {
+        cursor: auto;
+      }
+    }
+  }
+}
+
+.daily-index-content {
+  display: none;
+}

@@ -8,17 +8,17 @@
         = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id, :action => :show
     %ul.nav.nav-tabs#type-nav
       %li
-        = link_to 'Cached JSON', '#'
+        %a Cached JSON
       %li
-        = link_to 'Cached', '#'
-      %li.active{:data => {:document_type => 'live-json'}}
-        = link_to 'Live JSON', '#'
-      %li{:data => {:document_type => 'live'}}
-        = link_to 'Live', '#'
+        %a Cached
+      %li#nav-tab-live-json{:data => {:document_type => 'live-json'}}
+        %a Live JSON
+      %li#nav-tab-live{:data => {:document_type => 'live'}}
+        %a Live
     .daily-index-content.live-json
-      %pre.pre-scrollable.prettyprint
+      %pre.pre-scrollable
     .daily-index-content.live
-      %pre.pre-scrollable.prettyprint
+      %pre.pre-scrollable
   .span3.well
     %table.table
       %tbody

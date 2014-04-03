@@ -1,4 +1,3 @@
-
 retireve_content = (doc_type, complete, error, progress) ->
   req = {
     DocumentType: doc_type
@@ -11,11 +10,27 @@ retireve_content = (doc_type, complete, error, progress) ->
     data: JSON.stringify(req)
   }).done(complete)
 
-$(document).ready () ->
-  doc_type_tab = $('#type-nav .active').first()
-  doc_type = doc_type_tab.attr('data-document-type')
-  retireve_content(doc_type, (response) ->
-    $('.daily-index-content.' + doc_type + ' pre').text(response['data'])
-    prettyPrint()
-  )
+select_type = (type) ->
+  console.log type
+  $('#type-nav li').removeClass 'active'
+  selected_tab = $('#nav-tab-' + type).addClass('active')
+  doc_type = selected_tab.attr('data-document-type')
+  $('.daily-index-content').hide()
+  $('.daily-index-content.' + doc_type).show()
+  unless selected_tab.attr('data-has-data')
+    retireve_content(doc_type, (response) ->
+      switch type
+        when 'live'
+          $('.daily-index-content.' + doc_type + ' pre').text(response['data']).addClass('prettyprint')
+        when 'live-json'
+          $('.daily-index-content.' + doc_type + ' pre').text(JSON.stringify(response)).addClass('prettyprint')
+      selected_tab.attr('data-has-data', true)
+      prettyPrint()
+    )
 
+$(document).ready () ->
+  type_nav = $('#type-nav')
+  type_nav.children('li').each () ->
+    $(this).select('a').on 'click', 'a', () ->
+      unless $(this).hasClass 'active'
+        select_type($(this).closest('li').attr('data-document-type'))
