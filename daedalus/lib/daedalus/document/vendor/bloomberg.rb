@@ -39,9 +39,7 @@ module Daedalus
                 entry = {
                     :link => entry_content_node.attribute('href').content
                 }
-                p entry_content_node
                 entry_content_node.children.each do |c_node|
-                  p c_node
                   if c_node.text? and not c_node.content.strip.empty?
                     entry[:title] = c_node.content.strip
                     c_node.remove
