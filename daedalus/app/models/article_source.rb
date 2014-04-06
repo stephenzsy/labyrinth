@@ -36,7 +36,7 @@ class ArticleSource
   end
 
   def can_cache_for_date?(date)
-    date < @timezone.now.midnight + 1.hour
+    date.utc < @timezone.now.midnight.utc - 1.day + 2.hour
   end
 
   def self.from_id(id)

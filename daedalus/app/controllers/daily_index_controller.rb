@@ -15,22 +15,25 @@ class DailyIndexController < ApplicationController
     @daily_index = DailyIndex.from_id(@article_source, params[:id])
     result = {}
     case params['DocumentType']
+      when 'cached-json'
+        result[:data] = @daily_index.get_document('cached-json')
       when 'cached'
-        result[:data] = @daily_index.get_document_cached
+        result[:data] = @daily_index.get_document('cached')
       when 'live'
-        result[:data] = Daedalus::Common::Html::WebPage.new(Daedalus::Common::Util::HttpClient.new.get(@daily_index.url)).html
+        result[:data] = @daily_index.get_document('live')
         result[:metadata] = {
             :url => @daily_index.url
         }
       when 'live-json'
-        web_page = Daedalus::Common::Html::WebPage.new(Daedalus::Common::Util::HttpClient.new.get(@daily_index.url))
-        doc = @article_source.process_daily_index(web_page)
+        doc = @article_source.process_daily_index(@daily_index.get_document('live'))
         result[:data] = doc[:document]
         result[:metadata] = {
             :url => @daily_index.url,
             :processor_version => doc[:processor_version],
             :processor_patch => doc[:processor_patch]
         }
+      else
+        raise 'Invalid Document Type: ' + params['DocumentType']
     end
     render json: result
   end

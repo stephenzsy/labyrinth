@@ -12,7 +12,15 @@ module Daedalus
       end
 
       def retrieve_document(index_options, conditions)
-        @repo.retrieve_document(index_options, conditions)
+        status, document, metadata = @repo.retrieve_document(index_options, conditions)
+        case status
+          when :cache_success
+            return status, document, metadata
+          when :cache_not_found
+            return status
+          else
+            raise 'Not Implemented'
+        end
       end
 
       def register

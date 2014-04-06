@@ -1,4 +1,10 @@
+require 'aws-sdk-core'
+require 'aws/plugins/s3_signer'
+require 'aws/plugins/signature_v4'
 require_relative 'cache_repository'
+
+Aws.remove_plugin Aws::Plugins::S3Signer
+Aws.add_plugin Aws::Plugins::SignatureV4
 
 module Daedalus
   module Cache
@@ -11,30 +17,39 @@ module Daedalus
           creds = YAML.load_file(Rails.root.join config[:credentials_file])
           aws_creds = Aws::Credentials.new creds[:aws_access_key_id], creds[:aws_secret_access_key]
         end
-        @s3 = Aws::S3.new(:credentials => aws_creds, :region => config[:document_repository][:s3][:region], :endpoint => config[:document_repository][:s3][:endpoint])
+        # noinspection RubyArgCount
+        @s3 = Aws::S3.new(
+            credentials: aws_creds,
+            region: config[:s3][:region],
+            endpoint: config[:s3][:endpoint])
+        @bucket = config[:s3][:cache_repository][:bucket]
+      end
+
+      def get_s3_key(index_options)
+        "#{index_options[:article_source_id]}:#{index_options[:type]}/#{index_options[:key]}.#{index_options[:document_type]}"
       end
 
       def retrieve_document(index_options, conditions)
-        s3_key = "#{index_options[:article_source_id]}:#{index_options[:type]}/#{index_options[:key]}.#{index_options[:document_type]}"
-         = @s3.get_object(
-            # required
-            bucket: nil,
-            if_match: nil,
-            if_modified_since: "<Time,DateTime,Date,Integer,String>",
-            if_none_match: nil,
-            if_unmodified_since: "<Time,DateTime,Date,Integer,String>",
-            # required
-            key: nil,
-            range: nil,
-            response_cache_control: nil,
-            response_content_disposition: nil,
-            response_content_encoding: nil,
-            response_content_language: nil,
-            response_content_type: nil,
-            response_expires: "<Time,DateTime,Date,Integer,String>",
-            version_id: nil,
+        begin
+          response = @s3.get_object(
+              bucket: @bucket,
+              key: get_s3_key(index_options)
+          )
+        rescue Aws::S3::Errors::NoSuchKey
+          # key doesn't exist
+          return :cache_not_found
+        end
+        [:cache_success, response[:body].string, response[:metadata]]
+      end
+
+      def store_document(document, index_options, metadata, storage_options = {})
+        @s3.put_object(
+            bucket: @bucket,
+            key: get_s3_key(index_options),
+            body: document,
+            metadata: metadata,
+            storage_class: (storage_options[:reduced_redundancy] ? 'REDUCED_REDUNDANCY' : 'STANDARD')
         )
-        [index_options, conditions, s3_key]
       end
 
     end

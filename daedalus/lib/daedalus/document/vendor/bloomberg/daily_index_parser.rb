@@ -1,3 +1,5 @@
+require 'nokogiri'
+
 module Daedalus
   module Document
     module Vendor
@@ -69,11 +71,11 @@ module Daedalus
 
         @@DAILY_INDEX_PARSER = DailyIndexParser.new :url_base => 'http://www.bloomberg.com'
 
-        def process_daily_index(web_page)
+        def process_daily_index(document)
           {
               :processor_version => DAILY_INDEX_PROCESSOR_VERSION,
               :processor_patch => DAILY_INDEX_PROCESSOR_PATCH,
-              :document => @@DAILY_INDEX_PARSER.parse(web_page.document)
+              :document => @@DAILY_INDEX_PARSER.parse(Nokogiri.HTML(document))
           }
         end
 
