@@ -1,6 +1,7 @@
 module Daedalus
   module Cache
     class CacheManager
+      @@instance = nil
 
       def initialize(repository)
         @repo = repository
@@ -10,8 +11,16 @@ module Daedalus
         @repo.store_document(document, index_options, metadata)
       end
 
-      def retrieve_document(document, index_options, metadata_conditions)
+      def retrieve_document(index_options, metadata_conditions)
 
+      end
+
+      def register
+        @@instance = self
+      end
+
+      def self.instance
+        @@instance
       end
 
     end

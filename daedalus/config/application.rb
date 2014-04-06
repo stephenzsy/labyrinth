@@ -12,7 +12,8 @@ Bundler.require(*Rails.groups)
 require_relative '../app/models/article_sources/bloomberg'
 require_relative '../app/models/article_sources/wsj'
 
-require_relative '../lib/daedalus/repository/s3_document_repository'
+require_relative '../lib/daedalus/cache/cache_manager'
+require_relative '../lib/daedalus/cache/aws_s3_cache_repository'
 
 module Daedalus
   class Application < Rails::Application
@@ -36,7 +37,7 @@ module Daedalus
 
     # initialize document repository
     begin
-      Daedalus::Repository::S3DocumentRepository.new.register
+      Daedalus::Cache::CacheManager.new(Daedalus::Cache::AWSS3CacheRepository.new()).register
     end
   end
 

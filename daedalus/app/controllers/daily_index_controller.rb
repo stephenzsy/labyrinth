@@ -15,6 +15,8 @@ class DailyIndexController < ApplicationController
     @daily_index = DailyIndex.from_id(@article_source, params[:id])
     result = {}
     case params['DocumentType']
+      when 'cached'
+        result[:data] = @daily_index.get_document_cached
       when 'live'
         result[:data] = Daedalus::Common::Html::WebPage.new(Daedalus::Common::Util::HttpClient.new.get(@daily_index.url)).html
         result[:metadata] = {

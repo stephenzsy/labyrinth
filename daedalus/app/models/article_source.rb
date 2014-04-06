@@ -35,6 +35,10 @@ class ArticleSource
     @@MAPPING[self.id] = self
   end
 
+  def can_cache_for_date?(date)
+    date < @timezone.now.midnight + 1.hour
+  end
+
   def self.from_id(id)
     @@MAPPING[id.to_sym]
   end

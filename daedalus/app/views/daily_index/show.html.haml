@@ -30,6 +30,12 @@
           %td.metadata-label Date
           %td= @daily_index.date.strftime('%Y-%m-%d')
         %tr
+          %td.metadata-label Cache Status
+          %td
+            - case @daily_index.cache_status
+              - when :cache_ok
+                = 'Cached'
+        %tr
           %td{:colspan => 2}= link_to 'Permalink', { |
             :controller => :daily_index, |
             :action => :show, |

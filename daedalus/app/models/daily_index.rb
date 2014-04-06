@@ -18,6 +18,15 @@ class DailyIndex < Daedalus::DocumentBase
     article_source.get_id(date())
   end
 
+  def cache_status
+    return :cache_not_available unless article_source.can_cache_for_date? date
+    :cache_ok
+  end
+
+  def get_document_cached
+    Daedalus::Cache::CacheManager.instance.retrieve_document()
+  end
+
   def self.from_date(article_source, date)
     DailyIndex.new(article_source, :date => date)
   end
