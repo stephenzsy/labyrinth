@@ -4,6 +4,7 @@ Daedalus::Application.routes.draw do
 
   #API uses POST
   post 'daily_index/:article_source_id/:id' => 'daily_index#api'
+  get 'daily_index/:article_source_id/:id' => 'daily_index#api'
 
   get 'article_source/:id' => 'article_source#show'
   get 'daily_index/:article_source_id' => 'daily_index#show'

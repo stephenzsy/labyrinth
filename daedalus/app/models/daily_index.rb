@@ -24,7 +24,22 @@ class DailyIndex < Daedalus::DocumentBase
   end
 
   def get_document_cached
-    Daedalus::Cache::CacheManager.instance.retrieve_document()
+    raise 'WTF' unless cache_status() == :cache_ok
+    Daedalus::Cache::CacheManager.instance.retrieve_document(
+        {
+            :article_source_id => article_source.id,
+            :type => 'daily_index:original',
+            :key => "#{self.date().strftime('%Y/%m/%d')}",
+            :document_type => :html
+        }, {
+            :match => {
+                :version => article_source.daily_index_version
+            },
+            :cache_if_not_exist => {
+                :enabled => true,
+                :external_url => self.url
+            }
+        })
   end
 
   def self.from_date(article_source, date)

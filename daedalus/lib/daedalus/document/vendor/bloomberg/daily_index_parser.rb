@@ -3,6 +3,12 @@ module Daedalus
     module Vendor
       module Bloomberg
 
+        DAILY_INDEX_VERSION = '2014-04-05'
+
+        def daily_index_version
+          DAILY_INDEX_VERSION
+        end
+
         DAILY_INDEX_PROCESSOR_VERSION = '2014-04-02'
         DAILY_INDEX_PROCESSOR_PATCH = 'dev'
 

@@ -11,8 +11,8 @@ module Daedalus
         @repo.store_document(document, index_options, metadata)
       end
 
-      def retrieve_document(index_options, metadata_conditions)
-
+      def retrieve_document(index_options, conditions)
+        @repo.retrieve_document(index_options, conditions)
       end
 
       def register

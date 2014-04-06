@@ -17,4 +17,5 @@
 
 # Ignore all IDE files
 /.idea
+aws.yml
 aws_credentials.yml
