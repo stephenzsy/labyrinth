@@ -16,13 +16,19 @@ class DailyIndexController < ApplicationController
     result = {}
     case params['DocumentType']
       when 'live'
-        result[:url] = @daily_index.url
         result[:data] = Daedalus::Common::Html::WebPage.new(Daedalus::Common::Util::HttpClient.new.get(@daily_index.url)).html
+        result[:metadata] = {
+            :url => @daily_index.url
+        }
       when 'live-json'
         web_page = Daedalus::Common::Html::WebPage.new(Daedalus::Common::Util::HttpClient.new.get(@daily_index.url))
-        result[:url] = @daily_index.url
-        result[:processor]
-        result[:data] = @article_source.process_daily_index(web_page)[:document]
+        doc = @article_source.process_daily_index(web_page)
+        result[:data] = doc[:document]
+        result[:metadata] = {
+            :url => @daily_index.url,
+            :processor_version => doc[:processor_version],
+            :processor_patch => doc[:processor_patch]
+        }
     end
     render json: result
   end

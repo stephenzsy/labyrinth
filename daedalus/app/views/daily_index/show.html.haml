@@ -5,6 +5,7 @@
         = link_to 'Home', :root
       %li
         = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id, :action => :show
+    .container-fluid#daily-index-display-container
     %ul.nav.nav-tabs#nav-doc-type
       %li= link_to 'Cached JSON', '#doc-content-cached-json', {:data => {:toggle => 'tab', :document_type => 'cached-json'}}
       %li= link_to 'Cached',      '#doc-content-cached',      {:data => {:toggle => 'tab', :document_type => 'cached'}}
@@ -40,4 +41,10 @@
 .row
   %p
     Find me in app/views/daily_index/show.html.erb
+#template-container
+  .daily-index-display-item
+    .box
+      %a
+        %span.title
+
 = javascript_include_tag "daily_index/show"

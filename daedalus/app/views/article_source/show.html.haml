@@ -1,7 +1,7 @@
 .row-fluid
   %h1= @article_source.display_name
-.row-fluid
-  .span9
+.row
+  .col-lg-9
     %h3 Daily Index (Last 5 Days)
     - current_local_date = @article_source.get_local_date get_current_datetime()
     %ul
@@ -12,7 +12,7 @@
       Homepage Preview
     -# %div
       != get_web_page(@article_source.home_url).body.to_s
-  .span3.well
+  .col-lg-3.well
     %h3 Configuration
 .row
   %p.span12

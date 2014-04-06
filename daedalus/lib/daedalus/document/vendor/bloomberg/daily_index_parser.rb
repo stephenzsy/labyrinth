@@ -7,6 +7,11 @@ module Daedalus
         DAILY_INDEX_PROCESSOR_PATCH = 'dev'
 
         class DailyIndexParser
+
+          def initialize(opt = {})
+            @url_base = (opt[:url_base].nil?) ? '' : opt[:url_base]
+          end
+
           def verify_empty(node)
             if node.element?
               node.children.each do |c_node|
@@ -37,7 +42,7 @@ module Daedalus
             stories_node.css('li').each do |node|
               node.css('a').each do |entry_content_node|
                 entry = {
-                    :link => entry_content_node.attribute('href').content
+                    :url => "#{@url_base}#{entry_content_node.attribute('href').content}"
                 }
                 entry_content_node.children.each do |c_node|
                   if c_node.text? and not c_node.content.strip.empty?
@@ -56,7 +61,7 @@ module Daedalus
 
         end
 
-        @@DAILY_INDEX_PARSER = DailyIndexParser.new
+        @@DAILY_INDEX_PARSER = DailyIndexParser.new :url_base => 'http://www.bloomberg.com'
 
         def process_daily_index(web_page)
           {

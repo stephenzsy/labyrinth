@@ -11,6 +11,7 @@ retireve_content = (doc_type, complete, error, progress) ->
   }).done(complete)
 
 $(document).ready () ->
+  # define tabs
   $('#nav-doc-type li a').on 'click', (e) ->
     e.preventDefault()
     doc_type = $(this).attr('data-document-type')
@@ -26,3 +27,15 @@ $(document).ready () ->
         prettyPrint()
       )
     $(this).tab('show')
+
+  # fill json data
+  display_container = $('#daily-index-display-container')
+  retireve_content('live-json', (response) ->
+    # render display
+    response['data'].forEach (item) ->
+      item_display = $('#template-container .daily-index-display-item').clone()
+      item_display.find('.title').text(item['title'])
+      item_display.find('a').attr('href', item['url'])
+      item_display.appendTo display_container
+  )
+

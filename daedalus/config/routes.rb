@@ -1,5 +1,7 @@
 Daedalus::Application.routes.draw do
 
+  resources :news_articles
+
   #API uses POST
   post 'daily_index/:article_source_id/:id' => 'daily_index#api'
 
