@@ -15,23 +15,9 @@ class DailyIndexController < ApplicationController
     @daily_index = DailyIndex.from_id(@article_source, params[:id])
     result = {}
     case params['DocumentType']
-      when 'cached-json'
-        result[:data] = @daily_index.get_document('cached-json')
-      when 'cached'
-        result[:data] = @daily_index.get_document('cached')
-      when 'live'
-        result[:data] = @daily_index.get_document('live')
-        result[:metadata] = {
-            :url => @daily_index.url
-        }
-      when 'live-json'
-        doc = @article_source.process_daily_index(@daily_index.get_document('live'))
-        result[:data] = doc[:document]
-        result[:metadata] = {
-            :url => @daily_index.url,
-            :processor_version => doc[:processor_version],
-            :processor_patch => doc[:processor_patch]
-        }
+      when 'cached-json', 'cached', 'live-json', 'live'
+        result[:data] = @daily_index.get_document(params['DocumentType'])
+
       else
         raise 'Invalid Document Type: ' + params['DocumentType']
     end

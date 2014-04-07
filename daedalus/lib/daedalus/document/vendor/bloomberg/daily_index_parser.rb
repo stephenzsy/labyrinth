@@ -12,7 +12,7 @@ module Daedalus
         end
 
         DAILY_INDEX_PROCESSOR_VERSION = '2014-04-02'
-        DAILY_INDEX_PROCESSOR_PATCH = 'dev'
+        DAILY_INDEX_PROCESSOR_PATCH = '0'
 
         class DailyIndexParser
 
@@ -72,11 +72,8 @@ module Daedalus
         @@DAILY_INDEX_PARSER = DailyIndexParser.new :url_base => 'http://www.bloomberg.com'
 
         def process_daily_index(document)
-          {
-              :processor_version => DAILY_INDEX_PROCESSOR_VERSION,
-              :processor_patch => DAILY_INDEX_PROCESSOR_PATCH,
-              :document => @@DAILY_INDEX_PARSER.parse(Nokogiri.HTML(document))
-          }
+          yield ({:version => DAILY_INDEX_PROCESSOR_VERSION, :patch => DAILY_INDEX_PROCESSOR_PATCH})
+          @@DAILY_INDEX_PARSER.parse(Nokogiri.HTML(document))
         end
 
       end

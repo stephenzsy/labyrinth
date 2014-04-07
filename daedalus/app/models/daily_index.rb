@@ -30,16 +30,15 @@ class DailyIndex < Daedalus::DocumentBase
     @@http_client.get(url)
   end
 
+  def get_date_universal_string(date)
+    date.utc.strftime '%Y-%m-%dT%H:%M:%SZ'
+  end
+
   def get_document_cached
     unless cache_status() == :cache_ok
       return :cache_not_available
     end
-    index_options = {
-        :article_source_id => article_source.id,
-        :type => 'daily_index:original',
-        :key => "#{self.date().strftime('%Y/%m/%d')}",
-        :document_type => :html
-    }
+    index_options = get_cache_index_options type: 'daily_index:original', document_type: :html
     status, document, metadata = @@cache_manager.retrieve_document(
         index_options, {
         :match => {
@@ -54,7 +53,7 @@ class DailyIndex < Daedalus::DocumentBase
         document = get_document_live
         metadata = {
             :version => article_source.daily_index_version,
-            :retrieval_date => DateTime.now.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+            :retrieval_date => get_date_universal_string(DateTime.now)
         }
         @@cache_manager.store_document(document, index_options, metadata)
         return :cache_success, document, metadata
@@ -63,16 +62,18 @@ class DailyIndex < Daedalus::DocumentBase
     end
   end
 
+  def get_cache_index_options(opt)
+    {
+        :article_source_id => article_source.id,
+        :key => "#{self.date().strftime('%Y/%m/%d')}",
+    }.merge(opt)
+  end
+
   def get_document_cached_json
     unless cache_status() == :cache_ok
       return :cache_not_available
     end
-    index_options = {
-        :article_source_id => article_source.id,
-        :type => 'daily_index:json',
-        :key => "#{self.date().strftime('%Y/%m/%d')}",
-        :document_type => :json
-    }
+    index_options = get_cache_index_options type: 'daily_index:json', document_type: :json
     status, document, metadata = @@cache_manager.retrieve_document(
         index_options, {
         :match => {
@@ -80,22 +81,41 @@ class DailyIndex < Daedalus::DocumentBase
         }
     })
     case status
+      when :cache_success
+        return :cache_success, document, metadata
       when :cache_not_found
         o_status, o_document, o_metadata = get_document_cached
         raise o_status unless o_status == :cache_success
-        doc = article_source.process_daily_index(o_document)
-        return doc
+        metadata = {
+            source_retrieval_date: o_metadata[:retrieval_date],
+            source_version: o_metadata[:version]
+        }
+        metadata[:source_key] = o_metadata[:_index_key] unless o_metadata[:_index_key].nil?
+        document = article_source.process_daily_index(o_document) do |m|
+          metadata[:processor_version] = m[:version]
+          metadata[:processor_patch] = m[:patch]
+        end
+        metadata[:generation_date] = get_date_universal_string(DateTime.now)
+        @@cache_manager.store_document(JSON.generate(document), index_options, metadata, {reduced_redundancy: true})
+        return :cache_success, document, metadata
       else
         raise 'Not Implemented'
     end
   end
 
+  def get_document_live_json
+    article_source.process_daily_index(get_document_live) do |m|
+    end
+  end
+
   def get_document(type)
     case type
-      when 'cached'
-        get_document_cached
       when 'cached-json'
         get_document_cached_json
+      when 'cached'
+        get_document_cached
+      when 'live-json'
+        get_document_live_json
       when 'live'
         get_document_live
     end

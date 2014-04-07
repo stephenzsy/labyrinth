@@ -30,16 +30,17 @@ module Daedalus
       end
 
       def retrieve_document(index_options, conditions)
+        s3_key = get_s3_key(index_options)
         begin
           response = @s3.get_object(
               bucket: @bucket,
-              key: get_s3_key(index_options)
+              key: s3_key
           )
         rescue Aws::S3::Errors::NoSuchKey
           # key doesn't exist
           return :cache_not_found
         end
-        [:cache_success, response[:body].string, response[:metadata]]
+        [:cache_success, response[:body].string, response[:metadata].symbolize_keys.merge({_index_key: s3_key})]
       end
 
       def store_document(document, index_options, metadata, storage_options = {})
