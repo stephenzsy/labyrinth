@@ -44,10 +44,18 @@ module Daedalus
       end
 
       def store_document(document, index_options, metadata, storage_options = {})
+        content_type = nil
+        case index_options[:document_type]
+          when :html
+            content_type = 'text/html'
+          when :json
+            content_type = 'application/json'
+        end
         @s3.put_object(
             bucket: @bucket,
             key: get_s3_key(index_options),
             body: document,
+            content_type: content_type,
             metadata: metadata,
             storage_class: (storage_options[:reduced_redundancy] ? 'REDUCED_REDUNDANCY' : 'STANDARD')
         )

@@ -1,3 +1,15 @@
 .row
+  .col-lg-9
+    %ul.breadcrumb
+      %li
+        = link_to 'Home', :root
+      %li
+        = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id, :action => :show
+      %li
+        = link_to @daily_index.id, :controller => :daily_index, :id => @daily_index.id, :action => :show, :article_source_id => @article_source.id
+    = render :partial => 'layouts/tabbed_document_content'
+.row
   %p
     Find me in app/views/news_article/show.html.erb
+
+= javascript_include_tag 'news_article/show'

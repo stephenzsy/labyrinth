@@ -18,7 +18,7 @@ class DailyIndexController < ApplicationController
     raise "Invalid Document Type: #{document_type}" unless  ['cached-json', 'cached', 'live-json', 'live'].include? document_type
     status, document, metadata = @daily_index.get_document(params['DocumentType'])
     raise "Status: #{status}" unless status == :success
-    metadata = metadata.reject { |k, v| k.to_s.start_with? '_' }
+    metadata = metadata.reject { |k, v| k.to_s.start_with? '_' } unless metadata.nil?
 
     case document_type
       when 'cached-json', 'live-json'

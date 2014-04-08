@@ -6,20 +6,7 @@
       %li
         = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id, :action => :show
     .container-fluid#daily-index-display-container
-    %ul.nav.nav-tabs#nav-doc-type
-      %li= link_to 'Cached JSON', '#doc-content-cached-json', {:data => {:toggle => 'tab', :document_type => 'cached-json'}}
-      %li= link_to 'Cached',      '#doc-content-cached',      {:data => {:toggle => 'tab', :document_type => 'cached'}}
-      %li= link_to 'Live JSON',   '#doc-content-live-json',   {:data => {:toggle => 'tab', :document_type => 'live-json'}}
-      %li= link_to 'Live',        '#doc-content-live',        {:data => {:toggle => 'tab', :document_type => 'live'}}
-    .tab-content
-      .tab-pane#doc-content-cached-json
-        %pre.pre-scrollable
-      .tab-pane#doc-content-cached
-        %pre.pre-scrollable
-      .tab-pane#doc-content-live-json
-        %pre.pre-scrollable
-      .tab-pane#doc-content-live
-        %pre.pre-scrollable
+    = render :partial => 'layouts/tabbed_document_content'
   .col-lg-3.well
     %table.table
       %tbody#metadata-container
@@ -76,4 +63,4 @@
         %td.metadata-label Date Source Retrieved
         %td.value-field
 
-= javascript_include_tag "daily_index/show"
+= javascript_include_tag 'daily_index/show'
