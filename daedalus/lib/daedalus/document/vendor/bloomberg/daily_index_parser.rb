@@ -49,8 +49,9 @@ module Daedalus
             result = []
             stories_node.css('li').each do |node|
               node.css('a').each do |entry_content_node|
+                link_content = entry_content_node.attribute('href').content.strip
                 entry = {
-                    :url => "#{@url_base}#{entry_content_node.attribute('href').content}"
+                    :url => "#{@url_base}#{link_content}"
                 }
                 entry_content_node.children.each do |c_node|
                   if c_node.text? and not c_node.content.strip.empty?
@@ -69,11 +70,28 @@ module Daedalus
 
         end
 
-        @@DAILY_INDEX_PARSER = DailyIndexParser.new :url_base => 'http://www.bloomberg.com'
+        @@URL_BASE = 'http://www.bloomberg.com'
+        @@DAILY_INDEX_PARSER = DailyIndexParser.new :url_base => @@URL_BASE
 
         def process_daily_index(document)
           yield ({:version => DAILY_INDEX_PROCESSOR_VERSION, :patch => DAILY_INDEX_PROCESSOR_PATCH})
           @@DAILY_INDEX_PARSER.parse(Nokogiri.HTML(document))
+        end
+
+        def daily_index_url_to_article_id(url)
+          raise 'Invalid URL:' + url unless url[0..@@URL_BASE.length-1] == @@URL_BASE
+          str = url[@@URL_BASE.length..-1]
+          /^\/(?<type>\w+)\/(?<id_date>\d{4}-\d{2}-\d{2})\/(?<id>[\w-]+)\.html$/.match(str) do |m|
+            case m[:type]
+              when 'news'
+                return "#{m[:id_date]}--#{m[:id]}"
+              when 'slideshow'
+                return nil
+              else
+                raise 'Unknown URL Type: ' + m[:type]
+            end
+          end
+          raise "Not Matched: #{url}"
         end
 
       end

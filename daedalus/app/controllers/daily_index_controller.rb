@@ -18,15 +18,26 @@ class DailyIndexController < ApplicationController
     raise "Invalid Document Type: #{document_type}" unless  ['cached-json', 'cached', 'live-json', 'live'].include? document_type
     status, document, metadata = @daily_index.get_document(params['DocumentType'])
     raise "Status: #{status}" unless status == :success
-    metadata= metadata.reject { |k, v| k.to_s.start_with? '_' }
+    metadata = metadata.reject { |k, v| k.to_s.start_with? '_' }
+
     case document_type
       when 'cached-json', 'live-json'
-        render text: '{"document":' + document + (metadata.nil? ? '' : ',"metadata":' + JSON.generate(metadata)) + '}'
-      when 'cached', 'live'
-        result = {:document => document}
-        result[:metadata] = metadata unless metadata.nil?
-        render json: result
+        document = JSON.parse(document, :symbolize_names => true).map do |item|
+          news_article_id = @article_source.daily_index_url_to_article_id(item[:url])
+          unless news_article_id.nil?
+            item[:external_url] = item[:url]
+            item[:url] = url_for controller: :news_article,
+                                 action: :show,
+                                 id: news_article_id,
+                                 article_source_id: @article_source.id,
+                                 daily_index_id: @daily_index.id
+          end
+          item
+        end
     end
+    result = {:document => document}
+    result[:metadata] = metadata unless metadata.nil?
+    render json: result
   end
 
   protect_from_forgery
