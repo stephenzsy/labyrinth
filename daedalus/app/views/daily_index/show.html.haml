@@ -22,7 +22,7 @@
         %pre.pre-scrollable
   .col-lg-3.well
     %table.table
-      %tbody
+      %tbody#metadata-container
         %tr
           %td.metadata-label Source
           %td= @article_source.display_name
@@ -31,10 +31,14 @@
           %td= @daily_index.date.strftime('%Y-%m-%d')
         %tr
           %td.metadata-label Cache Status
-          %td
+          %td#metadata-cache-status{data:{cache_status: "#{@daily_index.cache_status}"}}
             - case @daily_index.cache_status
               - when :cache_ok
-                = 'Cached'
+                Cached
+              - when :cache_not_available
+                Not Available
+              - else
+                Unknown
         %tr
           %td{:colspan => 2}= link_to 'Permalink', { |
             :controller => :daily_index, |
@@ -52,5 +56,22 @@
     .box
       %a
         %span.title
+  %table
+    %tbody#metadata-fields
+      %tr.metadata-label{data:{field:'processor_version'}}
+        %td Processor Version
+        %td.value-field
+      %tr.metadata-label{data:{field:'processor_patch'}}
+        %td Processor Patch
+        %td.value-field
+      %tr.metadata-label{data:{field:'source_version'}}
+        %td Source Version
+        %td.value-field
+      %tr.metadata-label{data:{field:'generation_date'}}
+        %td Date Generated
+        %td.value-field
+      %tr.metadata-label{data:{field:'source_retrieval_date'}}
+        %td Date Source Retrieved
+        %td.value-field
 
 = javascript_include_tag "daily_index/show"

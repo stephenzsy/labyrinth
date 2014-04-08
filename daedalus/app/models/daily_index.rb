@@ -26,12 +26,25 @@ class DailyIndex < Daedalus::DocumentBase
     :cache_ok
   end
 
-  def get_document_live
-    @@http_client.get(url)
-  end
-
   def get_date_universal_string(date)
     date.utc.strftime '%Y-%m-%dT%H:%M:%SZ'
+  end
+
+  def get_document_live
+    return :success, @@http_client.get(url)
+  end
+
+  def get_document_live_json
+    status, document, metadata = get_document_live
+    document = article_source.process_daily_index(document) do |m|
+      unless m.nil?
+        metadata ||= {}
+        metadata[:source_version] = article_source.daily_index_version
+        metadata[:processor_version] = m[:version]
+        metadata[:processor_patch] = m[:patch]
+      end
+    end
+    return :success, JSON.generate(document), metadata
   end
 
   def get_document_cached
@@ -47,7 +60,7 @@ class DailyIndex < Daedalus::DocumentBase
     })
     case status
       when :cache_success
-        return status, document, metadata
+        return :success, document, metadata
       when :cache_not_found
         # cache it now
         document = get_document_live
@@ -56,7 +69,7 @@ class DailyIndex < Daedalus::DocumentBase
             :retrieval_date => get_date_universal_string(DateTime.now)
         }
         @@cache_manager.store_document(document, index_options, metadata)
-        return :cache_success, document, metadata
+        return :success, document, metadata
       else
         raise 'Not Implemented'
     end
@@ -82,29 +95,25 @@ class DailyIndex < Daedalus::DocumentBase
     })
     case status
       when :cache_success
-        return :cache_success, document, metadata
+        return :success, document, metadata
       when :cache_not_found
         o_status, o_document, o_metadata = get_document_cached
-        raise o_status unless o_status == :cache_success
+        raise o_status.to_s unless o_status == :success
         metadata = {
             source_retrieval_date: o_metadata[:retrieval_date],
             source_version: o_metadata[:version]
         }
-        metadata[:source_key] = o_metadata[:_index_key] unless o_metadata[:_index_key].nil?
+        metadata[:_source_key] = o_metadata[:_index_key] unless o_metadata[:_index_key].nil?
         document = article_source.process_daily_index(o_document) do |m|
           metadata[:processor_version] = m[:version]
           metadata[:processor_patch] = m[:patch]
         end
         metadata[:generation_date] = get_date_universal_string(DateTime.now)
-        @@cache_manager.store_document(JSON.generate(document), index_options, metadata, {reduced_redundancy: true})
-        return :cache_success, document, metadata
+        document = JSON.generate(document)
+        @@cache_manager.store_document(document, index_options, metadata, {reduced_redundancy: true})
+        return :success, document, metadata
       else
         raise 'Not Implemented'
-    end
-  end
-
-  def get_document_live_json
-    article_source.process_daily_index(get_document_live) do |m|
     end
   end
 
@@ -118,6 +127,8 @@ class DailyIndex < Daedalus::DocumentBase
         get_document_live_json
       when 'live'
         get_document_live
+      else
+        raise 'Not Supported'
     end
   end
 
