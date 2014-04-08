@@ -11,21 +11,11 @@ table {
   }
 }
 
-#template-container {
-  display: none;
-}
-
-#daily-index-display-container {
-  -webkit-column-count: 3;
-  -moz-column-count: 3;
-  column-count: 3;
-}
-
 .daily-index-display-item {
-  .box {
-    background-color: whitesmoke;
-    margin: 5pt 0;
-    padding: 4pt;
-    border-radius: 5pt;
-  }
+  display: inline-block;
+  background-color: whitesmoke;
+  margin: 3pt;
+  padding: 3pt 6pt;
+  border-radius: 4pt;
+  text-overflow: ellipsis;
 }

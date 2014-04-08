@@ -30,6 +30,9 @@
           %td.metadata-label Date
           %td= @daily_index.date.strftime('%Y-%m-%d')
         %tr
+          %td.metadata-label Article Count
+          %td#article-count
+        %tr
           %td.metadata-label Cache Status
           %td#metadata-cache-status{data:{cache_status: "#{@daily_index.cache_status}"}}
             - case @daily_index.cache_status
@@ -51,27 +54,26 @@
 .row
   %p
     Find me in app/views/daily_index/show.html.erb
-#template-container
+#template-container.hidden
   .daily-index-display-item
-    .box
-      %a
-        %span.title
+    %a
+      %span.title
   %table
     %tbody#metadata-fields
-      %tr.metadata-label{data:{field:'processor_version'}}
-        %td Processor Version
+      %tr{data:{field:'processor_version'}}
+        %td.metadata-label Processor Version
         %td.value-field
-      %tr.metadata-label{data:{field:'processor_patch'}}
-        %td Processor Patch
+      %tr{data:{field:'processor_patch'}}
+        %td.metadata-label Processor Patch
         %td.value-field
-      %tr.metadata-label{data:{field:'source_version'}}
-        %td Source Version
+      %tr{data:{field:'source_version'}}
+        %td.metadata-label Source Version
         %td.value-field
-      %tr.metadata-label{data:{field:'generation_date'}}
-        %td Date Generated
+      %tr{data:{field:'generation_date'}}
+        %td.metadata-label Date Generated
         %td.value-field
-      %tr.metadata-label{data:{field:'source_retrieval_date'}}
-        %td Date Source Retrieved
+      %tr{data:{field:'source_retrieval_date'}}
+        %td.metadata-label Date Source Retrieved
         %td.value-field
 
 = javascript_include_tag "daily_index/show"

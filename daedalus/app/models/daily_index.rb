@@ -63,7 +63,7 @@ class DailyIndex < Daedalus::DocumentBase
         return :success, document, metadata
       when :cache_not_found
         # cache it now
-        document = get_document_live
+        status, document, metadata = get_document_live
         metadata = {
             :version => article_source.daily_index_version,
             :retrieval_date => get_date_universal_string(DateTime.now)

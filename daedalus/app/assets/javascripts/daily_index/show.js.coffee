@@ -33,13 +33,14 @@ $(document).ready () ->
       )
     $(this).tab('show')
 
-  # fill json data
-  display_container = $('#daily-index-display-container')
-  metadata_container = $('#metadata-container')
+  # render display
   display_page = (type) ->
     retireve_content(type, (response) ->
-      # render display
-      response['document'].forEach (item) ->
+      display_container = $('#daily-index-display-container')
+      metadata_container = $('#metadata-container')
+      documents = response['document']
+      $('#article-count').text(documents.length)
+      documents.forEach (item) ->
         item_display = $('#template-container .daily-index-display-item').clone()
         item_display.find('.title').text(item['title'])
         item_display.find('a').attr('href', item['url'])
