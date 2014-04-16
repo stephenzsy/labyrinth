@@ -1,13 +1,13 @@
 #=require ../_document_content.js.coffee
 
 $(document).ready () ->
-
   document_content = new DocumentContent()
   document_content.prepare_tabs()
 
   # render display
   display_page = (type) ->
     document_content.retrieve_content(type, (response) ->
+      $('#daily-index-display-alert').addClass('hidden')
       display_container = $('#daily-index-display-container')
       metadata_container = $('#metadata-container')
       documents = response['document']
@@ -26,6 +26,9 @@ $(document).ready () ->
             t = $(this).clone()
             t.find('.value-field').text(m[k])
             t.appendTo metadata_container
+    , (error) ->
+      $('#daily-index-display-alert .content').text(error.statusText)
+      $('#daily-index-display-alert').removeClass('hidden')
     )
 
   switch $('#metadata-cache-status').attr('data-cache-status')

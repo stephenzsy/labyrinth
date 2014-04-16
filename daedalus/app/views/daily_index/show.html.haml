@@ -1,4 +1,4 @@
-.row
+.row-fluid
   .col-lg-9
     %ul.breadcrumb
       %li
@@ -6,6 +6,9 @@
       %li
         = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id, :action => :show
     .container-fluid#daily-index-display-container
+      .hidden.alert.alert-danger#daily-index-display-alert
+        Error:
+        %span.content
     = render :partial => 'layouts/tabbed_document_content'
   .col-lg-3.well
     %table.table

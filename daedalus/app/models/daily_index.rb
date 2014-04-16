@@ -18,7 +18,7 @@ class DailyIndex < Daedalus::DocumentBase
   end
 
   def id
-    article_source.get_id(date())
+    article_source.local_date_to_id(date())
   end
 
   def cache_status

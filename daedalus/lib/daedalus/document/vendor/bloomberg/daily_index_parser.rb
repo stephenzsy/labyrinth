@@ -1,5 +1,7 @@
 require 'nokogiri'
 
+require_relative '../html_parser'
+
 module Daedalus
   module Document
     module Vendor
@@ -14,34 +16,10 @@ module Daedalus
         DAILY_INDEX_PROCESSOR_VERSION = '2014-04-02'
         DAILY_INDEX_PROCESSOR_PATCH = '0'
 
-        class DailyIndexParser
+        class DailyIndexParser < Vendor::HtmlParser
 
           def initialize(opt = {})
             @url_base = (opt[:url_base].nil?) ? '' : opt[:url_base]
-          end
-
-          def verify_empty(node)
-            if node.element?
-              node.children.each do |c_node|
-                consume_empty c_node
-              end
-              unless node.children.empty?
-                Rails.logger.error("Non Empty Element Node: #{node.to_xml}")
-                raise 'Node not empty'
-              end
-            elsif node.text?
-              unless  node.content.strip.empty?
-                Rails.logger.error("Non Empty Text Node: #{node.content}")
-                raise 'Node note empty'
-              end
-            else
-              raise "Unknown Node Type: #{node.node_type}"
-            end
-          end
-
-          def consume_empty(node)
-            verify_empty(node)
-            node.remove
           end
 
           def parse(document)
@@ -79,7 +57,7 @@ module Daedalus
         end
 
         def daily_index_url_to_article_id(url)
-          raise 'Invalid URL:' + url unless url[0..@@URL_BASE.length-1] == @@URL_BASE
+          raise 'Invalid URL: ' + url unless url[0..@@URL_BASE.length-1] == @@URL_BASE
           str = url[@@URL_BASE.length..-1]
           /^\/(?<type>[\w-]+)\/(?<id_date>\d{4}-\d{2}-\d{2})\/(?<id>[\w-]+)\.html$/.match(str) do |m|
             case m[:type]

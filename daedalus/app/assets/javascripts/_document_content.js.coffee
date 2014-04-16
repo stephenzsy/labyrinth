@@ -10,7 +10,7 @@ class @DocumentContent
       contentType: 'application/json',
       dataType: 'json',
       data: JSON.stringify(req)
-    }).done(complete)
+    }).done(complete).fail(error)
 
   prepare_tabs: ->
     # define tabs

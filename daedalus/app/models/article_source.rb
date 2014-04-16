@@ -36,7 +36,11 @@ class ArticleSource
   end
 
   def can_cache_for_date?(date)
-    date.utc < @timezone.now.midnight.utc - 1.day + 2.hour
+    date < @timezone.now.midnight - 1.day - 2.hour
+  end
+
+  def daily_index_id_to_date(daily_index_id)
+    @timezone.parse(daily_index_id)
   end
 
   def self.from_id(id)

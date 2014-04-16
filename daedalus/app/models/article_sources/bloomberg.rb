@@ -30,12 +30,8 @@ module Daedalus
         end
       end
 
-      def get_id(local_date)
+      def local_date_to_id(local_date)
         local_date.strftime('%Y-%m-%d')
-      end
-
-      def daily_index_id_to_date(daily_index_id)
-        @timezone.parse(daily_index_id)
       end
 
       include Daedalus::Document::Vendor::Bloomberg
