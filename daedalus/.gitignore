@@ -20,3 +20,5 @@
 *.iml
 aws.yml
 aws_credentials.yml
+config/social.yml
+

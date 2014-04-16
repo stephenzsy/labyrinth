@@ -1,0 +1,13 @@
+<%= render partial: 'layouts/fb_load' %>
+<div class="navbar navbar-default navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <%= link_to 'Daedalus', :root, {class: 'navbar-brand'} %>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a><%= render partial: 'layouts/fb_login_button' %></a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>

@@ -81,11 +81,11 @@ module Daedalus
         def daily_index_url_to_article_id(url)
           raise 'Invalid URL:' + url unless url[0..@@URL_BASE.length-1] == @@URL_BASE
           str = url[@@URL_BASE.length..-1]
-          /^\/(?<type>\w+)\/(?<id_date>\d{4}-\d{2}-\d{2})\/(?<id>[\w-]+)\.html$/.match(str) do |m|
+          /^\/(?<type>[\w-]+)\/(?<id_date>\d{4}-\d{2}-\d{2})\/(?<id>[\w-]+)\.html$/.match(str) do |m|
             case m[:type]
               when 'news'
                 return "#{m[:id_date]}--#{m[:id]}"
-              when 'slideshow'
+              when 'slideshow', 'money-gallery'
                 return nil
               else
                 raise 'Unknown URL Type: ' + m[:type]
