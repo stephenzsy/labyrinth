@@ -1,4 +1,4 @@
-.row
+.row-fluid
   .col-lg-9
     %ul.breadcrumb
       %li
@@ -8,7 +8,17 @@
       %li
         = link_to @daily_index.id, :controller => :daily_index, :id => @daily_index.id, :action => :show, :article_source_id => @article_source.id
     = render :partial => 'layouts/tabbed_document_content'
-.row
+  .col-lg-3.well
+    %table.table
+      %tbody#metadata-container
+        %tr
+          %td{:colspan => 2}= link_to 'Permalink', { |
+            :controller => :news_article, |
+            :action => :show, |
+            :article_source_id => @article_source.id, |
+            :id => @news_article.id }, |
+            id: 'permalink'
+.row-fluid
   %p
     Find me in app/views/news_article/show.html.erb
 

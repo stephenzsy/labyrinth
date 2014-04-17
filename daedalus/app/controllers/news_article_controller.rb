@@ -3,6 +3,7 @@ class NewsArticleController < ApplicationController
   def show
     @article_source = ArticleSource.from_id(params[:article_source_id])
     @daily_index = DailyIndex.from_id(@article_source, params[:daily_index_id])
+    @news_article = NewsArticle.from_id(@article_source, @daily_index, params[:id])
   end
 
   def api
