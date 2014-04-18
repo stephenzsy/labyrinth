@@ -19,6 +19,8 @@
 /.idea
 *.iml
 aws.yml
+
+# configuration files
 aws_credentials.yml
 config/social.yml
 
