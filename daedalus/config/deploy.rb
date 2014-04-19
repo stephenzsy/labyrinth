@@ -33,8 +33,15 @@ set :application, 'Daedalus'
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
+set :ssh_options, {
+    forward_agent: true,
+    keys_only: true
+}
+
+before :deploy, 'deploy:aws:prepare_instance'
 
 namespace :deploy do
+
 
   #
   # desc 'Restart application'

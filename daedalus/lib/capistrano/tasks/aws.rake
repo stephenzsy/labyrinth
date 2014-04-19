@@ -51,11 +51,13 @@ namespace :deploy do
         # launch new instance
         launch_instance ec2, config.ec2_config
       else
-        p instances.first.public_dns_name
-        raise 'Not Implemented'
+        i = instances.first
+        puts "Server: #{i.public_dns_name}"
+        role :app, "ec2-user@#{i.public_dns_name}"
+        server i.public_dns_name, user: 'ec2-user', roles: ['app']
+        set :ssh_options, fetch(:ssh_options).merge({keys: [config.ec2_config[:ssh_key_file]]})
       end
     end
-
 
   end
 end
