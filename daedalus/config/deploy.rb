@@ -34,8 +34,6 @@ set :application, 'Daedalus'
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
-
-
 namespace :deploy do
 
   #
