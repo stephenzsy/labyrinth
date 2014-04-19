@@ -6,7 +6,6 @@
 
 #role :app, %w{deploy@example.com}
 
-invoke 'deploy:aws:prepare_instance'
 
 
 # Extended Server Syntax

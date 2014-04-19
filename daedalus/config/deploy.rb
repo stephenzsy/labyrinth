@@ -38,9 +38,10 @@ set :ssh_options, {
     keys_only: true
 }
 
-before :deploy, 'deploy:aws:prepare_instance'
+#before :deploy, 'deploy:aws:prepare_instance'
 
 namespace :deploy do
+
 
 
   #

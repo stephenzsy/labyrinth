@@ -23,4 +23,4 @@ aws.yml
 # configuration files
 aws_credentials.yml
 config/social.yml
-
+config/deploy/prepare.yml
