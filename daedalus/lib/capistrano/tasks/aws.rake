@@ -59,5 +59,22 @@ namespace :deploy do
       end
     end
 
+    desc 'Upload Package to S3'
+    task :upload_package do
+      local_artifact = fetch(:package_artifact_local)
+      if local_artifact.nil?
+        invoke('deploy:package')
+        local_artifact = fetch(:package_artifact_local)
+      end
+
+      # upload to S3
+      config = Daedalus::Common::Config::DeployConfig.instance
+      s3 = config.get_s3_client
+      p s3.list_buckets[:buckets]
+
+      p local_artifact
+      p "upload"
+    end
+
   end
 end

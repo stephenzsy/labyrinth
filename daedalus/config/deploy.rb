@@ -43,7 +43,6 @@ set :ssh_options, {
 namespace :deploy do
 
 
-
   #
   # desc 'Restart application'
   # task :restart do
