@@ -3,3 +3,13 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 //= require application
 //= require google-code-prettify/prettify
+
+table {
+  td.metadata-label {
+    font-weight: bold;
+  }
+
+  td.metadata-value {
+    text-overflow: ellipsis;
+  }
+}

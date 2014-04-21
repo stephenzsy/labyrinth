@@ -4,4 +4,5 @@
 #= require application
 #= require google-code-prettify/prettify
 #= require angularjs/angular.min
+#= require angularjs/angular-resource.min
 #= require news_article/news_article_controller

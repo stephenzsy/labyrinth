@@ -70,10 +70,20 @@ namespace :deploy do
       # upload to S3
       config = Daedalus::Common::Config::DeployConfig.instance
       s3 = config.get_s3_client
-      p s3.list_buckets[:buckets]
+      prepare_config = config.get_prepare_config
 
-      p local_artifact
-      p "upload"
+      basename = File.basename local_artifact
+      key= "#{prepare_config[:s3_prefix]}#{basename}"
+
+      begin
+        s3.head_object bucket: prepare_config[:s3_bucket], key: key
+      rescue Aws::S3::Errors::NoSuchKey
+        # upload
+        s3.put_object bucket: prepare_config[:s3_bucket], key: key, body: File.open(local_artifact)
+      end
+      set :package_s3_bucket, prepare_config[:s3_bucket]
+      set :package_s3_key, key
+
     end
 
   end

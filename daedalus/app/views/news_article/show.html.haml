@@ -6,11 +6,18 @@
       %li
         = link_to @article_source.display_name, :controller => :article_source, :id => @article_source.id, :action => :show
       %li
-        = link_to @daily_index.id, :controller => :daily_index, :id => @daily_index.id, :action => :show, :article_source_id => @article_source.id
-    = render :partial => 'layouts/tabbed_document_content'
+        = link_to @daily_index.id, {:controller => :daily_index, :id => @daily_index.id, :action => :show, :article_source_id => @article_source.id}, |
+          {id: 'daily_index', data: {daily_index_id: @daily_index.id} }
+    = render partial: 'layouts/document_content_tabs'
   .col-lg-3.well
     %table.table
       %tbody#metadata-container
+        %tr
+          %td.metadata-label Article Source
+          %td.metadata-value#article_source{data:{article_source_id: "#{@article_source.id}"}}= @article_source.display_name
+        %tr
+          %td.metadata-label Article ID
+          %td.metadata-value#news_article_id= @news_article.id
         %tr
           %td{:colspan => 2}= link_to 'Permalink', { |
             :controller => :news_article, |
