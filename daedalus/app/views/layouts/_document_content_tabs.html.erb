@@ -5,6 +5,6 @@
 </ul>
 <div>
     <div ng-repeat='tab in content_tabs' id="doc-content-{{tab.key}}" ng-show="isActive(tab.key)">
-        <pre class="pre-scrollable"></pre>
+        <pre class="pre-scrollable">{{tab_text[tab.key]}}</pre>
     </div>
 </div>
