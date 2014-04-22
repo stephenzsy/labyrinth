@@ -48,6 +48,6 @@ app.controller('NewsArticleCtrl', ($scope, $resource) ->
           DocumentType: tab_key
         },
       (data) ->
-        $scope.tab_text[tab_key] = data
+        $scope.tab_text[tab_key] = data['document']
       )
 )
