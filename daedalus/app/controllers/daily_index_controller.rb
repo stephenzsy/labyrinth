@@ -36,7 +36,7 @@ class DailyIndexController < ApplicationController
         end
     end
     result = {:document => document}
-    result[:metadata] = metadata unless metadata.nil?
+    result[:metadata] = metadata unless metadata.nil? or metadata.empty?
     render json: result
   end
 

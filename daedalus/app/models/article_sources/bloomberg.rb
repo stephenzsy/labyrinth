@@ -1,6 +1,7 @@
 require_relative '../article_source'
 
 require_relative '../../../lib/daedalus/document/vendor/bloomberg/daily_index_parser'
+require_relative '../../../lib/daedalus/document/vendor/bloomberg/news_article_parser'
 
 module Daedalus
   module ArticleSources

@@ -56,7 +56,7 @@ module Daedalus
           @@DAILY_INDEX_PARSER.parse(Nokogiri.HTML(document))
         end
 
-        def daily_index_url_to_article_id(url)
+        def article_url_to_id(url)
           raise 'Invalid URL: ' + url unless url[0..@@URL_BASE.length-1] == @@URL_BASE
           str = url[@@URL_BASE.length..-1]
           /^\/(?<type>[\w-]+)\/(?<id_date>\d{4}-\d{2}-\d{2})\/(?<id>[\w-]+)\.html$/.match(str) do |m|
@@ -70,6 +70,12 @@ module Daedalus
             end
           end
           raise "Not Matched: #{url}"
+        end
+
+        def article_id_to_url(opt={})
+          raise "Nil Article ID" if opt[:article_id].nil?
+          m = /^(?<id_date>\d{4}-\d{2}-\d{2})--(?<id>.*)$/.match opt[:article_id]
+          "#{@@URL_BASE}/news/#{m[:id_date]}/#{m[:id]}.html"
         end
 
       end

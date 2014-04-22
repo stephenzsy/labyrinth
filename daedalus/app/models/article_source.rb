@@ -43,6 +43,10 @@ class ArticleSource
     @timezone.parse(daily_index_id)
   end
 
+  def article_id_to_url(opt)
+    raise 'Abstract method'
+  end
+
   def self.from_id(id)
     @@MAPPING[id.to_sym]
   end

@@ -1,7 +1,7 @@
-require 'daedalus/document'
 require 'daedalus/common/util/http_client'
+require 'daedalus/document/document_base'
 
-class DailyIndex < Daedalus::DocumentBase
+class DailyIndex < Daedalus::Document::DocumentBase
   attr_accessor :article_source, :date, :url
   @@http_client = Daedalus::Common::Util::HttpClient.new
   @@cache_manager = Daedalus::Cache::CacheManager.instance
@@ -24,10 +24,6 @@ class DailyIndex < Daedalus::DocumentBase
   def cache_status
     return :cache_not_available unless article_source.can_cache_for_date? date
     :cache_ok
-  end
-
-  def get_date_universal_string(date)
-    date.utc.strftime '%Y-%m-%dT%H:%M:%SZ'
   end
 
   def get_document_live
@@ -114,21 +110,6 @@ class DailyIndex < Daedalus::DocumentBase
         return :success, document, metadata
       else
         raise 'Not Implemented'
-    end
-  end
-
-  def get_document(type)
-    case type
-      when 'cached-json'
-        get_document_cached_json
-      when 'cached'
-        get_document_cached
-      when 'live-json'
-        get_document_live_json
-      when 'live'
-        get_document_live
-      else
-        raise 'Not Supported'
     end
   end
 

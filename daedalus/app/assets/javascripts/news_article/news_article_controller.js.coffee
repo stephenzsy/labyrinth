@@ -42,6 +42,6 @@ app.controller('NewsArticleCtrl', ($scope, $resource) ->
         article_source_id: articleSourceId,
         daily_index_id: dailyIndexId,
         id: newsArticleId,
-        document_type: tab_key}, () ->
+        DocumentType: tab_key}, () ->
         console.log('success')
 )
