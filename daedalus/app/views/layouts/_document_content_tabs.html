@@ -1,0 +1,10 @@
+<ul class="nav nav-tabs">
+    <li ng-repeat='tab in content_tabs' ng-class='isActive(tab.key)'>
+        <a href="#doc-content-{{tab.key}}" ng-click="tabClick(tab.key, $event)" data-content-tab-key="{{tab.key}}">{{tab.display_name}}</a>
+    </li>
+</ul>
+<div>
+    <div ng-repeat='tab in content_tabs' id="doc-content-{{tab.key}}" ng-show="isActive(tab.key)">
+        <pre class="pre-scrollable" my-document-content-pretty-print="tab_text[tab.key]"></pre>
+    </div>
+</div>

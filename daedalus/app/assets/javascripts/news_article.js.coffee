@@ -3,6 +3,7 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 #= require application
 #= require google-code-prettify/prettify
-#= require angularjs/angular.min
-#= require angularjs/angular-resource.min
+#= require angular/angular.min
+#= require angular/angular-resource.min
+#= require angular/angular-sanitize.min
 #= require news_article/news_article_controller
