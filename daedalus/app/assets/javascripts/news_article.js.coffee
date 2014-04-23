@@ -5,5 +5,4 @@
 #= require google-code-prettify/prettify
 #= require angular/angular.min
 #= require angular/angular-resource.min
-#= require angular/angular-sanitize.min
 #= require news_article/news_article_controller

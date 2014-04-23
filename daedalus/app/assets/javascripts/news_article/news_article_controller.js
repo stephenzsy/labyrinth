@@ -66,7 +66,6 @@
             return {
                 restrict: 'A',
                 link: function (scope, element, attrs) {
-                    console.log(element.html());
                     scope.$watch(attrs.myDocumentContentPrettyPrint, function (text) {
                         element.text(text);
                         element.removeClass('prettyprinted');

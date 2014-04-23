@@ -23,7 +23,7 @@ class DailyIndexController < ApplicationController
     case document_type
       when 'cached-json', 'live-json'
         document = JSON.parse(document, :symbolize_names => true).map do |item|
-          news_article_id = @article_source.daily_index_url_to_article_id(item[:url])
+          news_article_id = @article_source.article_url_to_id(item[:url])
           unless news_article_id.nil?
             item[:external_url] = item[:url]
             item[:url] = url_for controller: :news_article,

@@ -3,4 +3,4 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 #= require application
 #= require google-code-prettify/prettify
-#= require angularjs/angular.min
+#= require angular/angular.min
