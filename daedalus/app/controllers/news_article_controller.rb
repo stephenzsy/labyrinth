@@ -22,6 +22,8 @@ class NewsArticleController < ApplicationController
     case document_type
       when 'live', 'cached'
         render text: document
+      when 'live-json'
+        render json: result
     end
   end
 

@@ -49,6 +49,19 @@ class NewsArticle < Daedalus::Document::DocumentBase
     end
   end
 
+  def get_document_live_json
+    status, document, metadata = get_document_live
+    document = article_source.process_news_article(document) do |m|
+      unless m.nil?
+        metadata ||= {}
+        metadata[:source_version] = article_source.article_version
+        metadata[:processor_version] = m[:version]
+        metadata[:processor_patch] = m[:patch]
+      end
+    end
+    return :success, document, metadata
+  end
+
 
   def self.from_id(article_source, daily_index, id)
     NewsArticle.new article_source, daily_index, id

@@ -47,6 +47,10 @@ class ArticleSource
     raise 'Abstract method'
   end
 
+  def process_news_article(document)
+    raise 'Abstract method'
+  end
+
   def self.from_id(id)
     @@MAPPING[id.to_sym]
   end

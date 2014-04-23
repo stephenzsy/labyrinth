@@ -3,26 +3,28 @@ require 'nokogiri'
 module Daedalus
   module Document
     module Parser
-      module DOMTreeNodeDef
-        class DOMTreeNode
-
-        end
-
-        class RootNode
-
-        end
-
-        class SingleSelectorNode
-
-        end
-      end
 
       class DOMTreeParser
 
-        include DOMTreeNodeDef
+        def initialize
+          @selectors = []
+        end
 
+        def parse(node, result=nil)
+          @selectors.each do |s|
+            unless s[:block].nil?
+              s[:block].call(node.css(s[:selector]), result)
+            end
+          end
+          result
+        end
 
+        # construction
 
+        def css(selector, opt = {}, &block)
+          @selectors << {selector: selector, opt: opt, block: block}
+          self
+        end
       end
     end
   end
