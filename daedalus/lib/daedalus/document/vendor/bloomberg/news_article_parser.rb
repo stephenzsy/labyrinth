@@ -1,3 +1,5 @@
+require 'execjs'
+
 require_relative '../../parser/dom_tree_parser'
 
 module Daedalus
@@ -28,10 +30,7 @@ module Daedalus
               m = /__reach_config\s*=\s*(?<reach_config>\{.*\});/.match(n.text.gsub("\n", ' '))
               next if m.nil?
               str = m[:reach_config]
-              mm = /(?<before>.*)\s*\bpid\s*:\s*\'(?<pid>\w+)\'(\s*,)?(?<after>.*)/.match(str)
-              str = mm[:before] + mm[:after]
-              p mm[:pid]
-              p str
+              p ExecJS.eval str
             end
           end
           .css('body article',
