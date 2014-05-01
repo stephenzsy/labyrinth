@@ -1,0 +1,8 @@
+<h1>{{doc['article_title']}}</h1>
+<h3>Meta Tags</h3>
+<ul>
+    <li ng-repeat="meta_tag in doc['meta']">
+        <span class="label label-default">{{meta_tag['name']}}</span>
+        {{meta_tag['value']}}
+    </li>
+</ul>

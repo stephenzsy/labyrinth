@@ -50,17 +50,33 @@
                 current_tab = tab_key;
                 if (!(tab_key in $scope.tab_text)) {
                     DocumentText.fetch({
-                            article_source_id: articleSourceId,
-                            daily_index_id: dailyIndexId,
-                            id: newsArticleId
-                        }, {
-                            DocumentType: tab_key
-                        },
-                        function (data) {
-                            $scope.tab_text[tab_key] = data['document'];
-                        });
+                        article_source_id: articleSourceId,
+                        daily_index_id: dailyIndexId,
+                        id: newsArticleId
+                    }, {
+                        DocumentType: tab_key
+                    }, function (data) {
+                        $scope.tab_text[tab_key] = data['document'];
+                    });
                 }
             };
+
+            var DocumentData = $resource('/news_article/:article_source_id/:daily_index_id/:id', {
+                article_source_id: '@article_source_id', daily_index_id: '@daily_index_id', id: '@id'
+            }, {fetch: {
+                method: 'POST', isArray: false
+            }});
+
+            // begin
+            DocumentData.fetch({
+                article_source_id: articleSourceId,
+                daily_index_id: dailyIndexId,
+                id: newsArticleId
+            }, {
+                DocumentType: 'live-json'
+            }, function (data) {
+                $scope.doc = data['document'];
+            });
         })
         .directive('myDocumentContentPrettyPrint', function () {
             return {

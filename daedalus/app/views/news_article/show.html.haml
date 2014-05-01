@@ -8,6 +8,7 @@
       %li
         = link_to @daily_index.id, {:controller => :daily_index, :id => @daily_index.id, :action => :show, :article_source_id => @article_source.id}, |
           {id: 'daily_index', data: {daily_index_id: @daily_index.id} }
+    = render partial: 'content'
     = render partial: 'layouts/document_content_tabs'
   .col-lg-3.well
     %table.table
@@ -25,6 +26,10 @@
             :article_source_id => @article_source.id, |
             :id => @news_article.id }, |
             id: 'permalink'
+        %tr
+          %td{:colspan => 2}= link_to 'External Link', |
+            @news_article.external_url, |
+            id: 'external_url'
 .row-fluid
   %p
     Find me in app/views/news_article/show.html.erb

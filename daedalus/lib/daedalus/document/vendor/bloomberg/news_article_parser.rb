@@ -16,16 +16,39 @@ module Daedalus
         begin
           P = Daedalus::Document::Parser::DOMTreeParser
 
-          @@NEWS_ARTICLE_PARSER = P.new().
-              css('head meta') do |nodes, result|
+          @@NEWS_ARTICLE_PARSER = P.new()
+          .css('head meta') do |nodes, result|
             result[:meta] = []
             nodes.each do |n|
-              p n
               result[:meta] << {name: n.attr('name'), value: n.attr('content')} if n.has_attribute? 'name'
             end
-          end.css('body') do |nodes|
-            p nodes
           end
+          .css('head script') do |nodes, result|
+            nodes.each do |n|
+              m = /__reach_config\s*=\s*(?<reach_config>\{.*\});/.match(n.text.gsub("\n", ' '))
+              next if m.nil?
+              str = m[:reach_config]
+              mm = /(?<before>.*)\s*\bpid\s*:\s*\'(?<pid>\w+)\'(\s*,)?(?<after>.*)/.match(str)
+              str = mm[:before] + mm[:after]
+              p mm[:pid]
+              p str
+            end
+          end
+          .css('body article',
+               sub: P.new(process_all: true)
+               .remove('script')
+               .remove('> .header_wrap, .interaction_contain')
+               .css('.article_title') do |article_title, result|
+                 result[:article_title] = article_title.text.strip
+               end
+               .css('.entry_wrap',
+                    sub: P.new(process_all: true)
+                    .css('.byline',
+                         sub: P.new(process_all: true)
+                         .remove('.divider')
+                    )
+               )
+          )
         end
 
         def process_news_article(document)
