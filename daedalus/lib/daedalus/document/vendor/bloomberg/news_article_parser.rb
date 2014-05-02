@@ -17,6 +17,44 @@ module Daedalus
 
         begin
           P = Daedalus::Document::Parser::DOMTreeParser
+          class ContentParser < P
+
+            def initialize()
+              @node_filters = []
+            end
+
+            def parse(node, result = {})
+              if node.text? and node.text.strip.empty?
+                node.remove
+              else
+                @node_filters.each do |filter|
+                  if node.name == filter[:name]
+                    filter[:block].call(node, result)
+                    break
+                  end
+                end
+              end
+              if not node_empty? node and RAISE_ERRORS
+                p node
+                raise NodeNotEmptyError.new(node)
+              end
+              result
+            end
+
+            #constructors
+            def c(node_name, opt={}, &block)
+              @node_filters << {name: node_name, opt: opt, block: block}
+              self
+            end
+
+          end
+
+          # content parser
+          @@CONTENT_PARSER = ContentParser.new
+          .c('p') do |node, result|
+            result
+            p node
+          end
 
           @@NEWS_ARTICLE_PARSER = P.new()
           .css('head meta') do |nodes, result|
@@ -30,7 +68,16 @@ module Daedalus
               m = /__reach_config\s*=\s*(?<reach_config>\{.*\});/.match(n.text.gsub("\n", ' '))
               next if m.nil?
               str = m[:reach_config]
-              p ExecJS.eval str
+              script_content = ExecJS.eval str
+              script_content.delete_if { |k, v| %w(pid iframe ignore_errors url).include? k }
+              result[:metadata] ||= {}
+              %w(authors date title tags channels).each do |k|
+                result[:metadata][k] = script_content.delete k
+              end
+              unless script_content.empty?
+                p script_content
+                raise 'meta script fields not empty'
+              end
             end
           end
           .css('body article',
@@ -44,7 +91,19 @@ module Daedalus
                     sub: P.new(process_all: true)
                     .css('.byline',
                          sub: P.new(process_all: true)
-                         .remove('.divider')
+                         .remove('.divider, span.author, .byline_links')
+                         .css('span.date') do |node, result|
+                           result[:metadata][:byline_date] = node.text.strip
+                         end)
+                    .css('> .entry_content',
+                         sub: P.new(process_all: true)
+                         .remove('section.ad_medium')
+                         .css('> .article_body',
+                              sub: P.new(
+                                  process_all: true,
+                                  sequential: @@CONTENT_PARSER
+                              )
+                         )
                     )
                )
           )
@@ -52,7 +111,7 @@ module Daedalus
 
         def process_news_article(document)
           yield ({:version => ARTICLE_PROCESSOR_VERSION, :patch => ARTICLE_PROCESSOR_PROCESSOR_PATCH})
-          @@NEWS_ARTICLE_PARSER.parse(Nokogiri.HTML(document), {})
+          @@NEWS_ARTICLE_PARSER.parse(Nokogiri.HTML(document), {content: []})
         end
 
 

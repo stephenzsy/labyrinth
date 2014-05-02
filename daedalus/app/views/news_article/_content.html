@@ -1,5 +1,34 @@
 <h1>{{doc['article_title']}}</h1>
-<h3>Meta Tags</h3>
+<div class="article-metadata">
+    <h3>Metadata</h3>
+    <table class="table">
+        <tr>
+            <td>Authors</td>
+            <td>{{doc['metadata']['authors'].join(', ')}}</td>
+        </tr>
+        <tr>
+            <td>Date</td>
+            <td>{{doc['metadata']['date']}}</td>
+        </tr>
+        <tr>
+            <td>Title</td>
+            <td>{{doc['metadata']['title']}}</td>
+        </tr>
+        <tr>
+            <td>Tags</td>
+            <td>{{doc['metadata']['tags'].join(', ')}}</td>
+        </tr>
+        <tr>
+            <td>Channels</td>
+            <td>{{doc['metadata']['channels'].join(', ')}}</td>
+        </tr>
+        <tr>
+            <td>Byline Date</td>
+            <td>{{doc['metadata']['byline_date']}}</td>
+        </tr>
+    </table>
+</div>
+<h3>Tags</h3>
 <ul>
     <li ng-repeat="meta_tag in doc['meta']">
         <span class="label label-default">{{meta_tag['name']}}</span>
