@@ -17,7 +17,7 @@ module Daedalus
 
       class DOMTreeParser
 
-        RAISE_ERRORS = true
+        RAISE_ERRORS = false
 
         def initialize(opt = {})
           @parser_option = opt
@@ -49,10 +49,15 @@ module Daedalus
             end
             @selectors.each do |s|
               selected = node.css(s[:selector])
+              result_entry = result
+              unless s[:opt][:result_entry].nil? or s[:opt][:result_entry][:hash_key].nil?
+                result_entry = s[:opt][:result_entry][:hash_value].clone
+                result[s[:opt][:result_entry][:hash_key]] = result_entry
+              end
               if not s[:opt][:sub].nil?
-                s[:opt][:sub].parse(selected, result);
+                s[:opt][:sub].parse(selected, result_entry);
               elsif not s[:block].nil?
-                s[:block].call(selected, result)
+                s[:block].call(selected, result_entry)
               end
               selected.remove
             end

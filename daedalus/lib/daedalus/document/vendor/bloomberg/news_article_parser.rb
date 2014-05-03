@@ -23,15 +23,19 @@ module Daedalus
               @node_filters = []
             end
 
-            def parse(node, result = {})
-              if node.text? and node.text.strip.empty?
-                node.remove
-              else
-                @node_filters.each do |filter|
-                  if node.name == filter[:name]
-                    filter[:block].call(node, result)
-                    break
-                  end
+            def parse(node, result = [])
+              @node_filters.each do |filter|
+                case filter[:type]
+                  when :text
+                    if node.text?
+                      filter[:block].call(self, node, result)
+                      break
+                    end
+                  when :selector
+                    if node.matches? filter[:selector]
+                      filter[:block].call(self, node, result)
+                      break
+                    end
                 end
               end
               if not node_empty? node and RAISE_ERRORS
@@ -42,8 +46,13 @@ module Daedalus
             end
 
             #constructors
-            def c(node_name, opt={}, &block)
-              @node_filters << {name: node_name, opt: opt, block: block}
+            def css(selector, opt={}, &block)
+              @node_filters << {type: :selector, selector: selector, opt: opt, block: block}
+              self
+            end
+
+            def text(opt= {}, &block)
+              @node_filters << {type: :text, opt: opt, block: block}
               self
             end
 
@@ -51,9 +60,31 @@ module Daedalus
 
           # content parser
           @@CONTENT_PARSER = ContentParser.new
-          .c('p') do |node, result|
-            result
-            p node
+          .text() do |parser, node, result|
+            unless node.text.strip.empty?
+              result << {_text: node.text.strip}
+            end
+            node.remove
+          end
+          .css('p') do |parser, node, result|
+            r = []
+            node.children.each do |n|
+              parser.parse(n, r)
+            end
+            result << {p: r} unless r.empty?
+          end
+          .css('a.web_ticker') do |parser, node, result|
+            r = []
+            node.children.each do |n|
+              parser.parse(n, r)
+            end
+            metadata = {}
+            node.attribute_nodes.each do |attr|
+              next if attr.name == 'title' and attr.content == 'Get Quote'
+              metadata[attr.name] = attr.content
+            end
+            result << {a: r, _: metadata}
+            #       <a topic_url="http://topics.bloomberg.com/china-mobile-ltd/" href="http://www.bloomberg.com/quote/941:HK" density="sparse" title="Get Quote" ticker="941:HK" class="web_ticker">China Mobile Ltd. (941)</a>
           end
 
           @@NEWS_ARTICLE_PARSER = P.new()
@@ -102,7 +133,8 @@ module Daedalus
                               sub: P.new(
                                   process_all: true,
                                   sequential: @@CONTENT_PARSER
-                              )
+                              ),
+                              result_entry: {hash_key: :content, hash_value: []}
                          )
                     )
                )
@@ -111,7 +143,7 @@ module Daedalus
 
         def process_news_article(document)
           yield ({:version => ARTICLE_PROCESSOR_VERSION, :patch => ARTICLE_PROCESSOR_PROCESSOR_PATCH})
-          @@NEWS_ARTICLE_PARSER.parse(Nokogiri.HTML(document), {content: []})
+          @@NEWS_ARTICLE_PARSER.parse(Nokogiri.HTML(document), {})
         end
 
 
