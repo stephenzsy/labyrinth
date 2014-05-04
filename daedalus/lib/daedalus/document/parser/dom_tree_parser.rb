@@ -17,7 +17,7 @@ module Daedalus
 
       class DOMTreeParser
 
-        RAISE_ERRORS = false
+        RAISE_ERRORS = true
 
         def initialize(opt = {})
           @parser_option = opt

@@ -1,13 +1,8 @@
 <div class="page-header">
     <h1>{{doc['article_title']}}</h1></div>
-<script type="text/ng-template" id="article_content_renderer.html">
-    {{(node['_text']) ? node['_text'] : ''}}
-    <p ng-if="node['p']"><span ng-include="'article_content_renderer.html'" ng-repeat="node in node['p']"></span></p>
-    <a ng-if="node['a']"><span ng-include="'article_content_renderer.html'" ng-repeat="node in node['a']"></span></a>
-</script>
-<div class="article-content">
-    <div ng-include="'article_content_renderer.html'" ng-repeat="node in doc['content']"></div>
+<div class="article-content" my-article-content="doc['content']">
 </div>
+<hr>
 <div class="article-metadata">
     <h3>Metadata</h3>
     <table class="table">

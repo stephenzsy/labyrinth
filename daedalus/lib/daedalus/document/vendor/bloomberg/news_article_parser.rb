@@ -42,6 +42,7 @@ module Daedalus
                 p node
                 raise NodeNotEmptyError.new(node)
               end
+              node.remove
               result
             end
 
@@ -62,7 +63,7 @@ module Daedalus
           @@CONTENT_PARSER = ContentParser.new
           .text() do |parser, node, result|
             unless node.text.strip.empty?
-              result << {_text: node.text.strip}
+              result << {_text: node.text}
             end
             node.remove
           end
@@ -73,26 +74,34 @@ module Daedalus
             end
             result << {p: r} unless r.empty?
           end
-          .css('a.web_ticker') do |parser, node, result|
+          .css('a') do |parser, node, result|
             r = []
             node.children.each do |n|
               parser.parse(n, r)
             end
             metadata = {}
             node.attribute_nodes.each do |attr|
-              next if attr.name == 'title' and attr.content == 'Get Quote'
               metadata[attr.name] = attr.content
             end
             result << {a: r, _: metadata}
             #       <a topic_url="http://topics.bloomberg.com/china-mobile-ltd/" href="http://www.bloomberg.com/quote/941:HK" density="sparse" title="Get Quote" ticker="941:HK" class="web_ticker">China Mobile Ltd. (941)</a>
+          end
+          .css('h2') do |parser, node, result|
+            r = []
+            node.children.each do |n|
+              parser.parse(n, r)
+            end
+            result << {h: r, _: {level: 2}}
+            node.children.remove
           end
 
           @@NEWS_ARTICLE_PARSER = P.new()
           .css('head meta') do |nodes, result|
             result[:meta] = []
             nodes.each do |n|
-              result[:meta] << {name: n.attr('name'), value: n.attr('content')} if n.has_attribute? 'name'
+              result[:meta] << {name: n.attr('name').strip, value: n.attr('content').strip} if n.has_attribute? 'name'
             end
+            result[:meta].reject! { |e| e[:name].start_with? 'twitter:' }
           end
           .css('head script') do |nodes, result|
             nodes.each do |n|
@@ -128,7 +137,7 @@ module Daedalus
                          end)
                     .css('> .entry_content',
                          sub: P.new(process_all: true)
-                         .remove('section.ad_medium')
+                         .remove('section.ad_medium, ul.entry_sharing')
                          .css('> .article_body',
                               sub: P.new(
                                   process_all: true,
@@ -136,6 +145,9 @@ module Daedalus
                               ),
                               result_entry: {hash_key: :content, hash_value: []}
                          )
+                    ).css('> .secondary_content',
+                          sub: P.new(process_all: true)
+                          .remove('section.ad_small, section.suggestions, section.comments')
                     )
                )
           )

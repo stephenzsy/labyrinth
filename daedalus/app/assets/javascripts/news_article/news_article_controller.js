@@ -77,8 +77,7 @@
             }, function (data) {
                 $scope.doc = data['document'];
             });
-        })
-        .directive('myDocumentContentPrettyPrint', function () {
+        }).directive('myDocumentContentPrettyPrint', function () {
             return {
                 restrict: 'A',
                 link: function (scope, element, attrs) {
@@ -90,6 +89,37 @@
                     });
                 }
             };
+        }).directive('myArticleContent', function ($compile) {
+            return {
+                restrict: 'A',
+                scope: {
+                    content: '=myArticleContent'
+                },
+                link: function (scope, element, attributes) {
+                    scope.$watch('content', function (content) {
+                        if (!content) {
+                            return;
+                        }
+                        content.forEach(function (entry, i) {
 
+                            function cunstruct_element(name, field) {
+                                return '<' + name + ' my-article-content="content[' + i + '][\'' + field + '\']"></' + name + '>'
+                            }
+
+                            if (entry['_text']) {
+                                element.append(entry['_text']);
+                            } else if (entry['p']) {
+                                $compile(cunstruct_element('p', 'p'))(scope).appendTo(element);
+                            } else if (entry['a']) {
+                                $compile(cunstruct_element('a', 'a'))(scope).appendTo(element);
+                            } else if (entry['h']) {
+                                $compile(cunstruct_element('h' + entry['_']['level'], 'h'))(scope).appendTo(element);
+                            } else {
+                                $compile('<div>{{content[' + i + ']}}<div>')(scope).appendTo(element);
+                            }
+                        });
+                    });
+                }
+            };
         });
 })();

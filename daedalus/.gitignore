@@ -24,3 +24,6 @@ aws.yml
 aws_credentials.yml
 config/social.yml
 config/deploy/prepare.yml
+
+# external files
+vendor/assets/angular-*
