@@ -1,5 +1,5 @@
 # config valid only for Capistrano 3.1
-lock '3.2.0'
+lock '3.2.1'
 
 set :application, 'Daedalus'
 #set :repo_url, 'git@example.com:me/my_repo.git'
@@ -17,7 +17,7 @@ set :application, 'Daedalus'
 # set :format, :pretty
 
 # Default value for :log_level is :debug
-# set :log_level, :debug
+set :log_level, :debug
 
 # Default value for :pty is false
 # set :pty, true
@@ -33,9 +33,10 @@ set :application, 'Daedalus'
 
 # Default value for keep_releases is 5
 # set :keep_releases, 5
+SSHKit.config.output_verbosity=Logger::DEBUG
+
 set :ssh_options, {
-    forward_agent: true,
-    keys_only: true
+    use_agent: true
 }
 
 #before :deploy, 'deploy:aws:prepare_instance'

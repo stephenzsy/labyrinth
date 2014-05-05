@@ -54,8 +54,20 @@ namespace :deploy do
         i = instances.first
         puts "Server: #{i.public_dns_name}"
         role :app, "ec2-user@#{i.public_dns_name}"
+
         server i.public_dns_name, user: 'ec2-user', roles: ['app']
         set :ssh_options, fetch(:ssh_options).merge({keys: [config.ec2_config[:ssh_key_file]]})
+      end
+    end
+
+    desc 'Run commands on EC2 Instances'
+    task :run_commands do
+      config = Daedalus::Common::Config::DeployConfig.instance
+      ec2 = config.get_ec2_client
+      instances = get_non_terminated_instances ec2, config.ec2_config
+      i = instances.first
+      Net::SSH.start(i.public_dns_name, 'ec2-user', keys: [config.ec2_config[:ssh_key_file]]) do |ssh|
+        p ssh.exec! 'ec2-metadata'
       end
     end
 
@@ -77,7 +89,7 @@ namespace :deploy do
 
       begin
         s3.head_object bucket: prepare_config[:s3_bucket], key: key
-      rescue Aws::S3::Errors::NoSuchKey
+      rescue Aws::S3::Errors::NotFound
         # upload
         s3.put_object bucket: prepare_config[:s3_bucket], key: key, body: File.open(local_artifact)
       end

@@ -14,6 +14,7 @@ namespace :deploy do
         matched_artifacts = Dir.glob("#{artifact_file_name_base}-*")
         if matched_artifacts.empty?
           # create artifact file
+          FileUtils.rm_rf "#{prepare_config[:package_directory]}/*"
           puts %x(cd #{prepare_config[:repo_directory]}; GIT_WORK_TREE="#{prepare_config[:package_directory]}" git checkout -f "#{prepare_config[:branch]}")
           artifact_file = File.join(Dir.pwd, "#{artifact_file_name_base}-#{Time.now.utc.strftime '%Y%m%dT%H%M%SZ'}.tar.gz")
           puts %x(cd #{prepare_config[:package_directory]}; tar -czf #{artifact_file} #{prepare_config[:artifact_base_name]})
