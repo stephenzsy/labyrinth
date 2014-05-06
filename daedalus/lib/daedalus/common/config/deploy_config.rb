@@ -35,6 +35,10 @@ module Daedalus
                       sigv4_name: 's3'
         end
 
+        def aws_config
+          @aws_config
+        end
+
         def get_prepare_config
           @prepare_config
         end

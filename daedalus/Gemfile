@@ -50,6 +50,7 @@ end
 # gem 'debugger', group: [:development, :test]
 
 gem 'nokogiri'
-gem 'capistrano', '~> 3.2.1'
+
+# Deployment dependency
 gem 'net-ssh', '~> 2.9.0'
 
