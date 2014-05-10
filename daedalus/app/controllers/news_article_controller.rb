@@ -16,13 +16,14 @@ class NewsArticleController < ApplicationController
     raise "Invalid Document Type: #{document_type}" unless  ['cached-json', 'cached', 'live-json', 'live'].include? document_type
     status, document, metadata = @news_article.get_document(params['DocumentType'])
     raise "Status: #{status}" unless status == :success
+    type = metadata[:_type]
     metadata = metadata.reject { |k, v| k.to_s.start_with? '_' } unless metadata.nil?
     result = {:document => document}
     result[:metadata] = metadata unless metadata.nil? or metadata.empty?
     case document_type
       when 'live', 'cached'
         render text: document
-      when 'live-json'
+      when 'live-json', 'cached-json'
         render json: result
     end
   end

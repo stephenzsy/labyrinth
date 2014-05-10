@@ -34,9 +34,9 @@
             var current_tab = null;
             $scope.tab_text = {};
             $scope.tab_display = {};
-            var newsArticleId = $('#news_article_id').text();
-            var articleSourceId = $('#article_source').attr('data-article-source-id');
-            var dailyIndexId = $('#daily_index').attr('data-daily-index-id');
+            var newsArticleId = angular.element($('#news_article_id')).text();
+            var articleSourceId = angular.element($('#article_source')).attr('data-article-source-id');
+            var dailyIndexId = angular.element($('#daily_index')).attr('data-daily-index-id');
 
             $scope.isActive = function (tab_key) {
                 if (current_tab === tab_key) {
@@ -73,9 +73,10 @@
                 daily_index_id: dailyIndexId,
                 id: newsArticleId
             }, {
-                DocumentType: 'live-json'
+                DocumentType: 'cached-json'
             }, function (data) {
                 $scope.doc = data['document'];
+                $scope.doc_metadata = data['metadata'];
             });
         }).directive('myDocumentContentPrettyPrint', function () {
             return {

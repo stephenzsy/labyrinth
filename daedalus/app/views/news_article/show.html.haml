@@ -30,6 +30,26 @@
           %td{:colspan => 2}= link_to 'External Link', |
             @news_article.external_url, |
             id: 'external_url'
+        %tr
+          %td.metadata-label Generation Date
+          %td.metadata-value
+            {{doc_metadata['generation_date']}}
+        %tr
+          %td.metadata-label Source Retrieval Date
+          %td.metadata-value
+            {{doc_metadata['source_retrieval_date']}}
+        %tr
+          %td.metadata-label Processor Version
+          %td.metadata-value
+            {{doc_metadata['processor_version']}}
+        %tr
+          %td.metadata-label Processor Patch
+          %td.metadata-value
+            {{doc_metadata['processor_patch']}}
+        %tr
+          %td.metadata-label Source Version
+          %td.metadata-value
+            {{doc_metadata['source_version']}}
 .row-fluid
   %p
     Find me in app/views/news_article/show.html.erb

@@ -137,7 +137,7 @@ module Daedalus
                          end)
                     .css('> .entry_content',
                          sub: P.new(process_all: true)
-                         .remove('section.ad_medium, ul.entry_sharing')
+                         .remove('section.ad_medium, ul.entry_sharing, section.company_chart, .image_focus')
                          .css('> .article_body',
                               sub: P.new(
                                   process_all: true,

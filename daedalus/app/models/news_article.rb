@@ -62,6 +62,37 @@ class NewsArticle < Daedalus::Document::DocumentBase
     return :success, document, metadata
   end
 
+  def get_document_cached_json
+    index_options = get_cache_index_options type: 'article:json', document_type: :json
+    status, document, metadata = @@cache_manager.retrieve_document(
+        index_options, {
+        :match => {
+            :source_version => article_source.article_version
+        }
+    })
+    case status
+      when :cache_success
+        return :success, JSON.parse(document), metadata
+      when :cache_not_found
+        o_status, o_document, o_metadata = get_document_cached
+        raise o_status.to_s unless o_status == :success
+        metadata = {
+            source_retrieval_date: o_metadata[:retrieval_date],
+            source_version: o_metadata[:version]
+        }
+        metadata[:_source_key] = o_metadata[:_index_key] unless o_metadata[:_index_key].nil?
+        document = article_source.process_news_article(o_document) do |m|
+          metadata[:processor_version] = m[:version]
+          metadata[:processor_patch] = m[:patch]
+        end
+        metadata[:generation_date] = get_date_universal_string(DateTime.now)
+        document = JSON.generate(document)
+        @@cache_manager.store_document(document, index_options, metadata, {reduced_redundancy: true})
+        return :success, JSON.parse(document), metadata
+      else
+        raise 'Not Implemented'
+    end
+  end
 
   def self.from_id(article_source, daily_index, id)
     NewsArticle.new article_source, daily_index, id
