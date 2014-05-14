@@ -1,36 +1,53 @@
 require 'aws-sdk-core'
 require 'net/ssh'
+require 'shellwords'
 
 require 'daedalus/common/config/deploy_config'
 
 namespace :deploy do
   namespace :aws do
+    LOGGER = Logger.new(STDOUT)
 
     def pick_subnet(ec2, vpc_id)
       ec2.describe_subnets(:filters => [{name: "vpc-id", :values => [vpc_id]}])[:subnets].sample
     end
 
+    def get_images(ec2, config)
+      images = ec2.describe_images(owners: ['self']).images
+      images.each do |image|
+        puts image.image_id
+      end
+    end
+
     def launch_instance(ec2, config)
       subnet = pick_subnet ec2, config[:vpc_id]
-      ec2.run_instances(image_id: config[:ami_id],
-                        min_count: 1,
-                        max_count: 1,
-                        key_name: config[:instance_key_name],
-                        instance_type: config[:instance_type],
-                        monitoring: {
-                            enabled: false,
-                        },
-                        network_interfaces: [
-                            {
-                                device_index: 0,
-                                subnet_id: subnet[:subnet_id],
-                                associate_public_ip_address: true,
-                                groups: config[:security_group_ids]
-                            }
-                        ],
-                        iam_instance_profile: {
-                            arn: config[:instance_profile_arn]
-                        })
+      #get_images(ec2, config)
+      reservation = ec2.run_instances(image_id: config[:ami_id],
+                                      min_count: 1,
+                                      max_count: 1,
+                                      key_name: config[:instance_key_name],
+                                      instance_type: config[:instance_type],
+                                      monitoring: {
+                                          enabled: false,
+                                      },
+                                      network_interfaces: [
+                                          {
+                                              device_index: 0,
+                                              subnet_id: subnet[:subnet_id],
+                                              associate_public_ip_address: true,
+                                              groups: config[:security_group_ids]
+                                          }
+                                      ],
+                                      iam_instance_profile: {
+                                          arn: config[:instance_profile_arn]
+                                      })
+      instance_id = nil
+      reservation.instances.each do |i|
+        instance_id = i.instance_id
+      end
+      LOGGER.info("Launched EC2 Instance: #{i.instance_id}")
+      ec2.create_tags(resources: [instance_id], tags: [{key: 'Name', value: 'Daedalus'}])
+      reservation.instances
     end
 
     def get_non_terminated_instances(ec2, config)
@@ -49,7 +66,7 @@ namespace :deploy do
       instances = get_non_terminated_instances ec2, config.ec2_config
       if instances.empty?
         # launch new instance
-        launch_instance ec2, config.ec2_config
+        instances = launch_instance ec2, config.ec2_config
       else
         i = instances.first
         Settings.set :host, i.public_dns_name
@@ -93,25 +110,51 @@ namespace :deploy do
 
     task :bootstrap => [:prepare_instance, :upload_package] do
       config = Daedalus::Common::Config::DeployConfig.instance
+
+      # assemble commands
+      commands = []
+      app_root = '${HOME}' + '/labyrinth'.shellescape
+      artifact_root = '${HOME}' + '/deploy/artifacts'.shellescape
+      commands << "mkdir -p #{app_root}"
+      commands << "mkdir -p #{artifact_root}"
+      package_remote_filename = File.basename(Settings.fetch(:package_s3_key)).shellescape
+      artifact_remote_path = '${HOME}' + "/deploy/artifacts/#{package_remote_filename}".shellescape
+      package_remote_directory = "${HOME}/deploy/daedalus/#{/(?<dir_name>.*)\.tar\.gz/.match(package_remote_filename)[:dir_name]}"
+      artifact_s3_region = config.aws_config[:region].shellescape
+      artifact_s3_bucket = Settings.fetch(:package_s3_bucket).shellescape
+      artifact_s3_key = Settings.fetch(:package_s3_key).shellescape
+      # download artifact from S3
+      commands << "aws s3api --region #{artifact_s3_region} get-object --bucket #{artifact_s3_bucket} --key #{artifact_s3_key} #{artifact_remote_path}"
+
+      # unpack package
+      commands << "mkdir -p #{package_remote_directory}"
+      commands << "cd #{package_remote_directory}"
+      commands << "tar -xzvf #{artifact_remote_path}"
+
+      # make symbolic link
+      commands << "rm #{app_root}/daedalus"
+      commands << "ln -s #{package_remote_directory}/daedalus #{app_root}/daedalus"
+
+      commands << "cd #{app_root}/daedalus"
+      commands << "bundle"
+
       Net::SSH.start(Settings.fetch(:host), 'ec2-user', keys: Settings.fetch(:ssh_options)[:keys]) do |ssh|
-
-        #puts ssh.exec!('ec2-metadata')
-        puts ssh.exec!('mkdir -p ${HOME}/labyrinth')
-        puts ssh.exec!('mkdir -p ${HOME}/deploy/artifacts')
-        puts ssh.exec!('cd ${HOME}/deploy/artifacts')
-        package_remote_filename = File.basename(Settings.fetch(:package_s3_key))
-        package_remote_directory = "${HOME}/deploy/daedalus/#{/(?<dir_name>.*)\.tar\.gz/.match(package_remote_filename)[:dir_name]}"
-        puts ssh.exec!("aws s3api --region #{config.aws_config[:region]}" +
-                           " get-object" +
-                           " --bucket \"#{Settings.fetch(:package_s3_bucket)}\"" +
-                           " --key \"#{Settings.fetch(:package_s3_key)}\"" +
-                           " ${HOME}/deploy/artifacts/#{package_remote_filename}")
-
-        puts "mkdir -p #{package_remote_directory}; cd #{package_remote_directory}; tar -xzvf \"${HOME}/deploy/artifacts/#{package_remote_filename}\""
-
-        puts ssh.exec!("mkdir -p #{package_remote_directory}; cd #{package_remote_directory}; tar -xzvf \"${HOME}/deploy/artifacts/#{package_remote_filename}\"")
+        execute_commands ssh, commands
       end
       p Settings.settings
+    end
+
+    def execute_commands(ssh, commands = [], opt = {})
+      commands = ["source ~/.bash_profile"] + commands
+      script = commands.join(";\n") + ";\n"
+      LOGGER.info "Executing script: \n#{script}"
+      stdout = ssh.exec! script
+      unless stdout.nil?
+        LOGGER.info "----- STDOUT -----"
+        stdout.each_line do |line|
+          LOGGER.info line.rstrip
+        end
+      end
     end
 
   end
