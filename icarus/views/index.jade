@@ -1,0 +1,23 @@
+extends layout
+
+block scripts
+    script(type="text/javascript", src='angular/latest/angular-resource.min.js')
+    script(type="text/javascript", src='javascripts/instances.js')
+
+block content
+    h1= title
+    div(ng-controller='instances')
+        h2 Current Running Instances
+        table.table
+            tr
+                th Instance ID
+                th Image ID
+                th Public IP
+                th Public DNS
+                th Subnet ID
+            tr(ng-repeat='instance in instances')
+                td {{instance['InstanceId']}}
+                td {{instance['ImageId']}}
+                td {{instance['PublicIpAddress']}}
+                td {{instance['PublicDnsName']}}
+                td {{instance['SubnetId']}}

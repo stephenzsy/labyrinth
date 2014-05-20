@@ -44,8 +44,8 @@ namespace :deploy do
       instance_id = nil
       reservation.instances.each do |i|
         instance_id = i.instance_id
+        LOGGER.info("Launched EC2 Instance: #{i.instance_id}")
       end
-      LOGGER.info("Launched EC2 Instance: #{i.instance_id}")
       ec2.create_tags(resources: [instance_id], tags: [{key: 'Name', value: 'Daedalus'}])
       reservation.instances
     end
@@ -155,6 +155,12 @@ namespace :deploy do
           LOGGER.info line.rstrip
         end
       end
+    end
+
+    task :upload_configs do
+      config = Daedalus::Common::Config::DeployConfig.instance
+      p config
+
     end
 
   end

@@ -21,10 +21,18 @@
 aws.yml
 
 # configuration files
-aws_credentials.yml
+aws_credentials.ymlornieutumomornieutummkksaklsdserserssersser
 config/social.yml
 config/deploy/prepare.yml
 config/deploy/config/*
 
 # external files
 vendor/assets/angular-*
+
+config/config.js
+public/angular
+public/bootstrap
+public/jquery
+
+node_modules/*
+
