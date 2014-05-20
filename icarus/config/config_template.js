@@ -9,6 +9,11 @@ var config = {
         ec2: {
             endpoint: 'TBD'
         }
+    },
+    apps: {
+        appId: {
+            localPath: 'path'
+        }
     }
 };
 
