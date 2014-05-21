@@ -5,7 +5,7 @@ block scripts
     script(type="text/javascript", src='javascripts/icarus.js')
 
 block content
-    div.col-lg-10(ng-controller='icarus')
+    div(ng-controller='icarus')
         h1.page-header= title
             br
             small Deployment Dashboard
@@ -24,22 +24,29 @@ block content
                     td {{instance['PublicIpAddress']}}
                     td {{instance['PublicDnsName']}}
                     td {{instance['SubnetId']}}
-        div#localSettings
-            h2 Local Settings
-            table.table
-                tr
-                    th App ID
-                    th Commit ID
-                tr(ng-repeat='appId in appIds')
-                    td {{appId}}
-                    td {{currentApp[appId]['commitId']}}
+        div#Source
+            h2 Version Control
+            div(ng-repeat='app in apps')
+                h3 App: {{app['displayName']}}
+                table.table
+                    tr
+                        th Commit ID
+                        th Date
+                        th Release Notes
+                        th Actions
+                    tr(ng-repeat="commit in app['commits']")
+                        td {{commit['hash']}}
+                        td {{commit['date']}}
+                        td {{commit['releaseNotes']}}
+                        td
+                            a.btn.btn-primary(type='button') Build
         div#localArtifacts
             h2 Local Artifacts
-    div.col-lg-2(data-spy='affix', data-offset-top="60", data-offset-bottom="200")
+    //div(data-spy='affix', data-offset-top="60", data-offset-bottom="200")
         ul.nav.nav-list
             li
                 a(href='#instances') Instances
             li
-                a(href='#localSettings') Local Settings
+                a(href='#Source') Local Settings
             li
                 a(href='#localArtifacts') Local Artifacts

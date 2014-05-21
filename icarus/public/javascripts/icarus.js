@@ -3,17 +3,20 @@
 
     angular.module('icarus', [])
         .controller('icarus', function ($scope, icarusService) {
-            $scope.appIds = ['daedalus'];
-            $scope.currentApp = {};
+            $scope.apps = [
+                {id: 'daedalus', displayName: 'Daedalus'}
+            ];
 
             icarusService.instances()
                 .success(function (data) {
                     $scope.instances = data;
                 });
 
-            $scope.appIds.forEach(function (appId) {
+            $scope.apps.forEach(function (app) {
+                var appId = app['id'];
+                app['commits'] = [];
                 icarusService.current(appId).success(function (data) {
-                    $scope.currentApp[appId] = data;
+                    app['commits'] = data['commits'];
                 });
             });
         })
@@ -29,7 +32,7 @@
             }
 
             function current(appId) {
-                return $http({method: 'GET', url: '/current', params: {appId: appId}});
+                return $http({method: 'GET', url: '/vcs', params: {appId: appId}});
             }
 
             function artifact() {
