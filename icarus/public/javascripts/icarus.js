@@ -19,12 +19,20 @@
                     app['commits'] = data['commits'];
                 });
             });
+
+            $scope.buildArtifact = function (app, commit) {
+                var appId = app['id'];
+                var commitId = commit['hash'];
+                icarusService.buildArtifact(appId, commitId).success(function (data) {
+                });
+            };
         })
         .service('icarusService', function ($http) {
             return {
                 instances: instances,
                 current: current,
-                artifact: artifact
+                artifact: artifact,
+                buildArtifact: buildArtifact
             };
 
             function instances() {
@@ -36,6 +44,13 @@
             }
 
             function artifact() {
+            }
+
+            function buildArtifact(appId, commitId, callback) {
+                return $http({method: 'POST', url: '/build', data: {
+                    type: 'artifact',
+                    appId: appId,
+                    commitId: commitId}});
             }
         });
 })();

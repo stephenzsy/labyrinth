@@ -35,7 +35,11 @@ router.get('/instances', function (req, res) {
 
 router.get('/vcs', function (req, res) {
     var appId = req.query.appId;
-    var appLocalPath = Config['apps'][appId];
+    if (!appId) {
+        res.send(404, "appId not specified");
+        return;
+    }
+    var appLocalPath = Config['apps'][appId]['localPath'];
     if (!appLocalPath) {
         res.send(404, "AppId not found: " + appId);
         return;
@@ -60,7 +64,6 @@ router.get('/vcs', function (req, res) {
                 date: date,
                 releaseNotes: releaseNotes
             });
-            console.log(commitId, date, releaseNotes);
         });
         res.send({commits: commits});
     });
@@ -81,6 +84,48 @@ router.get('/artifact', function (req, res) {
      */
     var debug = {files: files};
     res.send({local: [], remote: [], debug: debug});
+});
+
+router.post('/build', function (req, res) {
+    var params = req.body;
+    var type = params['type'];
+    if (type != 'artifact') {
+        res.send(400, "Invalid Type: " + type);
+        return;
+    }
+    var appId = params['appId'];
+    var appConfig = Config['apps'][appId];
+    if (!appId || !appConfig) {
+        res.send(400, "Malformed appId: " + appId);
+        return;
+    }
+    var commitId = params['commitId'];
+    if (!commitId) {
+        res.send(400, "No commitId specified");
+        return;
+    }
+    if (!/^[A-Fa-f0-9]+$/.test(commitId)) {
+        res.send(400, "Malformed commitId: " + commitId);
+        return;
+    }
+    child_process.exec('cd ' + appConfig['localPath'] + ';  git show -s ' + commitId + ';', function (error, stdout, stderr) {
+        if (error) {
+            res.send(404, "Commit ID not found: " + commitId);
+            return;
+        }
+        else {
+            var prefix = appId + '-' + commitId;
+            var outputPath = appConfig['artifact']['artifactDirectory'] + '/' + prefix + '.tar.gz';
+            var command = 'cd ' + appConfig['localPath'] + ';' + 'git archive ' + commitId + ' --format=tar.gz --prefix=\'' + prefix + '/\' --output=\'' + outputPath + '\';';
+            console.log(command)
+            child_process.exec(command, function (error, stdout, stderr) {
+                if (error) {
+                    res.send(500, error);
+                }
+            });
+            res.send('200', 'prefix')
+        }
+    });
 });
 
 module.exports = router;

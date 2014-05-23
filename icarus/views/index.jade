@@ -39,7 +39,7 @@ block content
                         td {{commit['date']}}
                         td {{commit['releaseNotes']}}
                         td
-                            a.btn.btn-primary(type='button') Build
+                            a.btn.btn-primary(ng-click="buildArtifact(app, commit)") Build
         div#localArtifacts
             h2 Local Artifacts
     //div(data-spy='affix', data-offset-top="60", data-offset-bottom="200")
