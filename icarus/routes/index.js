@@ -60,7 +60,7 @@ router.get('/vcs', function (req, res) {
             var date = parts.shift();
             var releaseNotes = parts.join(',');
             commits.push({
-                hash: commitId,
+                commitId: commitId,
                 date: date,
                 releaseNotes: releaseNotes
             });
@@ -69,19 +69,29 @@ router.get('/vcs', function (req, res) {
     });
 });
 
+function formatDate(date) {
+    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d+Z/, 'Z');
+}
+
+function parseDate(dateString) {
+    var m = /^(\d{4})$/.match(dateString);
+    var date = new Date(0);
+
+    date.setUTCFullYear(m[1]);
+    console.log(date);
+    return date;
+}
+
 router.get('/artifact', function (req, res) {
     var appId = req.query.appId;
     if (!Config['apps'][appId]) {
-        res.send(400);
+        res.send(400, "Invalid appId: " + appId);
         return;
     }
     var artifactConfig = Config['apps'][appId]['artifact'];
-    var files = fs.readdirSync(artifactConfig['prepareDirectory']);
-    /*
-     files.forEach(function (file) {
-     });
-     files = fs.readdirSync(artifactConfig['prepareDirectory']);
-     */
+    var files = fs.readdirSync(artifactConfig['artifactDirectory']);
+
+
     var debug = {files: files};
     res.send({local: [], remote: [], debug: debug});
 });
@@ -114,10 +124,11 @@ router.post('/build', function (req, res) {
             return;
         }
         else {
-            var prefix = appId + '-' + commitId;
+            var date = new Date();
+            var prefix = appId + '-' + commitId + '-' + formatDate(date);
             var outputPath = appConfig['artifact']['artifactDirectory'] + '/' + prefix + '.tar.gz';
-            var command = 'cd ' + appConfig['localPath'] + ';' + 'git archive ' + commitId + ' --format=tar.gz --prefix=\'' + prefix + '/\' --output=\'' + outputPath + '\';';
-            console.log(command)
+            var command = 'cd ' + appConfig['localPath'] + ';' + 'git archive ' + commitId + ' --format=tar.gz --prefix \'' + prefix + '/\' --output \'' + outputPath + '\';';
+            console.log(command);
             child_process.exec(command, function (error, stdout, stderr) {
                 if (error) {
                     res.send(500, error);

@@ -18,12 +18,17 @@ block content
                     th Public IP
                     th Public DNS
                     th Subnet ID
+                    th State
+                    th Actions
                 tr(ng-repeat='instance in instances')
                     td {{instance['InstanceId']}}
                     td {{instance['ImageId']}}
                     td {{instance['PublicIpAddress']}}
                     td {{instance['PublicDnsName']}}
                     td {{instance['SubnetId']}}
+                    td {{instance['State']['Name']}}
+                    td
+                        a.btn.btn-link(href="/bootstrap/{{instance['InstanceId']}}") Bootstrap
         div#Source
             h2 Version Control
             div(ng-repeat='app in apps')
@@ -35,11 +40,13 @@ block content
                         th Release Notes
                         th Actions
                     tr(ng-repeat="commit in app['commits']")
-                        td {{commit['hash']}}
+                        td {{commit['commitId']}}
                         td {{commit['date']}}
                         td {{commit['releaseNotes']}}
                         td
-                            a.btn.btn-primary(ng-click="buildArtifact(app, commit)") Build
+                            button.btn.btn-link(ng-show="getBuildArtifactStatus(app,commit) === 'NotAvailable'",ng-click='buildArtifact(app, commit)') Build
+                            span.text-info(ng-show="getBuildArtifactStatus(app,commit) === 'Building'") Building
+                            span.text-success(ng-show="getBuildArtifactStatus(app,commit) === 'Success'") Available
         div#localArtifacts
             h2 Local Artifacts
     //div(data-spy='affix', data-offset-top="60", data-offset-bottom="200")
