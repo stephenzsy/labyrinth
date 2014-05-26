@@ -22,19 +22,12 @@
                 });
             });
 
+            // current revision
             IcarusService.currentRevision('icarus').success(function (data) {
-                $scope.currentRevision = data.commits[0];
+                var commit = data.commits[0];
+                $scope.currentRevision = commit;
+                refreshArtifactsRemote(commit.commitId);
             });
-
-            $scope.localArtifacts = [];
-
-            function refreshArtifactsLocal() {
-                IcarusService.artifactLocal('icarus').success(function (data) {
-                    $scope.localArtifacts = data.localArtifacts;
-                });
-            }
-
-            refreshArtifactsLocal();
 
             $scope.artifactBuildStatus = 'NotStarted';
             $scope.buildArtifact = function (commit) {
@@ -50,5 +43,37 @@
                         $scope.artifactBuildError = data;
                     });
             };
+
+            // local artifacts
+            $scope.localArtifacts = [];
+
+            function refreshArtifactsLocal() {
+                IcarusService.artifactLocal('icarus').success(function (data) {
+                    $scope.localArtifacts = data.localArtifacts;
+                });
+            }
+
+            refreshArtifactsLocal();
+
+            $scope.artifactLocalDelete = function (filename) {
+                IcarusService.artifactLocalDelete('icarus', filename).success(function () {
+                    refreshArtifactsLocal();
+                });
+            };
+
+            // uploading
+            $scope.artifactRemoteUpload = function (artifact) {
+                IcarusService.artifactRemoteUpload('icarus', artifact.filename).success(function () {
+                    refreshArtifactsRemote(artifact.commitId);
+                });
+            };
+
+            // remote artifacts
+            $scope.remoteArtifacts = [];
+            function refreshArtifactsRemote(commitId) {
+                IcarusService.artifactRemote('icarus', commitId).success(function (data) {
+                    $scope.remoteArtifacts = data.remoteArtifacts;
+                });
+            }
         });
 })();

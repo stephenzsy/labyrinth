@@ -28,12 +28,21 @@ block content
                         h4 Local
                         div.alert.alert-warning(ng-show="!localArtifacts.length") No built artifacts found.
                         div
-                            ul
-                                li(ng-repeat='artifact in localArtifacts') {{artifact.filename}}
-                                    div.btn.btn-xs.btn-link(style="color:red;")
-                                        span.glyphicon.glyphicon-remove
+                            div(ng-repeat='artifact in localArtifacts')
+                                span {{artifact.filename}}&nbsp;
+                                span.btn.btn-xs.btn-link(ng-click='artifactRemoteUpload(artifact)')
+                                    span.glyphicon.glyphicon-cloud-upload
+                                    span &nbsp;Upload
+                                span.btn.btn-xs.btn-link(ng-click='artifactLocalDelete(artifact.filename)')
+                                    span.glyphicon.glyphicon-remove.text-danger
+                                    span.text-danger &nbsp;Remove
                     div.col-lg-6
                         h4 Remote
+                        div(ng-repeat='artifact in remoteArtifacts')
+                             span {{artifact.key}}&nbsp;
+                             //span.btn.btn-xs.btn-link
+                                 span.glyphicon.glyphicon-remove.text-danger
+                                 span.text-danger &nbsp;Remove
             div
                 h2 EC2 Instance
             div

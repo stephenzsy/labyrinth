@@ -14,6 +14,22 @@
             return $http({method: 'POST', url: '/api/artifact/local', data: {appId: appId}});
         };
 
+        this.artifactLocalDelete = function (appId, filename) {
+            return $http({method: 'POST', url: '/api/artifact/local/delete', data: {appId: appId, filename: filename}});
+        };
+
+        this.artifactRemote = function (appId, commitId) {
+            return $http({method: 'POST', url: '/api/artifact/remote', data: {appId: appId, commitId: commitId}});
+        }
+
+        this.artifactRemoteUpload = function (appId, filename) {
+            return $http({method: 'POST', url: '/api/artifact/remote/upload', data: {appId: appId, filename: filename}});
+        }
+
+        this.artifactRemoteDelete = function (appId, filename) {
+            return $http({method: 'POST', url: '/api/artifact/remote/delete', data: {appId: appId, filename: filename}});
+        }
+
         this.buildArtifact = function (appId, commitId) {
             return $http({method: 'POST', url: '/api/artifact/build', data: {
                 type: 'artifact',
