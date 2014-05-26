@@ -9,7 +9,7 @@
                     controller: 'bootstrap'
                 });
         })
-        .controller('bootstrap', function ($scope, $route, BootstrapService) {
+        .controller('bootstrap', function ($scope, $route, IcarusService) {
             $scope.raw = {
                 'DescribeInstances': ''
             };
@@ -17,39 +17,38 @@
             $scope.$on('$routeChangeSuccess', function () {
                 var instanceId = $route.current.params['instanceId'];
 
-                BootstrapService.describeInstances([instanceId]).success(function (data) {
+                IcarusService.ec2DescribeInstances([instanceId]).success(function (data) {
                     $scope.raw['DescribeInstances'] = JSON.stringify(data, null, 2);
                 });
             });
 
-            BootstrapService.currentRevision('icarus').success(function (data) {
+            IcarusService.currentRevision('icarus').success(function (data) {
                 $scope.currentRevision = data.commits[0];
             });
-        })
-        .service('BootstrapService', function ($http) {
-            return {
-                describeInstances: describe_instances,
-                currentRevision: currentRevision,
-                artifact: artifact,
-                buildArtifact: buildArtifact
+
+            $scope.localArtifacts = [];
+
+            function refreshArtifactsLocal() {
+                IcarusService.artifactLocal('icarus').success(function (data) {
+                    $scope.localArtifacts = data.localArtifacts;
+                });
+            }
+
+            refreshArtifactsLocal();
+
+            $scope.artifactBuildStatus = 'NotStarted';
+            $scope.buildArtifact = function (commit) {
+                $scope.artifactBuildStatus = 'Building';
+                IcarusService.buildArtifact('icarus', commit.commitId)
+                    .success(function (data) {
+                        $scope.artifactBuildStatus = 'Success';
+                        $scope.builtArtifact = data;
+                        refreshArtifactsLocal();
+                    })
+                    .error(function (data) {
+                        $scope.artifactBuildStatus = 'Error';
+                        $scope.artifactBuildError = data;
+                    });
             };
-
-            function describe_instances(instanceIds) {
-                return $http({method: 'POST', url: 'ec2/describeInstances', data: {InstanceIds: instanceIds}});
-            }
-
-            function currentRevision(appId) {
-                return $http({method: 'GET', url: '/vcs', params: {appId: appId}});
-            }
-
-            function artifact() {
-            }
-
-            function buildArtifact(appId, commitId, callback) {
-                return $http({method: 'POST', url: '/build', data: {
-                    type: 'artifact',
-                    appId: appId,
-                    commitId: commitId}});
-            }
         });
 })();

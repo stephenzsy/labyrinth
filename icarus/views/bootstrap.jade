@@ -4,17 +4,44 @@ block scripts
     script(type="text/javascript", src='/angular/latest/angular-resource.min.js')
     script(type="text/javascript", src='/angular/latest/angular-route.min.js')
     script(type="text/javascript", src='/javascripts/bootstrap.js')
+    script(type="text/javascript", src='/javascripts/api.js')
 
 block content
     section(ng-controller='bootstrap')
         h1.page-header= "Bootstrap on EC2 Instance: " + instanceId
         div
-            ul
-                li Current revision
-                    ul
-                        li Commit ID: {{currentRevision.commitId}}
-                        li Date: {{currentRevision.date}}
-                        li Release Notes: {{currentRevision.releaseNotes}}
+            div
+                h2 Current Icarus Revision
+                ul
+                    li Commit ID: {{currentRevision.commitId}}
+                    li Date: {{currentRevision.date}}
+                    li Release Notes: {{currentRevision.releaseNotes}}
+                div
+                    button.btn.btn-primary(ng-show="artifactBuildStatus == 'NotStarted'", ng-click='buildArtifact(currentRevision)') Build
+                    span.text-info(ng-show="artifactBuildStatus == 'Building'") Building
+                    span.text-success(ng-show="artifactBuildStatus == 'Success'") Build Success: {{builtArtifact}}
+                    span.text-danger(ng-show="artifactBuildStatus == 'Error'") Build Error: {{artifactBuildError}}
+            div
+                h2 Icarus Artifacts
+                div.container
+                    div.col-lg-6
+                        h4 Local
+                        div.alert.alert-warning(ng-show="!localArtifacts.length") No built artifacts found.
+                        div
+                            ul
+                                li(ng-repeat='artifact in localArtifacts') {{artifact.filename}}
+                                    div.btn.btn-xs.btn-link(style="color:red;")
+                                        span.glyphicon.glyphicon-remove
+                    div.col-lg-6
+                        h4 Remote
+            div
+                h2 EC2 Instance
+            div
+                h2 Security
+            hr
+            div
+                button.btn.btn-primary Start Bootstrap
+        hr
         div.panel-group
             div.panel.panel-default
                 div.panel-heading Raw DescribeInstances Output
