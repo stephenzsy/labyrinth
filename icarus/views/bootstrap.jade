@@ -45,11 +45,31 @@ block content
                                  span.text-danger &nbsp;Remove
             div
                 h2 EC2 Instance
-            div
-                h2 Security
+                div
+                    table.table
+                        tr
+                            td Public DNS
+                            td {{ec2InstanceDescription.PublicDnsName}}
+                div
+                    h3 Security
+                //div
+                    h3 EC2 Metadata
+                    {{ec2Metadata}}
             hr
             div
-                button.btn.btn-primary Start Bootstrap
+                h2 Steps
+                ol
+                    li Download package to instance {{ec2InstanceDescription.InstanceId}}
+                        form.form-horizontal
+                            div.form-group
+                                label.col-sm-1.control-label S3 Key:
+                                div.col-sm-5
+                                    select.form-control(ng-model="remoteArtifactToDeploy",ng-options="artifact.key for artifact in remoteArtifacts")
+                            div.form-group
+                                div.col-sm-offset-1.col-sm-5
+                                    a.btn.btn-link
+                                        span.glyphicon.glyphicon-cloud-download
+                                        span &nbsp;Download
         hr
         div.panel-group
             div.panel.panel-default

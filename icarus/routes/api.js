@@ -72,10 +72,14 @@ router.post('/artifact/local/delete', function (req, res) {
     });
 });
 
+function ValidationException(message) {
+    this.message = message;
+}
+
 function validateAppId(req, res) {
     var appId = req.body.appId;
     if (!Config['apps'][appId]) {
-        res.send(400, "Invalid appId: " + appId);
+        throw new ValidationException("Invalid appId: " + appId);
         return null;
     }
     return appId;
@@ -145,19 +149,19 @@ router.post('/artifact/remote/upload', function (req, res) {
     }
     var artifactConfig = Config['apps'][appId]['artifact'];
     var s3 = getS3();
-    fs.open(path.join(artifactConfig.artifactDirectory, filename), 'r', function (fd) {
-        s3.putObject({
-            Bucket: artifactConfig.s3Bucket,
-            Key: artifactConfig.s3Prefix + filename,
-            Body: fd
-        }, function (err, data) {
-            if (err) {
-                console.warn(err);
-                res.send(500, err);
-                return;
-            }
-            res.send(200);
-        });
+    var localArtifactPath = path.join(artifactConfig.artifactDirectory, filename);
+    var stream = fs.createReadStream(localArtifactPath);
+    s3.putObject({
+        Bucket: artifactConfig.s3Bucket,
+        Key: artifactConfig.s3Prefix + filename,
+        Body: stream
+    }, function (err, data) {
+        if (err) {
+            console.warn(err);
+            res.send(500, err);
+            return;
+        }
+        res.send(200);
     });
 });
 
@@ -207,5 +211,91 @@ router.post('/artifact/build', function (req, res) {
         }
     });
 });
+
+// ssh - BEGIN
+
+var Connection = require('ssh2');
+
+function getSSHConnection(command, stdout, stderr, complete) {
+    var c = new Connection();
+    c.on('ready', function () {
+        console.log('Connection :: ready');
+        c.exec(command, function (err, stream) {
+            if (err) throw err;
+            stream.on('data', function (data, extended) {
+                if (extended === 'stderr') {
+                    // stderr
+                    stderr(data);
+                } else {
+                    //stdout
+                    stdout(data);
+                }
+            });
+            stream.on('end', function () {
+                complete();
+            });
+            stream.on('close', function () {
+                console.log('Stream :: close');
+            });
+            stream.on('exit', function (code, signal) {
+                console.log('Stream :: exit :: code: ' + code + ', signal: ' + signal);
+                c.end();
+            });
+        });
+    });
+    c.on('error', function (err) {
+        console.log('Connection :: error :: ' + err);
+    });
+    c.on('end', function () {
+        console.log('Connection :: end');
+    });
+    c.on('close', function (had_error) {
+        console.log('Connection :: close');
+    });
+    return c;
+}
+
+router.post('/ec2/metadata', function (req, res) {
+    var server = req.body.dnsName;
+    console.log(server);
+    var stdout = '';
+    var conn = getSSHConnection('ec2-metadata', function (out) {
+        stdout += out;
+    }, function (err) {
+    }, function () {
+        res.send(stdout);
+    });
+
+    conn.connect({
+        host: server,
+        port: 22,
+        username: 'ec2-user',
+        privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
+    });
+});
+
+router.post('/bootstrap/download', function (req, res) {
+    try {
+        var server = req.body.dnsName;
+        var appId = validateAppId();
+        var artifactKey = req.body.artifactKey;
+        res.send({server: server, appId: appId, artifactKey: artifactKey});
+    } catch (e) {
+        if (e instanceof ValidationException) {
+            res.send(400, e.message)
+        } else {
+            throw e;
+        }
+    }
+});
+
+// example output:
+// Connection :: connect
+// Connection :: ready
+// STDOUT:  17:41:15 up 22 days, 18:09,  1 user,  load average: 0.00, 0.01, 0.05
+//
+// Stream :: exit :: code: 0, signal: undefined
+// Connection :: end
+// Connection :: close
 
 module.exports = router;

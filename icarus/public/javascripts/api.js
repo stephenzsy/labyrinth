@@ -36,6 +36,10 @@
                 appId: appId,
                 commitId: commitId}});
         };
+
+        this.ec2Metadata = function (dnsName) {
+            return $http({method: 'POST', url: '/api/ec2/metadata', data: {dnsName: dnsName}});
+        }
     }
 
     angular.module('icarus')

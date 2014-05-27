@@ -14,13 +14,24 @@
                 'DescribeInstances': ''
             };
 
+            $scope.ec2InstanceDescription = {};
+
             $scope.$on('$routeChangeSuccess', function () {
                 var instanceId = $route.current.params['instanceId'];
 
                 IcarusService.ec2DescribeInstances([instanceId]).success(function (data) {
-                    $scope.raw['DescribeInstances'] = JSON.stringify(data, null, 2);
+                    var instance = data.Reservations[0].Instances[0];
+                    $scope.raw['DescribeInstances'] = JSON.stringify(instance);
+                    $scope.ec2InstanceDescription = instance;
+                    updateMetadata(instance.PublicDnsName);
                 });
             });
+
+            function updateMetadata(dnsName) {
+                IcarusService.ec2Metadata(dnsName).success(function (data) {
+                    $scope.ec2Metadata = data;
+                });
+            }
 
             // current revision
             IcarusService.currentRevision('icarus').success(function (data) {
@@ -70,9 +81,11 @@
 
             // remote artifacts
             $scope.remoteArtifacts = [];
+            $scope.remoteArtifactToDeploy = null;
             function refreshArtifactsRemote(commitId) {
                 IcarusService.artifactRemote('icarus', commitId).success(function (data) {
                     $scope.remoteArtifacts = data.remoteArtifacts;
+                    $scope.remoteArtifactToDeploy = data.remoteArtifacts[0];
                 });
             }
         });
