@@ -40,6 +40,15 @@
         this.ec2Metadata = function (dnsName) {
             return $http({method: 'POST', url: '/api/ec2/metadata', data: {dnsName: dnsName}});
         }
+
+        this.remoteInstanceS3Download = function (server, artifactToDeploy) {
+            return $http({method: 'POST', url: '/api/bootstrap/download', data: {
+                server: server,
+                appId: 'icarus',
+                key: artifactToDeploy.key
+            }});
+        };
+
     }
 
     angular.module('icarus')

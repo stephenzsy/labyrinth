@@ -67,9 +67,12 @@ block content
                                     select.form-control(ng-model="remoteArtifactToDeploy",ng-options="artifact.key for artifact in remoteArtifacts")
                             div.form-group
                                 div.col-sm-offset-1.col-sm-5
-                                    a.btn.btn-link
+                                    a.btn.btn-link(ng-show="remoteInstanceS3DownloadStatus === 'NotStarted'",
+                                            ng-click="remoteInstanceS3Download(ec2InstanceDescription, remoteArtifactToDeploy)")
                                         span.glyphicon.glyphicon-cloud-download
-                                        span &nbsp;Download
+                                        span &nbsp;Download to Instance
+                                    span.text-info(ng-show="remoteInstanceS3DownloadStatus === 'Downloading'") Downloading
+                                    span.text-success(ng-show="remoteInstanceS3DownloadStatus === 'Success'") Download Success
         hr
         div.panel-group
             div.panel.panel-default

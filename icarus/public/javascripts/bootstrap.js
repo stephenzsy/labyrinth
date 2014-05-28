@@ -23,15 +23,15 @@
                     var instance = data.Reservations[0].Instances[0];
                     $scope.raw['DescribeInstances'] = JSON.stringify(instance);
                     $scope.ec2InstanceDescription = instance;
-                    updateMetadata(instance.PublicDnsName);
+//                    updateMetadata(instance.PublicDnsName);
                 });
             });
 
-            function updateMetadata(dnsName) {
-                IcarusService.ec2Metadata(dnsName).success(function (data) {
-                    $scope.ec2Metadata = data;
-                });
-            }
+//            function updateMetadata(dnsName) {
+//                IcarusService.ec2Metadata(dnsName).success(function (data) {
+//                    $scope.ec2Metadata = data;
+//                });
+//            }
 
             // current revision
             IcarusService.currentRevision('icarus').success(function (data) {
@@ -88,5 +88,14 @@
                     $scope.remoteArtifactToDeploy = data.remoteArtifacts[0];
                 });
             }
+
+            $scope.remoteInstanceS3DownloadStatus = 'NotStarted';
+            $scope.remoteInstanceS3Download = function (instanceDescription, artifactToDeploy) {
+                $scope.remoteInstanceS3DownloadStatus = 'Downloading';
+                IcarusService.remoteInstanceS3Download(instanceDescription.PublicDnsName, artifactToDeploy).success(function (data) {
+                    $scope.remoteInstanceS3DownloadStatus = 'Success';
+                })
+            };
+
         });
 })();

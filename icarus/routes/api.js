@@ -216,10 +216,10 @@ router.post('/artifact/build', function (req, res) {
 
 var Connection = require('ssh2');
 
-function getSSHConnection(command, stdout, stderr, complete) {
+function sshConnection(command, stdout, stderr, complete, error) {
     var c = new Connection();
     c.on('ready', function () {
-        console.log('Connection :: ready');
+        //console.log('Connection :: ready');
         c.exec(command, function (err, stream) {
             if (err) throw err;
             stream.on('data', function (data, extended) {
@@ -235,22 +235,23 @@ function getSSHConnection(command, stdout, stderr, complete) {
                 complete();
             });
             stream.on('close', function () {
-                console.log('Stream :: close');
+                // console.debug('Stream :: close');
             });
             stream.on('exit', function (code, signal) {
-                console.log('Stream :: exit :: code: ' + code + ', signal: ' + signal);
+                //console.debug('Stream :: exit :: code: ' + code + ', signal: ' + signal);
                 c.end();
             });
         });
     });
     c.on('error', function (err) {
-        console.log('Connection :: error :: ' + err);
+        error(err);
+        //console.log('Connection :: error :: ' + err);
     });
     c.on('end', function () {
-        console.log('Connection :: end');
+        //console.log('Connection :: end');
     });
     c.on('close', function (had_error) {
-        console.log('Connection :: close');
+        //console.log('Connection :: close');
     });
     return c;
 }
@@ -259,7 +260,7 @@ router.post('/ec2/metadata', function (req, res) {
     var server = req.body.dnsName;
     console.log(server);
     var stdout = '';
-    var conn = getSSHConnection('ec2-metadata', function (out) {
+    var conn = sshConnection('ec2-metadata', function (out) {
         stdout += out;
     }, function (err) {
     }, function () {
@@ -276,13 +277,52 @@ router.post('/ec2/metadata', function (req, res) {
 
 router.post('/bootstrap/download', function (req, res) {
     try {
-        var server = req.body.dnsName;
-        var appId = validateAppId();
-        var artifactKey = req.body.artifactKey;
-        res.send({server: server, appId: appId, artifactKey: artifactKey});
+        var server = req.body.server;
+        var appId = validateAppId(req);
+        var key = req.body.key;
+        var artifactConfig = Config.apps[appId].artifact;
+
+        var params = {
+            region: Config.aws.region,
+            s3Endpoint: 'https://' + Config.aws.s3.endpoint,
+            s3Bucket: artifactConfig.s3Bucket,
+            s3Key: artifactConfig.s3Prefix + key,
+            remoteArtifactDirectory: '/home/ec2-user/deploy/artifacts/' + appId
+        };
+
+        // compose command
+        var cmds = [
+            ['mkdir' , '-p', params.remoteArtifactDirectory],
+            ['cd' , params.remoteArtifactDirectory],
+            ['aws', '--region', params.region, 's3api', 'get-object', '--bucket', params.s3Bucket, '--key', params.s3Key, key]
+        ];
+
+        var execCmds = cmds.map(function (cmd) {
+            return cmd.join(" ")
+        }).join(";\n");
+
+        var stdout = '';
+        var stderr = '';
+        var conn = sshConnection(execCmds, function (data) {
+            stdout += data;
+        }, function (data) {
+            stderr += data;
+        }, function () {
+            res.send(200, {stdout: stdout, stderr: stderr});
+        }, function () {
+            res.send(500);
+        });
+
+        //console.log(execCmds);
+        conn.connect({
+            host: server,
+            port: 22,
+            username: 'ec2-user',
+            privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
+        });
     } catch (e) {
         if (e instanceof ValidationException) {
-            res.send(400, e.message)
+            res.send(400, e.message);
         } else {
             throw e;
         }

@@ -33,6 +33,7 @@ config/config.js
 public/angular
 public/bootstrap
 public/jquery
+public/images/AwsSimpleIcons
 
 node_modules/*
 
