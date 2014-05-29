@@ -49,6 +49,10 @@
             }});
         };
 
+        this.bootstrapNginxConfig = function (appIds) {
+            return $http({method: 'POST', url: '/api/bootstrap/nginxConfig', data: {appIds: appIds}});
+        };
+
     }
 
     angular.module('icarus')

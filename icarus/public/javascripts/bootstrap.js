@@ -98,5 +98,9 @@
                 });
             };
 
+            IcarusService.bootstrapNginxConfig(['icarus']).success(function (data) {
+                $scope.raw['NginxConfig'] = data;
+            });
+
         });
 })();

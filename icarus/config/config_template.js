@@ -2,17 +2,23 @@
 var config = {
     aws: {
         credentials: {
-            accessKeyId: 'TBD',
-            secretAccessKey: 'TBD'
+            accessKeyId: 'TO_BE_CONFIGURED',
+            secretAccessKey: 'TO_BE_CONFIGURED'
         },
-        region: 'TBD',
+        region: 'TO_BE_CONFIGURED',
         ec2: {
-            endpoint: 'TBD'
+            endpoint: 'TO_BE_CONFIGURED'
+        },
+        s3: {
+            endpoint: 'TO_BE_CONFIGURED'
         }
     },
     apps: {
         appId: {
-            localPath: 'path'
+            localPath: 'TO_BE_CONFIGURED',
+            artifact: {
+                artifactDirectory: 'TO_BE_CONFIGURED'
+            }
         }
     }
 };

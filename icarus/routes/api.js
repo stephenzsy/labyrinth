@@ -76,7 +76,7 @@ function ValidationException(message) {
     this.message = message;
 }
 
-function validateAppId(req, res) {
+function validateAppIdInRequest(req, res) {
     var appId = req.body.appId;
     if (!Config['apps'][appId]) {
         throw new ValidationException("Invalid appId: " + appId);
@@ -85,8 +85,13 @@ function validateAppId(req, res) {
     return appId;
 }
 
+function validateAppId(appId) {
+    if (!appId || !Config.apps[appId])
+        throw new ValidationException("Null AppID");
+}
+
 router.post('/artifact/local', function (req, res) {
-    var appId = validateAppId(req, res);
+    var appId = validateAppIdInRequest(req, res);
     if (appId == null) return;
     var artifactConfig = Config['apps'][appId]['artifact'];
     var files = fs.readdir(artifactConfig['artifactDirectory'], function (err, files) {
@@ -116,7 +121,7 @@ function validateCommitId(req, res) {
 }
 
 router.post('/artifact/remote', function (req, res) {
-    var appId = validateAppId(req, res);
+    var appId = validateAppIdInRequest(req, res);
     if (appId == null) return;
     var commitId = validateCommitId(req, res);
     if (commitId == null) return;
@@ -139,7 +144,7 @@ router.post('/artifact/remote', function (req, res) {
 });
 
 router.post('/artifact/remote/upload', function (req, res) {
-    var appId = validateAppId(req, res);
+    var appId = validateAppIdInRequest(req, res);
     if (appId == null) return;
     var filename = req.body.filename;
     var parsed = parseFilename(appId, filename);
@@ -278,7 +283,7 @@ router.post('/ec2/metadata', function (req, res) {
 router.post('/bootstrap/download', function (req, res) {
     try {
         var server = req.body.server;
-        var appId = validateAppId(req);
+        var appId = validateAppIdInRequest(req);
         var key = req.body.key;
         var artifactConfig = Config.apps[appId].artifact;
         var deployId = formatDate(new Date()) + '+' + Math.floor(Math.random() * 10000.0).toString();
@@ -332,6 +337,46 @@ router.post('/bootstrap/download', function (req, res) {
             username: 'ec2-user',
             privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
         });
+    } catch (e) {
+        if (e instanceof ValidationException) {
+            res.send(400, e.message);
+        } else {
+            throw e;
+        }
+    }
+});
+
+function expandIndent(indent) {
+    var whitespace = ''
+    for (var i = 0; i < indent; ++i) {
+        whitespace += '  ';
+    }
+    return whitespace;
+}
+
+function printStanza(stanza, indent, lines) {
+    for (var key in stanza) {
+        var value = stanza[key];
+        if (typeof(value) === 'object') {
+            lines.push(expandIndent(indent) + key + " {");
+            printStanza(value, indent + 1, lines);
+            lines.push(expandIndent(indent) + "}");
+        } else {
+            lines.push(expandIndent(indent) + key + ' ' + value + ";");
+        }
+    }
+}
+
+router.post('/bootstrap/nginxConfig', function (req, res) {
+    try {
+        var appIds = req.body.appIds;
+        appIds.forEach(function (appId) {
+            validateAppId(appId);
+        });
+        var stanza = Config.nginx.stanza;
+        var lines = []
+        printStanza(stanza, 0, lines);
+        res.send(lines.join("\n"));
     } catch (e) {
         if (e instanceof ValidationException) {
             res.send(400, e.message);

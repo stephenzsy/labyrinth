@@ -36,7 +36,7 @@
                 } catch (e) {
                     return 'Unknown';
                 }
-            }
+            };
 
             function setBuildArtifactStatus(app, commit, status) {
                 var appId = app['id'];
