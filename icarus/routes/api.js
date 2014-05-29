@@ -200,7 +200,7 @@ router.post('/artifact/build', function (req, res) {
             var date = new Date();
             var prefix = appId + '-' + commitId + '-' + formatDate(date);
             var outputPath = appConfig['artifact']['artifactDirectory'] + '/' + prefix + '.tar.gz';
-            var command = 'cd ' + appConfig['localPath'] + ';' + 'git archive ' + commitId + ' --format=tar.gz --prefix \'' + prefix + '/\' --output \'' + outputPath + '\';';
+            var command = 'cd ' + appConfig['localPath'] + ';' + 'git archive ' + commitId + ' --format=tar.gz --output \'' + outputPath + '\';';
             console.log(command);
             child_process.exec(command, function (error, stdout, stderr) {
                 if (error) {
@@ -281,25 +281,37 @@ router.post('/bootstrap/download', function (req, res) {
         var appId = validateAppId(req);
         var key = req.body.key;
         var artifactConfig = Config.apps[appId].artifact;
+        var deployId = formatDate(new Date()) + '+' + Math.floor(Math.random() * 10000.0).toString();
 
-        var params = {
+        var p = {
             region: Config.aws.region,
             s3Endpoint: 'https://' + Config.aws.s3.endpoint,
             s3Bucket: artifactConfig.s3Bucket,
             s3Key: artifactConfig.s3Prefix + key,
-            remoteArtifactDirectory: '/home/ec2-user/deploy/artifacts/' + appId
+            remoteArtifactDirectory: path.join('/home/ec2-user/deploy/artifacts', appId),
+            remoteArtifactPath: path.join('/home/ec2-user/deploy/artifacts', appId, key),
+            remoteApplicationPath: path.join('/home/ec2-user/deploy', appId, deployId),
+            appDirectoryParent: '/home/ec2-user/app',
+            appDirectory: path.join('/home/ec2-user/app', appId)
         };
 
         // compose command
         var cmds = [
-            ['mkdir' , '-p', params.remoteArtifactDirectory],
-            ['cd' , params.remoteArtifactDirectory],
-            ['aws', '--region', params.region, 's3api', 'get-object', '--bucket', params.s3Bucket, '--key', params.s3Key, key]
+            ['mkdir' , '-p', p.remoteArtifactDirectory],
+            ['aws', '--region', p.region, 's3api', 'get-object', '--bucket', p.s3Bucket, '--key', p.s3Key, p.remoteArtifactPath], // download
+            ['mkdir', '-p', p.remoteApplicationPath],
+            ['cd', p.remoteApplicationPath ],
+            ['tar', 'xzvf', p.remoteArtifactPath], // unpack
+            ['mkdir', '-p', p.appDirectoryParent],
+            ['ln', '-snf', p.remoteApplicationPath, p.appDirectory],
+            ['cd', p.appDirectory],
+            ['npm', 'update'] // update packages
         ];
 
         var execCmds = cmds.map(function (cmd) {
             return cmd.join(" ")
         }).join(";\n");
+        console.log(execCmds);
 
         var stdout = '';
         var stderr = '';

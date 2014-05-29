@@ -77,5 +77,8 @@ block content
         div.panel-group
             div.panel.panel-default
                 div.panel-heading Raw DescribeInstances Output
-                div.panel-body {{raw['DescribeInstances']}}
+                pre.panel-body {{raw['DescribeInstances']}}
+            div.panel.panel-default
+                div.panel-heading Raw SSH Session STDOUT
+                pre.panel-body {{raw.SshSessionStdout}}
 

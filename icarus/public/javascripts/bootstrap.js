@@ -21,7 +21,7 @@
 
                 IcarusService.ec2DescribeInstances([instanceId]).success(function (data) {
                     var instance = data.Reservations[0].Instances[0];
-                    $scope.raw['DescribeInstances'] = JSON.stringify(instance);
+                    $scope.raw['DescribeInstances'] = JSON.stringify(instance, null, 2);
                     $scope.ec2InstanceDescription = instance;
 //                    updateMetadata(instance.PublicDnsName);
                 });
@@ -94,7 +94,8 @@
                 $scope.remoteInstanceS3DownloadStatus = 'Downloading';
                 IcarusService.remoteInstanceS3Download(instanceDescription.PublicDnsName, artifactToDeploy).success(function (data) {
                     $scope.remoteInstanceS3DownloadStatus = 'Success';
-                })
+                    $scope.raw['SshSessionStdout'] = data.stdout;
+                });
             };
 
         });
