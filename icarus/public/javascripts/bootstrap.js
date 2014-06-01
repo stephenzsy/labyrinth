@@ -23,15 +23,15 @@
                     var instance = data.Reservations[0].Instances[0];
                     $scope.raw['DescribeInstances'] = JSON.stringify(instance, null, 2);
                     $scope.ec2InstanceDescription = instance;
-//                    updateMetadata(instance.PublicDnsName);
+                    updateMetadata(instance.PublicDnsName);
                 });
             });
 
-//            function updateMetadata(dnsName) {
-//                IcarusService.ec2Metadata(dnsName).success(function (data) {
-//                    $scope.ec2Metadata = data;
-//                });
-//            }
+            function updateMetadata(dnsName) {
+                IcarusService.ec2Metadata(dnsName).success(function (data) {
+                    $scope.raw['ec2Metadata'] = data;
+                });
+            }
 
             // current revision
             IcarusService.currentRevision('icarus').success(function (data) {
@@ -90,11 +90,18 @@
             }
 
             $scope.remoteInstanceS3DownloadStatus = 'NotStarted';
-            $scope.remoteInstanceS3Download = function (instanceDescription, artifactToDeploy) {
+            $scope['Bootstrap'] = {
+                'Error': null
+            };
+            $scope.bootstrapStart = function (instanceDescription, artifactToDeploy) {
                 $scope.remoteInstanceS3DownloadStatus = 'Downloading';
-                IcarusService.remoteInstanceS3Download(instanceDescription.PublicDnsName, artifactToDeploy).success(function (data) {
+                $scope.Bootstrap.Error = null;
+                IcarusService.bootstrapStart(instanceDescription.PublicDnsName, artifactToDeploy).success(function (data) {
                     $scope.remoteInstanceS3DownloadStatus = 'Success';
                     $scope.raw['SshSessionStdout'] = data.stdout;
+                }).error(function (data) {
+                    $scope.Bootstrap.Error = data;
+
                 });
             };
 

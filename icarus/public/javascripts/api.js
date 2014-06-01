@@ -20,15 +20,15 @@
 
         this.artifactRemote = function (appId, commitId) {
             return $http({method: 'POST', url: '/api/artifact/remote', data: {appId: appId, commitId: commitId}});
-        }
+        };
 
         this.artifactRemoteUpload = function (appId, filename) {
             return $http({method: 'POST', url: '/api/artifact/remote/upload', data: {appId: appId, filename: filename}});
-        }
+        };
 
         this.artifactRemoteDelete = function (appId, filename) {
             return $http({method: 'POST', url: '/api/artifact/remote/delete', data: {appId: appId, filename: filename}});
-        }
+        };
 
         this.buildArtifact = function (appId, commitId) {
             return $http({method: 'POST', url: '/api/artifact/build', data: {
@@ -39,10 +39,10 @@
 
         this.ec2Metadata = function (dnsName) {
             return $http({method: 'POST', url: '/api/ec2/metadata', data: {dnsName: dnsName}});
-        }
+        };
 
-        this.remoteInstanceS3Download = function (server, artifactToDeploy) {
-            return $http({method: 'POST', url: '/api/bootstrap/download', data: {
+        this.bootstrapStart = function (server, artifactToDeploy) {
+            return $http({method: 'POST', url: '/bootstrap/api/start/i-fakeid', data: {
                 server: server,
                 appId: 'icarus',
                 key: artifactToDeploy.key

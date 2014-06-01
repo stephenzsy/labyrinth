@@ -7,6 +7,8 @@ var Config = require('../config/config');
 var child_process = require('child_process');
 var fs = require('fs');
 var path = require('path');
+var Q = require('q');
+var log4js = require('log4js');
 
 function getEc2() {
     return  new AWS.EC2({
@@ -221,6 +223,22 @@ router.post('/artifact/build', function (req, res) {
 
 var Connection = require('ssh2');
 
+function sftpConnection(handle, complete, error) {
+    var c = new Connection();
+    c.on('ready', function () {
+        c.sftp(function (err, sftp) {
+            if (err) {
+                error(err);
+            }
+            sftp.on('end', function () {
+                complete();
+            });
+            handle(sftp);
+        });
+    });
+    return c;
+}
+
 function sshConnection(command, stdout, stderr, complete, error) {
     var c = new Connection();
     c.on('ready', function () {
@@ -261,28 +279,125 @@ function sshConnection(command, stdout, stderr, complete, error) {
     return c;
 }
 
-router.post('/ec2/metadata', function (req, res) {
-    var server = req.body.dnsName;
-    console.log(server);
-    var stdout = '';
-    var conn = sshConnection('ec2-metadata', function (out) {
-        stdout += out;
-    }, function (err) {
+function bootstrapNginxConfig(server, callback) {
+    var sftpConn = sftpConnection(function (sftp) {
+        var writeStream = sftp.createWriteStream(Config.nginx.remotePath);
+        var stanza = printStanza(Config.nginx.stanza, 0, []);
+        writeStream.write(stanza.join("\n"));
+        writeStream.end("\n");
     }, function () {
-        res.send(stdout);
+        callback();
+    }, function (err) {
+        callback(err);
     });
 
-    conn.connect({
+    sftpConn.connect({
         host: server,
         port: 22,
         username: 'ec2-user',
         privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
     });
+}
+
+router.post('/ec2/metadata', function (req, res) {
+    var server = req.body.dnsName;
+    console.log(server);
+//    var stdout = '';
+//    var conn = sshConnection('ec2-metadata', function (out) {
+//        stdout += out;
+//    }, function (err) {
+//    }, function () {
+//        res.send(stdout);
+//    });
+//
+//    conn.connect({
+//        host: server,
+//        port: 22,
+//        username: 'ec2-user',
+//        privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
+//    });
+
+    res.send("");
 });
+
+
+function ssh_connect(){
+    var c = new Connection();
+    c.on('ready', function() {
+        console.log('Connection :: ready');
+        c.exec('uptime', function(err, stream) {
+            if (err) throw err;
+            stream.on('data', function(data, extended) {
+                console.log((extended === 'stderr' ? 'STDERR: ' : 'STDOUT: ')
+                    + data);
+            });
+            stream.on('end', function() {
+                console.log('Stream :: EOF');
+            });
+            stream.on('close', function() {
+                console.log('Stream :: close');
+            });
+            stream.on('exit', function(code, signal) {
+                console.log('Stream :: exit :: code: ' + code + ', signal: ' + signal);
+                c.end();
+            });
+        });
+    });
+    c.on('error', function(err) {
+        console.log('Connection :: error :: ' + err);
+    });
+    c.on('end', function() {
+        console.log('Connection :: end');
+    });
+    c.on('close', function(had_error) {
+        console.log('Connection :: close');
+    });
+    c.connect({
+        host: '192.168.100.100',
+        port: 22,
+        username: 'frylock',
+        privateKey: require('fs').readFileSync('/here/is/my/key')
+    });
+
+// example output:
+}
+
+function exec_ssh_cmds(server, cmds) {
+}
+
+
 
 router.post('/bootstrap/download', function (req, res) {
     try {
+        var appId = req.body.appId;
+        validateAppId(appId);
         var server = req.body.server;
+        var key = req.body.key;
+        var artifactConfig = Config.apps[appId].artifact;
+        var deployId = formatDate(new Date()) + '+' + Math.floor(Math.random() * 10000.0).toString();
+
+        bootstrap(server, {
+            region: Config.aws.region,
+            s3Endpoint: 'https://' + Config.aws.s3.endpoint,
+            s3Bucket: artifactConfig.s3Bucket,
+            s3Key: artifactConfig.s3Prefix + key,
+            remoteArtifactDirectory: path.join('/home/ec2-user/deploy/artifacts', appId),
+            remoteArtifactPath: path.join('/home/ec2-user/deploy/artifacts', appId, key),
+            remoteApplicationPath: path.join('/home/ec2-user/deploy', appId, deployId),
+            appDirectoryParent: '/home/ec2-user/app',
+            appDirectory: path.join('/home/ec2-user/app', appId),
+            configDirectories: {
+                nginx: path.join('/home/ec2-user/config/nginx')
+            }
+        }).then(function () {
+            res.send(200);
+        });
+    } catch (e) {
+        console.warn(e);
+        res.send(500, e);
+    }
+    return;
+    try {
         var appId = validateAppIdInRequest(req);
         var key = req.body.key;
         var artifactConfig = Config.apps[appId].artifact;
@@ -297,7 +412,10 @@ router.post('/bootstrap/download', function (req, res) {
             remoteArtifactPath: path.join('/home/ec2-user/deploy/artifacts', appId, key),
             remoteApplicationPath: path.join('/home/ec2-user/deploy', appId, deployId),
             appDirectoryParent: '/home/ec2-user/app',
-            appDirectory: path.join('/home/ec2-user/app', appId)
+            appDirectory: path.join('/home/ec2-user/app', appId),
+            configDirectories: {
+                nginx: path.join('/home/ec2-user/config/nginx')
+            }
         };
 
         // compose command
@@ -310,13 +428,13 @@ router.post('/bootstrap/download', function (req, res) {
             ['mkdir', '-p', p.appDirectoryParent],
             ['ln', '-snf', p.remoteApplicationPath, p.appDirectory],
             ['cd', p.appDirectory],
-            ['npm', 'update'] // update packages
+            ['npm', 'link'], // update packages
+            ['mkdir', '-p', p.configDirectories.nginx] // nginx conf
         ];
 
         var execCmds = cmds.map(function (cmd) {
             return cmd.join(" ")
         }).join(";\n");
-        console.log(execCmds);
 
         var stdout = '';
         var stderr = '';
@@ -325,9 +443,34 @@ router.post('/bootstrap/download', function (req, res) {
         }, function (data) {
             stderr += data;
         }, function () {
-            res.send(200, {stdout: stdout, stderr: stderr});
-        }, function () {
-            res.send(500);
+            console.log(stdout);
+            console.warn(stderr);
+            bootstrapNginxConfig(server, function (err) {
+                if (err) {
+                    res.send(400, err);
+                    return;
+                }
+                var c = sshConnection(['sudo', 'ln', '-snf', Config.nginx.remotePath, '/opt/nginx/conf/nginx.conf'].join(" "), function (data) {
+                    stdout += data;
+                }, function (data) {
+                    stderr += data;
+                }, function () {
+                    console.log(stdout);
+                    console.warn(stderr);
+                    res.send(stdout);
+                }, function (err) {
+                    res.send(500, err);
+                });
+                console.log("PRE");
+                c.connect({
+                    host: server,
+                    port: 22,
+                    username: 'ec2-user',
+                    privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
+                });
+            });
+        }, function (err) {
+            res.send(500, err);
         });
 
         //console.log(execCmds);
@@ -347,7 +490,7 @@ router.post('/bootstrap/download', function (req, res) {
 });
 
 function expandIndent(indent) {
-    var whitespace = ''
+    var whitespace = '';
     for (var i = 0; i < indent; ++i) {
         whitespace += '  ';
     }
@@ -365,6 +508,7 @@ function printStanza(stanza, indent, lines) {
             lines.push(expandIndent(indent) + key + ' ' + value + ";");
         }
     }
+    return lines
 }
 
 router.post('/bootstrap/nginxConfig', function (req, res) {
@@ -374,7 +518,7 @@ router.post('/bootstrap/nginxConfig', function (req, res) {
             validateAppId(appId);
         });
         var stanza = Config.nginx.stanza;
-        var lines = []
+        var lines = [];
         printStanza(stanza, 0, lines);
         res.send(lines.join("\n"));
     } catch (e) {
