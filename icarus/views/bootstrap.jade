@@ -68,7 +68,8 @@ block content
                             div.form-group
                                 div.col-sm-offset-1.col-sm-5
                                     a.btn.btn-link(ng-show="remoteInstanceS3DownloadStatus === 'NotStarted'",
-                                            ng-click="bootstrapStart(ec2InstanceDescription, remoteArtifactToDeploy)")
+                                            ng-click="bootstrapStart(ec2InstanceDescription, remoteArtifactToDeploy)",
+                                            ng-disabled="!ec2InstanceDescription")
                                         span.glyphicon.glyphicon-cloud-download
                                         span &nbsp;Download to Instance
                                     span.text-info(ng-show="remoteInstanceS3DownloadStatus === 'Downloading'") Downloading
@@ -83,11 +84,11 @@ block content
         hr
         div.panel-group
             div.panel.panel-default
+                div.panel-heading Raw Bootstrap Output
+                pre.panel-body {{Bootstrap.Output}}
+            div.panel.panel-default
                 div.panel-heading Raw DescribeInstances Output
                 pre.panel-body {{raw['DescribeInstances']}}
-            div.panel.panel-default
-                div.panel-heading Raw SSH Session STDOUT
-                pre.panel-body {{raw.SshSessionStdout}}
             div.panel.panel-default
                 div.panel-heading Raw EC2 Metadata
                 pre.panel-body {{raw.ec2Metadata}}

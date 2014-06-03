@@ -46,6 +46,8 @@
                 server: server,
                 appId: 'icarus',
                 key: artifactToDeploy.key
+            }, transformResponse: function (data) {
+                return data;
             }});
         };
 

@@ -91,18 +91,19 @@
 
             $scope.remoteInstanceS3DownloadStatus = 'NotStarted';
             $scope['Bootstrap'] = {
-                'Error': null
+                Error: null,
+                Output: ''
             };
             $scope.bootstrapStart = function (instanceDescription, artifactToDeploy) {
                 $scope.remoteInstanceS3DownloadStatus = 'Downloading';
                 $scope.Bootstrap.Error = null;
-                IcarusService.bootstrapStart(instanceDescription.PublicDnsName, artifactToDeploy).success(function (data) {
-                    $scope.remoteInstanceS3DownloadStatus = 'Success';
-                    $scope.raw['SshSessionStdout'] = data.stdout;
-                }).error(function (data) {
-                    $scope.Bootstrap.Error = data;
-
-                });
+                IcarusService.bootstrapStart(instanceDescription.PublicDnsName, artifactToDeploy)
+                    .success(function (data) {
+                        $scope.remoteInstanceS3DownloadStatus = 'Success';
+                        $scope.Bootstrap.Output = data;
+                    }).error(function (data) {
+                        $scope.Bootstrap.Error = data;
+                    });
             };
 
             IcarusService.bootstrapNginxConfig(['icarus']).success(function (data) {
