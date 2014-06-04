@@ -6,9 +6,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var log = require('log4js').getLogger();
 
-var routes = require('./routes/index');
+//var routes = require('./routes/index');
 var bootstrap = require('./routes/bootstrap');
 var api = require('./routes/api');
+var icarus = require('./routes/icarus');
 
 var app = express();
 
@@ -23,7 +24,8 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+//app.use('/', routes);
+app.use('/', icarus);
 app.use('/bootstrap', bootstrap);
 app.use('/api', api);
 

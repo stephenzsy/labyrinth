@@ -7,13 +7,11 @@ var Config = require('../config/config');
 var child_process = require('child_process');
 var fs = require('fs');
 var path = require('path');
+return;
 
 if (Config.roles.icarus.admin) {
     (function () {
         /* GET home page. */
-        router.get('/', function (req, res) {
-            res.render('index', { title: 'Icarus' });
-        });
 
         router.get('/instances', function (req, res) {
             var ec2 = new AWS.EC2({

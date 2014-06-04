@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html ng-app="icarus">
+<head>
+    <title>Icarus</title>
+    <link rel="stylesheet" href="bootstrap/latest/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bootstrap/latest/css/bootstrap-theme.min.css">
+    <script type="text/javascript" src="jquery/latest/jquery.min.js"></script>
+    <script type="text/javascript" src="bootstrap/latest/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="angular/latest/angular.min.js"></script>
+    <script type="text/javascript" src="javascripts/icarus.js"></script>
+</head>
+<body class="container" ng-controller="icarusController">
+<header class="navbar navbar-static-top" role="banner">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">Icarus</a>
+        </div>
+    </div>
+</header>
+<section class="page-header">
+    <h1>Icarus</h1>
+</section>
+<div class="alert alert-info" ng-show="ready">Ready</div>
+</body>
+</html>
