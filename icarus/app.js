@@ -10,6 +10,7 @@ var log = require('log4js').getLogger();
 var bootstrap = require('./routes/bootstrap');
 var api = require('./routes/api');
 var icarus = require('./routes/icarus');
+var adminPackages = require('./routes/admin/packages');
 
 var app = express();
 
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', icarus);
 app.use('/bootstrap', bootstrap);
 app.use('/api', api);
+app.use('/admin/packages', adminPackages);
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {

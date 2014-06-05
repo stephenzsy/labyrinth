@@ -1,11 +1,26 @@
 (function () {
     'use strict';
 
-    angular.module('icarus', [])
-        .directive('myHeader', function () {
+    angular.module('icarus')
+        .controller('indexController', function ($scope, $Icarus) {
+            $Icarus.ListRoles().success(function (data) {
+                $scope.roles = data;
+            });
+
+            $Icarus.PassengerStatus().success(function (data) {
+                $scope.passengerStatus = data;
+            });
+
+            $scope.ready = true;
+        }).service('$Icarus', function ($http) {
             return {
-                templateUrl: '/_header.html'
-            };
+                ListRoles: function () {
+                    return $http({method: 'POST', url: '/', data: {Action: 'ListRoles', AppId: 'icarus'}});
+                },
+                PassengerStatus: function () {
+                    return $http({method: 'POST', url: '/', data: {Action: 'PassengerStatus'}});
+                }
+            }
         });
 
     /*

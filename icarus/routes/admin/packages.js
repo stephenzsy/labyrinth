@@ -1,4 +1,5 @@
 var Config = require('../../config/config');
+var express = require('express');
 var router = express.Router();
 
 (function () {
@@ -9,9 +10,6 @@ var router = express.Router();
         return;
     }
 
-    router.get('/', function(req,res) {
-       res.render('admin/artifact')
-    });
-
-    module.exports = router;
 })();
+
+module.exports = router;

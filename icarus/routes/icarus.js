@@ -14,8 +14,17 @@ var IcarusUtil = require('../lib/util');
 (function () {
     'use strict';
     var ActionHandlers = {
-        ListRoles: function (req, res) {
-            return Config.roles[req.body.AppId];
+        ListRoles: function (req, res, callback) {
+            callback(Config.roles[req.body.AppId]);
+        },
+        PassengerStatus: function (req, res, callback) {
+            child_process.exec('passenger-status', function (error, stdout, stderr) {
+                if (error) {
+                    res.send(500, error);
+                    return;
+                }
+                callback(stdout);
+            });
         }
     };
 
@@ -23,9 +32,10 @@ var IcarusUtil = require('../lib/util');
         log.debug("REQ: " + JSON.stringify(req.body));
         try {
             var handler = IcarusUtil.validateAction(req, ActionHandlers);
-            var result = handler(req, res);
-            log.debug("RES: " + JSON.stringify(result));
-            res.send(result);
+            handler(req, res, function (result) {
+                log.debug("RES: " + JSON.stringify(result));
+                res.send(result);
+            });
         } catch (e) {
             if (e instanceof IcarusUtil.ValidationException) {
                 res.send(400, e.message);
