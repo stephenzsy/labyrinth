@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="icarus">
 <head>
-    <base href="/admin/packages/"/>
+    <base href="/admin/packages"/>
     <title>Packages : Admin : Icarus</title>
     <link rel="stylesheet" href="/bootstrap/latest/css/bootstrap.min.css">
     <link rel="stylesheet" href="/bootstrap/latest/css/bootstrap-theme.min.css">
@@ -19,16 +19,13 @@
     <ol class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li>Admin</li>
-        <li class="active">Packages</li>
+        <li class="active"><a href="/admin/packages">Packages</a></li>
+        <li class="active">{{packages[appId].name}}</li>
     </ol>
 </section>
 <div class="page-header">
-    <h1>Packages</h1></div>
-<section>
-    <div ng-repeat="(id, package) in packages">
-        <div><a class="btn btn-link" href="/admin/packages/{{id}}">{{package.name}}</a></div>
-    </div>
-</section>
+    <h1>Package: {{packages[appId].name}}</h1>
+</div>
 <section></section>
 </body>
 </html>

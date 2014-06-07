@@ -2,9 +2,6 @@
     'use strict';
 
     angular.module('icarus', [])
-        .config(function ($locationProvider) {
-            $locationProvider.html5Mode(true);
-        })
         .controller('headerController', function ($scope, $Icarus) {
             $Icarus.ListRoles().success(function (data) {
                 $scope.roles = data;

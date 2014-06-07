@@ -30,7 +30,7 @@ var IcarusUtil = require('../../lib/util');
     });
 
     router.get('/:appId', function (req, res) {
-        res.sendfile('public/admin/packages.html')
+        res.sendfile('public/admin/package.html')
     });
 
     router.post('/', function (req, res) {
