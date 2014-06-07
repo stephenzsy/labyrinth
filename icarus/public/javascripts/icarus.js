@@ -2,10 +2,27 @@
     'use strict';
 
     angular.module('icarus', [])
+        .config(function ($locationProvider) {
+            $locationProvider.html5Mode(true);
+        })
+        .controller('headerController', function ($scope, $Icarus) {
+            $Icarus.ListRoles().success(function (data) {
+                $scope.roles = data;
+            });
+        })
         .directive('myHeader', function () {
             return {
                 templateUrl: '/_header.html'
             };
+        }).service('$Icarus', function ($http) {
+            return {
+                ListRoles: function () {
+                    return $http({method: 'POST', url: '/', data: {Action: 'ListRoles', AppId: 'icarus'}});
+                },
+                PassengerStatus: function () {
+                    return $http({method: 'POST', url: '/', data: {Action: 'PassengerStatus'}});
+                }
+            }
         });
 
     /*

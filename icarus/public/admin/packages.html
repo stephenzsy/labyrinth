@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="icarus">
 <head>
-    <title>Icarus : Server Status</title>
+    <title>Packages : Admin : Icarus</title>
     <link rel="stylesheet" href="/bootstrap/latest/css/bootstrap.min.css">
     <link rel="stylesheet" href="/bootstrap/latest/css/bootstrap-theme.min.css">
     <script type="text/javascript" src="/jquery/latest/jquery.min.js"></script>
@@ -10,14 +10,26 @@
     <script type="text/javascript" src="/javascripts/icarus.js"></script>
     <script type="text/javascript" src="/javascripts/admin/packages.js"></script>
 </head>
-<body ng-controller="adminPackagesController">
-<div my-header></div>
-<section class="container">
+<body ng-controller="adminPackagesController" class="container">
+<div ng-controller="headerController">
+    <div my-header></div>
+</div>
+<section>
     <ol class="breadcrumb">
         <li><a href="/">Home</a></li>
         <li>Admin</li>
         <li class="active"><a href="#">Packages</a></li>
     </ol>
 </section>
+<div class="page-header">
+    <h1 ng-hide="appId">Packages</h1>
+
+    <h1 ng-show="appId">Package: {{packages[appId].name}}</h1></div>
+<section ng-hide="appId">
+    <div ng-repeat="(id, package) in packages">
+        <div><a class="btn btn-link" href="/admin/packages/{{id}}">{{package.name}}</a></div>
+    </div>
+</section>
+<section></section>
 </body>
 </html>
