@@ -25,8 +25,17 @@
 <div class="page-header">
     <h1>Packages</h1></div>
 <section>
-    <div ng-repeat="(id, package) in packages">
-        <div><a class="btn btn-link" href="/admin/packages/{{id}}">{{package.name}}</a></div>
+    <h2>Apps</h2>
+
+    <div ng-repeat="p in packages | filter:{type:'app'}">
+        <div><a class="btn btn-link" href="/admin/packages/{{p.id}}">{{p.name}}</a></div>
+    </div>
+    <hr>
+
+    <h2>Third-party</h2>
+
+    <div ng-repeat="p in packages | filter:{type:'third-party'}">
+        <div><a class="btn btn-link" href="/admin/packages/{{p.id}}">{{p.name}}</a></div>
     </div>
 </section>
 <section></section>

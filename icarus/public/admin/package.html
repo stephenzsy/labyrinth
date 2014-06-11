@@ -20,11 +20,37 @@
         <li><a href="/">Home</a></li>
         <li>Admin</li>
         <li class="active"><a href="/admin/packages">Packages</a></li>
-        <li class="active">{{packages[appId].name}}</li>
+        <li class="active">{{currentPackage.name}}</li>
     </ol>
 </section>
 <div class="page-header">
-    <h1>Package: {{packages[appId].name}}</h1>
+    <h1>Package: {{currentPackage.name}}</h1>
+</div>
+<div ng-show="currentPackage.build.type === 'build'">
+    <h2>Build</h2>
+    <button class="btn btn-primary">Build</button>
+</div>
+<div>
+    <h2>Versions</h2>
+
+    <div ng-repeat="version in currentPackage.versions">
+        <h3>{{version}}</h3>
+        <button class="btn btn-primary" ng-show="currentPackage.build.type === 'import'"
+                ng-click="importPackage(appId, version)">Import
+        </button>
+        <hr>
+    </div>
+</div>
+<div>
+    <h2>Metadata</h2>
+    <table class="table">
+        <tbody>
+        <tr>
+            <td>Retention old versions</td>
+            <td>{{currentPackage.retentionPolicy.oldVersions}}</td>
+        </tr>
+        </tbody>
+    </table>
 </div>
 <section></section>
 </body>
