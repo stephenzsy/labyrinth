@@ -35,7 +35,11 @@
 
     <div ng-repeat="version in currentPackage.versions">
         <h3>{{version}}</h3>
-        <button class="btn btn-primary" ng-show="currentPackage.build.type === 'import'"
+
+        <p class="bg-warning"
+           ng-show="versionDescriptions[version].Status === 'NotFound'">Status: Not Available</p>
+        <button class="btn btn-primary"
+                ng-show="currentPackage.build.type === 'import' && versionDescriptions[version].Status === 'NotFound'"
                 ng-click="importPackage(appId, version)">Import
         </button>
         <hr>

@@ -45,5 +45,9 @@ var IcarusUtil = require('../lib/util');
             }
         }
     });
+
+    router.get('/', function (req, res) {
+        res.render('icarus');
+    });
     module.exports = router;
 })();

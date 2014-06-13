@@ -3,13 +3,7 @@
 
     angular.module('icarus')
         .controller('adminPackagesController', function ($scope, $window, $AdminPackages) {
-            var appId = null;
-            {
-                var m = $window.location.pathname.match(/\/packages\/(\w*)$/);
-                if (m) {
-                    appId = m[1]
-                }
-            }
+            var appId = APP_ID;
             $scope.appId = appId;
 
             $AdminPackages.ListPackages().success(function (data) {
@@ -25,24 +19,49 @@
 
                 if (appId) {
                     $scope.currentPackage = data[appId];
+                    /*
+                     $AdminPackages.GetPackageVersions(appId).success(function (data) {
+                     var descriptions = {};
+                     data.forEach(function (versionDescription) {
+                     descriptions[versionDescription.Version] = versionDescription;
+                     });
+                     $scope.versionDescriptions = descriptions;
+                     });
+                     */
+                    if ($scope.currentPackage.build.type === 'build') {
+                        $AdminPackages.ListCommits(appId).success(function (data) {
+                            $scope.commits = data.commits;
+                        });
+                    }
                 }
             });
 
-            $scope.importPackage = function (appId) {
-                $AdminPackages.ImportPackage(appId).success(function (data) {
+            $scope.importPackage = function (appId, version) {
+                $AdminPackages.ImportPackage(appId, version).success(function (data) {
                 });
             };
+
+            $scope.buildPackage = function (appId, commitId) {
+                $AdminPackages.BuildPackage(appId, commitId).success(function (data) {
+                });
+            }
 
         }).service('$AdminPackages', function ($http) {
             return {
                 ListPackages: function () {
                     return $http({method: 'POST', url: '/admin/packages', data: {Action: 'ListPackages'}});
                 },
-                ImportPackage: function (appId) {
-                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'ImportPackage', AppId: appId}});
+                ImportPackage: function (appId, version) {
+                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'ImportPackage', AppId: appId, Version: version}});
                 },
-                GetLatestVersion: function (appId, majorVersion) {
-                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'GetLatestVersion', AppId: appId, MajorVersion: majorVersion}});
+                GetPackageVersions: function (appId) {
+                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'GetPackageVersions', AppId: appId}});
+                },
+                ListCommits: function (appId) {
+                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'ListCommits', AppId: appId}});
+                },
+                BuildPackage: function (appId, commitId) {
+                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'BuildPackage', AppId: appId, CommitId: commitId}});
                 }
             }
         });

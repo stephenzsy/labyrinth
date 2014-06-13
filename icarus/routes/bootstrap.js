@@ -192,7 +192,7 @@ if (Config.roles.icarus.bootstrap) {
                 bootstrap(server, {
                     region: Config.aws.region,
                     s3Endpoint: 'https://' + Config.aws.s3.endpoint,
-                    s3Bucket: artifactConfig.s3Bucket,
+                    bucket: artifactConfig.s3Bucket,
                     s3Key: artifactConfig.s3Prefix + key,
                     remoteArtifactDirectory: path.join('/home/ec2-user/deploy/artifacts', appId),
                     remoteArtifactPath: path.join('/home/ec2-user/deploy/artifacts', appId, key),

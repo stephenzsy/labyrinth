@@ -1,0 +1,62 @@
+extends ../layout
+
+block scripts
+    | <script type="text/javascript" src="/javascripts/admin/packages.js"></script>
+    script.
+        var APP_ID = '!{AppId}';
+
+block content
+    div(ng-controller="adminPackagesController")
+        section.
+            <ol class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li>Admin</li>
+                <li class="active"><a href="/admin/packages">Packages</a></li>
+                <li class="active">{{currentPackage.name}}</li>
+            </ol>
+        div
+            div.page-header
+                h1 Package: {{currentPackage.name}}
+            div
+                h2 Commits
+                table.table
+                    thead
+                        tr
+                            th Commit ID
+                            th Date
+                            th Release Notes
+                            th Status
+                    tbody
+                        tr(ng-repeat="commit in commits")
+                            td {{commit.commitId}}
+                            td {{commit.date}}
+                            td {{commit.releaseNotes}}
+                            td
+                                span.text-success(ng-show="commit.status === 'Available'") Available
+                                span.text-warning(ng-show="commit.status === 'NotFound'") Not Found
+                                |<button class="btn btn-link" ng-show="commit.status === 'NotFound'" ng-click="buildPackage(appId, commit.commitId)">Build</button>
+        div.
+            <div>
+                <h2>Versions</h2>
+                    <div ng-repeat="version in currentPackage.versions">
+                    <h3>{{version}}</h3>
+                        <p class="bg-warning"
+                        ng-show="versionDescriptions[version].Status === 'NotFound'">Status: Not Available</p>
+                    <button class="btn btn-primary"
+                        ng-show="currentPackage.build.type === 'import' && versionDescriptions[version].Status === 'NotFound'"
+                        ng-click="importPackage(appId, version)">Import
+                    </button>
+                    <hr>
+                </div>
+            </div>
+            <div>
+                <h2>Metadata</h2>
+                <table class="table">
+                    <tbody>
+                    <tr>
+                        <td>Retention old versions</td>
+                        <td>{{currentPackage.retentionPolicy.oldVersions}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>

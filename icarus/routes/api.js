@@ -133,7 +133,7 @@ if (Config.roles.icarus.admin) {
             var artifactConfig = Config['apps'][appId]['artifact'];
             var s3 = getS3();
             s3.listObjects({
-                Bucket: artifactConfig.s3Bucket,
+                Bucket: artifactConfig.bucket,
                 Prefix: artifactConfig.s3Prefix + appId + '-' + commitId
             }, function (err, data) {
                 if (err) {
@@ -162,7 +162,7 @@ if (Config.roles.icarus.admin) {
             var localArtifactPath = path.join(artifactConfig.artifactDirectory, filename);
             var stream = fs.createReadStream(localArtifactPath);
             s3.putObject({
-                Bucket: artifactConfig.s3Bucket,
+                Bucket: artifactConfig.bucket,
                 Key: artifactConfig.s3Prefix + filename,
                 Body: stream
             }, function (err, data) {
@@ -179,48 +179,7 @@ if (Config.roles.icarus.admin) {
             return date.toISOString().replace(/[-:]/g, '').replace(/\.\d+Z/, 'Z');
         }
 
-        router.post('/artifact/build', function (req, res) {
-            var params = req.body;
-            var type = params['type'];
-            if (type != 'artifact') {
-                res.send(400, "Invalid Type: " + type);
-                return;
-            }
-            var appId = params['appId'];
-            var appConfig = Config['apps'][appId];
-            if (!appId || !appConfig) {
-                res.send(400, "Malformed appId: " + appId);
-                return;
-            }
-            var commitId = params['commitId'];
-            if (!commitId) {
-                res.send(400, "No commitId specified");
-                return;
-            }
-            if (!/^[A-Fa-f0-9]+$/.test(commitId)) {
-                res.send(400, "Malformed commitId: " + commitId);
-                return;
-            }
-            child_process.exec('cd ' + appConfig['localPath'] + ';  git show -s ' + commitId + ';', function (error, stdout, stderr) {
-                if (error) {
-                    res.send(404, "Commit ID not found: " + commitId);
-                    return;
-                }
-                else {
-                    var date = new Date();
-                    var prefix = appId + '-' + commitId + '-' + formatDate(date);
-                    var outputPath = appConfig['artifact']['artifactDirectory'] + '/' + prefix + '.tar.gz';
-                    var command = 'cd ' + appConfig['localPath'] + ';' + 'git archive ' + commitId + ' --format=tar.gz --output \'' + outputPath + '\';';
-                    console.log(command);
-                    child_process.exec(command, function (error, stdout, stderr) {
-                        if (error) {
-                            res.send(500, error);
-                        }
-                    });
-                    res.send(prefix)
-                }
-            });
-        });
+
 
 // ssh - BEGIN
 
@@ -381,7 +340,7 @@ if (Config.roles.icarus.admin) {
                 bootstrap(server, {
                     region: Config.aws.region,
                     s3Endpoint: 'https://' + Config.aws.s3.endpoint,
-                    s3Bucket: artifactConfig.s3Bucket,
+                    bucket: artifactConfig.s3Bucket,
                     s3Key: artifactConfig.s3Prefix + key,
                     remoteArtifactDirectory: path.join('/home/ec2-user/deploy/artifacts', appId),
                     remoteArtifactPath: path.join('/home/ec2-user/deploy/artifacts', appId, key),
@@ -408,7 +367,7 @@ if (Config.roles.icarus.admin) {
                 var p = {
                     region: Config.aws.region,
                     s3Endpoint: 'https://' + Config.aws.s3.endpoint,
-                    s3Bucket: artifactConfig.s3Bucket,
+                    bucket: artifactConfig.s3Bucket,
                     s3Key: artifactConfig.s3Prefix + key,
                     remoteArtifactDirectory: path.join('/home/ec2-user/deploy/artifacts', appId),
                     remoteArtifactPath: path.join('/home/ec2-user/deploy/artifacts', appId, key),

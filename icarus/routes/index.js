@@ -33,42 +33,6 @@ if (Config.roles.icarus.admin) {
             });
         });
 
-        router.get('/vcs', function (req, res) {
-            var appId = req.query.appId;
-            if (!appId) {
-                res.send(404, "appId not specified");
-                return;
-            }
-            var appLocalPath = Config['apps'][appId]['localPath'];
-            if (!appLocalPath) {
-                res.send(404, "AppId not found: " + appId);
-                return;
-            }
-            child_process.exec('cd ' + appLocalPath + ';  git log -5 --pretty=format:"%h,%cd,%s";', function (error, stdout, stderr) {
-                if (error) {
-                    console.error(error);
-                    res.send('404');
-                    return;
-                }
-                var commits = [];
-                stdout.split("\n").forEach(function (line) {
-                    var parts = line.trim().split(',');
-                    if (parts.length < 3) {
-                        return;
-                    }
-                    var commitId = parts.shift();
-                    var date = parts.shift();
-                    var releaseNotes = parts.join(',');
-                    commits.push({
-                        commitId: commitId,
-                        date: date,
-                        releaseNotes: releaseNotes
-                    });
-                });
-                res.send({commits: commits});
-            });
-        });
-
         function formatDate(date) {
             return date.toISOString().replace(/[-:]/g, '').replace(/\.\d+Z/, 'Z');
         }

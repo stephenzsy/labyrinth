@@ -1,0 +1,17 @@
+extends layout
+
+block scripts
+    | <script type="text/javascript" src="/javascripts/index.js"></script>
+
+block content
+    div(ng-controller="indexController").
+        <section class="page-header">
+            <h1>Icarus</h1>
+        </section>
+        <section>
+            <h2>Server Status</h2>
+                <h3>Passenger</h3>
+            <pre>{{passengerStatus}}</pre>
+        </section>
+
+
