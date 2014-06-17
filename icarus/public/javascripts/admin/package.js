@@ -3,6 +3,8 @@
 
     angular.module('icarus')
         .controller('adminPackagesController', function ($scope, $window, $AdminPackages) {
+            var appId = APP_ID;
+            $scope.appId = appId;
 
             $AdminPackages.ListPackages().success(function (data) {
                 {
@@ -15,6 +17,23 @@
                     $scope.packages = packages;
                 }
 
+                if (appId) {
+                    $scope.currentPackage = data[appId];
+                    /*
+                     $AdminPackages.GetPackageVersions(appId).success(function (data) {
+                     var descriptions = {};
+                     data.forEach(function (versionDescription) {
+                     descriptions[versionDescription.Version] = versionDescription;
+                     });
+                     $scope.versionDescriptions = descriptions;
+                     });
+                     */
+                    if ($scope.currentPackage.build.type === 'build') {
+                        $AdminPackages.ListCommits(appId).success(function (data) {
+                            $scope.commits = data.commits;
+                        });
+                    }
+                }
             });
 
             $scope.importPackage = function (appId, version) {

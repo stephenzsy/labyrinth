@@ -1,5 +1,6 @@
 'use strict';
-var Config = require('../config/config')
+var Config = require('../config/config');
+var AWS = require('aws-sdk');
 
 function ValidationException(message) {
     this.message = message;
@@ -30,5 +31,16 @@ module.exports = {
             throw new ValidationException("Invalid MajorVersion: " + majorVersion);
         }
         return majorVersion;
+    },
+
+    aws: {
+        getS3Client: function () {
+            return new AWS.S3({
+                endpoint: new AWS.Endpoint(Config['aws']['s3']['endpoint']),
+                region: Config.aws.region,
+                credentials: new AWS.Credentials(Config['aws']['credentials']['accessKeyId'], Config['aws']['credentials']['secretAccessKey']),
+                logger: process.stdout
+            });
+        }
     }
 };

@@ -14,13 +14,13 @@ var IcarusUtil = require('../lib/util');
 (function () {
     'use strict';
     var ActionHandlers = {
-        ListRoles: function (req, res, callback) {
+        ListRoles: function (req, callback, e) {
             callback(Config.roles[req.body.AppId]);
         },
-        PassengerStatus: function (req, res, callback) {
+        PassengerStatus: function (req, callback, e) {
             child_process.exec('passenger-status', function (error, stdout, stderr) {
                 if (error) {
-                    res.send(500, error);
+                    e(new IcarusUtil.ValidationException("Passenger not available"));
                     return;
                 }
                 callback(stdout);
@@ -32,9 +32,16 @@ var IcarusUtil = require('../lib/util');
         log.debug("REQ: " + JSON.stringify(req.body));
         try {
             var handler = IcarusUtil.validateAction(req, ActionHandlers);
-            handler(req, res, function (result) {
+            handler(req, function (result) {
                 log.debug("RES: " + JSON.stringify(result));
                 res.send(result);
+            }, function (e) {
+                if (e instanceof IcarusUtil.ValidationException) {
+                    res.send(400, e.message);
+                } else {
+                    console.warn(e);
+                    res.send(500, e);
+                }
             });
         } catch (e) {
             if (e instanceof IcarusUtil.ValidationException) {

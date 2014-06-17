@@ -10,6 +10,7 @@ var jsdom = require('jsdom');
 var AWS = require('aws-sdk');
 var path = require('path');
 var fs = require('fs');
+var packageRepo = new (require('../../lib/package-repository'))();
 
 (function () {
     'use strict';
@@ -161,7 +162,23 @@ var fs = require('fs');
         });
     }
 
+    function getBuiltPackageVersions(appId) {
+        var s3 = IcarusUtil.aws.getS3Client();
+    }
+
     var ActionHandlers = {
+        GetBootstrapPackages: function (req, callback) {
+            var r = [];
+            for (var appId in Config.packages) {
+                var p = Config.packages[appId];
+                if (p.bootstrap) {
+                    packageRepo.getDeployablePackageVersions(appId).then(function () {
+                    });
+                    r.push(p);
+                }
+            }
+            callback(r);
+        },
         ListPackages: function (req, callback) {
             callback(Config.packages);
         },
@@ -227,11 +244,7 @@ var fs = require('fs');
     };
 
     router.get('/', function (req, res) {
-        res.render('admin/packages', {})
-    });
-
-    router.get('/:appId', function (req, res) {
-        res.render('admin/package', {AppId: req.params.appId});
+        res.render('admin/bootstrap', {});
     });
 
     router.post('/', function (req, res) {

@@ -11,6 +11,7 @@ var bootstrap = require('./routes/bootstrap');
 var api = require('./routes/api');
 var icarus = require('./routes/icarus');
 var adminPackages = require('./routes/admin/packages');
+var adminBootstrap = require('./routes/admin/bootstrap');
 
 var app = express();
 
@@ -30,6 +31,7 @@ app.use('/', icarus);
 app.use('/bootstrap', bootstrap);
 app.use('/api', api);
 app.use('/admin/packages', adminPackages);
+app.use('/admin/bootstrap', adminBootstrap);
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {

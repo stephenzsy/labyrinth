@@ -5,6 +5,8 @@
         .controller('indexController', function ($scope, $Icarus) {
             $Icarus.PassengerStatus().success(function (data) {
                 $scope.passengerStatus = data;
+            }).error(function (data) {
+                $scope.passengerError = 'Passenger not available.';
             });
 
             $scope.ready = true;
