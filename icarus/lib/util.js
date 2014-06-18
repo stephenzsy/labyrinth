@@ -1,6 +1,8 @@
 'use strict';
 var Config = require('../config/config');
 var AWS = require('aws-sdk');
+var child_process = require('child_process');
+var Q = require('q');
 
 function ValidationException(message) {
     this.message = message;
@@ -31,6 +33,27 @@ module.exports = {
             throw new ValidationException("Invalid MajorVersion: " + majorVersion);
         }
         return majorVersion;
+    },
+
+
+    spawnCommand: function spawn(command, args, options) {
+        var stdout = '';
+        var stderr = '';
+        var handle = child_process.spawn(command, args, options);
+        handle.stdout.on('data', function (data) {
+            stdout += data;
+        });
+        handle.stderr.on('data', function (data) {
+            stderr += data;
+        });
+        return Q.Promise(function (c, e, p) {
+            handle.on('close', function (code) {
+                c({code: code, stdout: stdout, stderr: stderr});
+            });
+            handle.on('error', function (err) {
+                e(err);
+            })
+        });
     },
 
     aws: {

@@ -168,16 +168,28 @@ var packageRepo = new (require('../../lib/package-repository'))();
 
     var ActionHandlers = {
         GetBootstrapPackages: function (req, callback) {
-            var r = [];
+            var promises = [];
             for (var appId in Config.packages) {
                 var p = Config.packages[appId];
                 if (p.bootstrap) {
-                    packageRepo.getDeployablePackageVersions(appId).then(function () {
-                    });
-                    r.push(p);
+                    var promise = packageRepo.getPackageRepoCommits(appId)
+                        .then(function (versions) {
+                            return {
+                                appId: appId,
+                                config: p,
+                                versions: versions.map(function (v) {
+                                    v['version'] = v.commitId;
+                                    return v;
+                                })
+                            };
+                        });
+                    promises.push(promise);
                 }
             }
-            callback(r);
+            Q.all(promises)
+                .then(function (results) {
+                    callback(results);
+                });
         },
         ListPackages: function (req, callback) {
             callback(Config.packages);

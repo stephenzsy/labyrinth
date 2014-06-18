@@ -3,12 +3,14 @@
 
     angular.module('icarus')
         .controller('adminBootstrapController', function ($scope, $window, $AdminBootstrap) {
-            var appId = APP_ID;
-            $scope.appId = appId;
-
             $AdminBootstrap.GetBootstrapPackages().success(function (data) {
                 $scope.packages = data;
             });
+
+            $scope.selectBootstrapVersion = function (p, v) {
+                p['bootstrapVersion'] = v.version;
+            };
+
         }).service('$AdminBootstrap', function ($http) {
             return {
                 GetBootstrapPackages: function () {
