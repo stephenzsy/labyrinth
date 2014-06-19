@@ -1,0 +1,15 @@
+.table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.aws-icon {
+    display: block;
+    height: 14pt;
+    background-size: 21pt;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.aws-icon-ec2-ami {
+    background-image: url('../images/AwsSimpleIcons/Compute & Networking/SVG/Compute & Networking_Amazon EC2 AMI.svg');
+}

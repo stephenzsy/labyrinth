@@ -10,6 +10,7 @@
         <table class="table">
             <thead>
             <tr>
+                <th></th>
                 <th>Version</th>
                 <th>Date</th>
                 <th>Status</th>
@@ -18,13 +19,19 @@
             </thead>
             <tbody>
             <tr ng-repeat="v in p.versions">
+                <td><i class="fa fa-file-archive-o" ng-show="v.status === 'Available'"></i></td>
                 <td>{{v.commitId}}</td>
                 <td>{{v.date}}</td>
                 <td ng-class="{'bg-success': v.status === 'Available','bg-warning':v.status === 'NotFound'}">
-                    <span ng-show="v.status === 'Available'"><i class="fa fa-file-archive-o"></i> Available</span>
+                    <span ng-show="v.status === 'Available'"> Available</span>
                     <span ng-show="v.status === 'NotFound'">Not Found</span>
                 </td>
-                <td><a class="btn btn-link" ng-show="v.status === 'Available'">Bootstrap</a></td>
+                <td>
+                    <a class="btn btn-link"
+                       ng-show="v.status === 'NotFound'"
+                       ng-click="buildPackage(p.appId, v.commitId)">Build</a>
+                    <a class="btn btn-link" ng-show="v.status === 'Available'">Bootstrap</a>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -32,4 +39,22 @@
 </div>
 <div>
     <h2>Servers</h2>
+</div>
+<div>
+    <h2>Images</h2>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Image ID</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="image in images">
+            <td><div class="aws-icon aws-icon-ec2-ami"></div></td>
+            <td>{{image.ImageId}}</td>
+        </tr>
+        </tbody>
+    </table>
 </div>

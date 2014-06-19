@@ -64,6 +64,14 @@ module.exports = {
                 credentials: new AWS.Credentials(Config['aws']['credentials']['accessKeyId'], Config['aws']['credentials']['secretAccessKey']),
                 logger: process.stdout
             });
+        },
+        getEc2Client: function () {
+            return  new AWS.EC2({
+                endpoint: new AWS.Endpoint(Config['aws']['ec2']['endpoint']),
+                region: Config['aws']['region'],
+                credentials: new AWS.Credentials(Config['aws']['credentials']['accessKeyId'], Config['aws']['credentials']['secretAccessKey'])
+            });
         }
     }
-};
+}
+;

@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('icarus')
-        .controller('adminBootstrapController', function ($scope, $window, $AdminBootstrap, $AdminPackages, $q) {
+        .controller('adminBootstrapController', function ($scope, $window, $AdminInstances, $AdminPackages, $q) {
             $scope.navs = [
                 {text: 'Admin'},
                 {text: 'Bootstrap', active: true}
@@ -25,9 +25,7 @@
             deferred.promise.then(function (results) {
                 results.forEach(function (p) {
                     $AdminPackages.ListCommits(p.appId).success(function (data) {
-                        console.log(data);
                         p['versions'] = data;
-                        console.log($scope.packages);
                     });
                 });
             });
@@ -35,6 +33,15 @@
             $scope.selectBootstrapVersion = function (p, v) {
                 p['bootstrapVersion'] = v.version;
             };
+
+            $scope.buildPackage = function (appId, commitId) {
+                $AdminPackages.BuildPackage(appId, commitId).success(function (data) {
+                });
+            };
+
+            $AdminInstances.DescribeImages().success(function (data) {
+                $scope.images = data.Images;
+            });
 
         }).service('$AdminBootstrap', function ($http) {
             return {
