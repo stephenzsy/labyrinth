@@ -255,10 +255,6 @@ var packageRepo = new (require('../../lib/package-repository'))();
         }
     };
 
-    router.get('/', function (req, res) {
-        res.render('admin/bootstrap', {});
-    });
-
     router.post('/', function (req, res) {
         log.debug("REQ: " + JSON.stringify(req.body));
         try {

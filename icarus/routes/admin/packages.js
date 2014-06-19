@@ -10,6 +10,7 @@ var jsdom = require('jsdom');
 var AWS = require('aws-sdk');
 var path = require('path');
 var fs = require('fs');
+var packageRepo = new (require('../../lib/package-repository'))();
 
 (function () {
     'use strict';
@@ -67,27 +68,6 @@ var fs = require('fs');
 
     function getPackageS3Key(appId, commitId) {
         return  Config.aws.s3.deploy.prefix + appId + '/commit/' + getPackageFilename(appId, commitId);
-    }
-
-    function describePackageCommits(appId, commits) {
-        var s3 = getS3();
-        return Q.all(commits.map(function (commit) {
-            return Q.Promise(function (resolve, reject, progress) {
-                s3.headObject({Bucket: Config.aws.s3.deploy.bucket, Key: getPackageS3Key(appId, commit.commitId)}, function (err, data) {
-                    if (err) {
-                        if (err.code === 'NotFound') {
-                            commit['status'] = 'NotFound';
-                            resolve(commit);
-                            return;
-                        }
-                        reject(err);
-                        return;
-                    }
-                    commit['status'] = 'Available';
-                    resolve(commit);
-                });
-            });
-        }));
     }
 
     function spawn(command, args, options) {
@@ -181,33 +161,8 @@ var fs = require('fs');
         ListCommits: function (req, callback, error) {
             var appId = IcarusUtil.validateAppId(req);
             var p = Config.packages[appId];
-            spawn('git', ['log', '-5', '--pretty=format:%h,%cd,%s'], {cwd: p.repo.path})
-                .then(function (result) {
-                    var stdout = result.stdout;
-                    var commits = [];
-                    stdout.split("\n").forEach(function (line) {
-                        var parts = line.trim().split(',');
-                        if (parts.length < 3) {
-                            return;
-                        }
-                        var commitId = parts.shift();
-                        var date = parts.shift();
-                        var releaseNotes = parts.join(',');
-                        commits.push({
-                            commitId: commitId,
-                            date: date,
-                            releaseNotes: releaseNotes
-                        });
-                    });
-                    return commits;
-                }).then(function (commits) {
-                    return describePackageCommits(appId, commits);
-                }).done(function (result) {
-
-                    console.log(result);
-
-                    callback({commits: result});
-                }, error);
+            packageRepo.getPackageRepoCommits(appId)
+                .done(callback, error);
         },
         BuildPackage: function (req, callback, error) {
             var appId = IcarusUtil.validateAppId(req);

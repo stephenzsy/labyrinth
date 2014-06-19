@@ -2,9 +2,34 @@
     'use strict';
 
     angular.module('icarus')
-        .controller('adminBootstrapController', function ($scope, $window, $AdminBootstrap) {
-            $AdminBootstrap.GetBootstrapPackages().success(function (data) {
-                $scope.packages = data;
+        .controller('adminBootstrapController', function ($scope, $window, $AdminBootstrap, $AdminPackages, $q) {
+            $scope.navs = [
+                {text: 'Admin'},
+                {text: 'Bootstrap', active: true}
+            ];
+
+            var deferred = $q.defer();
+            $AdminPackages.ListPackages().success(function (packages) {
+                var results = [];
+                for (var appId in packages) {
+                    var p = packages[appId];
+                    if (p.bootstrap) {
+                        p['appId'] = appId;
+                        results.push(p);
+                    }
+                }
+                $scope.packages = results;
+                deferred.resolve(results);
+            });
+
+            deferred.promise.then(function (results) {
+                results.forEach(function (p) {
+                    $AdminPackages.ListCommits(p.appId).success(function (data) {
+                        console.log(data);
+                        p['versions'] = data;
+                        console.log($scope.packages);
+                    });
+                });
             });
 
             $scope.selectBootstrapVersion = function (p, v) {
@@ -15,18 +40,6 @@
             return {
                 GetBootstrapPackages: function () {
                     return $http({method: 'POST', url: '/admin/bootstrap', data: {Action: 'GetBootstrapPackages'}});
-                },
-                ImportPackage: function (appId, version) {
-                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'ImportPackage', AppId: appId, Version: version}});
-                },
-                GetPackageVersions: function (appId) {
-                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'GetPackageVersions', AppId: appId}});
-                },
-                ListCommits: function (appId) {
-                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'ListCommits', AppId: appId}});
-                },
-                BuildPackage: function (appId, commitId) {
-                    return $http({method: 'POST', url: '/admin/packages', data: {Action: 'BuildPackage', AppId: appId, CommitId: commitId}});
                 }
             }
         });

@@ -13,6 +13,12 @@ var IcarusUtil = require('../lib/util');
 
 (function () {
     'use strict';
+    var INDEX_PATH = path.resolve('public/index.html');
+
+    router.get(/^(.*)$/, function (req, res) {
+        res.sendfile(INDEX_PATH);
+    });
+
     var ActionHandlers = {
         ListRoles: function (req, callback, e) {
             callback(Config.roles[req.body.AppId]);
@@ -53,8 +59,5 @@ var IcarusUtil = require('../lib/util');
         }
     });
 
-    router.get('/', function (req, res) {
-        res.render('icarus');
-    });
     module.exports = router;
 })();

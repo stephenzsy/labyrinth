@@ -1,0 +1,35 @@
+<div icarus-nav=""></div>
+<div class="page-header">
+    <h1>Bootstrap</h1>
+</div>
+<div>
+    <h2>Packages</h2>
+
+    <div ng-repeat="p in packages">
+        <h3><i class="fa fa-cube"></i> {{p.name}}</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Version</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="v in p.versions">
+                <td>{{v.commitId}}</td>
+                <td>{{v.date}}</td>
+                <td ng-class="{'bg-success': v.status === 'Available','bg-warning':v.status === 'NotFound'}">
+                    <span ng-show="v.status === 'Available'"><i class="fa fa-file-archive-o"></i> Available</span>
+                    <span ng-show="v.status === 'NotFound'">Not Found</span>
+                </td>
+                <td><a class="btn btn-link" ng-show="v.status === 'Available'">Bootstrap</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div>
+    <h2>Servers</h2>
+</div>

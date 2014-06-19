@@ -1,27 +1,46 @@
 (function () {
     'use strict';
 
-    angular.module('icarus', [])
-        .controller('headerController', function ($scope, $Icarus) {
-            $Icarus.ListRoles().success(function (data) {
-                $scope.roles = data;
-            });
-        })
-        .directive('myHeader', function () {
-            return {
-                templateUrl: '/_header.html'
-            };
-        }).service('$Icarus', function ($http) {
-            return {
-                ListRoles: function () {
-                    return $http({method: 'POST', url: '/', data: {Action: 'ListRoles', AppId: 'icarus'}});
-                },
-                PassengerStatus: function () {
-                    return $http({method: 'POST', url: '/', data: {Action: 'PassengerStatus'}});
-                }
-            }
+    var app = angular.module('icarus', ['ngRoute'])
+        .config(function ($routeProvider, $locationProvider) {
+            $locationProvider.html5Mode(true);
+            $routeProvider
+                .when('/', {
+                    templateUrl: 'views/index.html',
+                    controller: 'indexController'
+                }).when('/admin/bootstrap', {
+                    templateUrl: 'views/admin/bootstrap.html',
+                    controller: 'adminBootstrapController'
+                }).otherwise({templateUrl: 'views/error.html'});
         });
-
+    app.directive('icarusHeader', function () {
+        return {
+            restrict: 'A',
+            templateUrl: 'views/_banner.html',
+            replace: true
+        };
+    }).directive('icarusNav', function () {
+        return {
+            restrict: 'A',
+            templateUrl: 'views/_nav.html',
+            replace: true
+        };
+    });
+    app.controller('mainController', function ($scope, $Icarus) {
+        $Icarus.ListRoles().success(function (roles) {
+            $scope.roles = roles;
+        });
+    });
+    app.service('$Icarus', function ($http) {
+        return {
+            ListRoles: function () {
+                return $http({method: 'POST', url: '/', data: {Action: 'ListRoles', AppId: 'icarus'}});
+            },
+            PassengerStatus: function () {
+                return $http({method: 'POST', url: '/', data: {Action: 'PassengerStatus'}});
+            }
+        }
+    });
     /*
      angular.module('icarus', [])
      .controller('icarus', function ($scope, icarusService) {
