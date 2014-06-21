@@ -23,7 +23,7 @@
                 <td>{{v.commitId}}</td>
                 <td>{{v.date}}</td>
                 <td ng-class="{'bg-success': v.status === 'Available','bg-warning':v.status === 'NotFound'}">
-                    <span ng-show="v.status === 'Available'"> Available</span>
+                    <span ng-show="v.status === 'Available'">Available</span>
                     <span ng-show="v.status === 'NotFound'">Not Found</span>
                 </td>
                 <td>
@@ -38,7 +38,12 @@
     </div>
 </div>
 <div>
-    <h2>Servers</h2>
+    <h2>Instances</h2>
+
+    <div icarus-instances-list=""></div>
+    <div>
+        <a href="/admin/instances" class="btn btn-link">Manage Instances</a>
+    </div>
 </div>
 <div>
     <h2>Images</h2>
@@ -48,13 +53,72 @@
         <tr>
             <th></th>
             <th>Image ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="image in images">
-            <td><div class="aws-icon aws-icon-ec2-ami"></div></td>
+            <td>
+                <div class="aws-icon aws-icon-ec2-ami"></div>
+            </td>
             <td>{{image.ImageId}}</td>
+            <td>{{image.Name}}</td>
+            <td>{{image.Description}}
+            <td>
+                <button class="btn btn-link" data-toggle="modal" ng-click="launchInstanceModal(image.ImageId)">
+                    Launch Instance
+                </button>
+            </td>
         </tr>
         </tbody>
     </table>
+</div>
+<div>
+    <div class="modal fade" id="launchInstanceModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Launch Instance</h4>
+                </div>
+                <div class="modal-body form-inline">
+                    <p><label>Image ID: </label> {{launchInstanceOptions.imageId}}</p>
+
+                    <p class="form-group">
+                        <label>Instance Type: </label>
+                        <select class="form-control" ng-model="launchInstanceOptions.instanceType">
+                            <option value="t1.micro">t1.micro</option>
+                            <option value="m1.small">m1.small</option>
+                        </select>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="launchInstance(launchInstanceOptions)">
+                        Launch
+                    </button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+</div>
+<div>
+    <h2>Debug</h2>
+
+    <h3>Instances</h3>
+    <pre>{{instances}}</pre>
+
+    <h3>Images</h3>
+    <pre>{{images}}</pre>
+
+    <h3>Subnets</h3>
+    <pre>{{subnets}}</pre>
+
+    <h3>Vpcs</h3>
+    <pre>{{vpcs}}</pre>
 </div>

@@ -1,8 +1,9 @@
 <div>
     <ol class="breadcrumb">
         <li><a href="/">Home</a></li>
-        <li ng-repeat="element in navs">
-            <a ng-href="{{element.href}}" ng-class="{active: element.active}">{{element.text}}</a>
+        <li ng-repeat="element in navs" ng-class="{active: element.active}">
+            <span ng-if="element.noLink">{{element.text}}</span>
+            <a ng-if="!element.noLink" ng-href="{{element.href}}">{{element.text}}</a>
         </li>
     </ol>
 </div>

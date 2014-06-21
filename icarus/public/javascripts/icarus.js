@@ -8,6 +8,12 @@
                 .when('/', {
                     templateUrl: 'views/index.html',
                     controller: 'indexController'
+                }).when('/admin/instances', {
+                    templateUrl: 'views/admin/instances.html',
+                    controller: 'adminInstancesController'
+                }).when('/admin/instances/launch', {
+                    templateUrl: 'views/admin/instances_launch.html',
+                    controller: 'adminInstancesController'
                 }).when('/admin/bootstrap', {
                     templateUrl: 'views/admin/bootstrap.html',
                     controller: 'adminBootstrapController'

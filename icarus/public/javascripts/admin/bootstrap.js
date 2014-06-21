@@ -4,8 +4,8 @@
     angular.module('icarus')
         .controller('adminBootstrapController', function ($scope, $window, $AdminInstances, $AdminPackages, $q) {
             $scope.navs = [
-                {text: 'Admin'},
-                {text: 'Bootstrap', active: true}
+                {text: 'Admin', noLink: true},
+                {text: 'Bootstrap', noLink: true, active: true}
             ];
 
             var deferred = $q.defer();
@@ -39,9 +39,38 @@
                 });
             };
 
+            $AdminInstances.DescribeInstances().success(function (data) {
+                var instances = [];
+                data.Reservations.forEach(function (reservation) {
+                    reservation.Instances.forEach(function (instance) {
+                        instances.push(instance);
+                    });
+                });
+                $scope.instances = instances;
+            });
+
             $AdminInstances.DescribeImages().success(function (data) {
                 $scope.images = data.Images;
             });
+            $AdminInstances.DescribeVpcs().success(function (data) {
+                $scope.vpcs = data.Vpcs;
+            });
+            $AdminInstances.DescribeSubnets().success(function (data) {
+                $scope.subnets = data.Subnets;
+            });
+
+
+            $scope.launchInstanceModal = function (imageId) {
+                $scope.launchInstanceOptions = {
+                    imageId: imageId,
+                    instanceType: 't1.micro'
+                };
+                $("#launchInstanceModal").modal();
+            };
+
+            $scope.launchInstance = function (options) {
+                console.log(options);
+            };
 
         }).service('$AdminBootstrap', function ($http) {
             return {

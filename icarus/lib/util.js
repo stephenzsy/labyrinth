@@ -3,12 +3,13 @@ var Config = require('../config/config');
 var AWS = require('aws-sdk');
 var child_process = require('child_process');
 var Q = require('q');
+var log = require('log4js').getLogger('Icarus');
 
 function ValidationException(message) {
     this.message = message;
 }
 
-module.exports = {
+var IcarusUtil = {
 
     ValidationException: ValidationException,
 
@@ -72,6 +73,34 @@ module.exports = {
                 credentials: new AWS.Credentials(Config['aws']['credentials']['accessKeyId'], Config['aws']['credentials']['secretAccessKey'])
             });
         }
+    },
+
+    getActionHandler: function (ActionHandlers) {
+        return function (req, res) {
+            log.debug("REQ: " + JSON.stringify(req.body));
+            try {
+                var handler = IcarusUtil.validateAction(req, ActionHandlers);
+                handler(req, function (result) {
+                    log.debug("RES: " + JSON.stringify(result));
+                    res.send(result);
+                }, function (e) {
+                    if (e instanceof IcarusUtil.ValidationException) {
+                        res.send(400, e.message);
+                    } else {
+                        console.warn(e);
+                        res.send(500, e);
+                    }
+                });
+            } catch (e) {
+                if (e instanceof IcarusUtil.ValidationException) {
+                    res.send(400, e.message);
+                } else {
+                    console.warn(e);
+                    res.send(500, e);
+                }
+            }
+        }
     }
-}
-;
+};
+
+module.exports = IcarusUtil;
