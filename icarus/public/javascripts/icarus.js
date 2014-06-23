@@ -13,7 +13,7 @@
                     controller: 'adminInstancesController'
                 }).when('/admin/instances/launch', {
                     templateUrl: 'views/admin/instances_launch.html',
-                    controller: 'adminInstancesController'
+                    controller: 'adminInstancesLaunchController'
                 }).when('/admin/bootstrap', {
                     templateUrl: 'views/admin/bootstrap.html',
                     controller: 'adminBootstrapController'
@@ -30,6 +30,30 @@
             restrict: 'A',
             templateUrl: 'views/_nav.html',
             replace: true
+        };
+    }).directive('icarusSimpleObject', function ($compile) {
+        return {
+            restrict: 'A',
+            scope: {
+                obj: '&icarusSimpleObject'
+            },
+            link: function (scope, element) {
+                var obj = scope.obj();
+                if (angular.isObject(obj)) {
+                    if (angular.isArray(obj)) {
+                        $compile('<div ng-repeat="element in obj()"><div>+</div>' +
+                            '<div class="margin-indent-2" icarus-simple-object="element"></div>' +
+                            '</div>')(scope).appendTo(element);
+                    } else {
+                        $compile('<div ng-repeat="(objKey, objValue) in obj()">' +
+                            '<strong>{{objKey}}</strong>' +
+                            '<div class="margin-indent-2" icarus-simple-object="objValue"></div>' +
+                            '</div>')(scope).appendTo(element);
+                    }
+                } else {
+                    $compile('<div>{{obj()}}</div>')(scope).appendTo(element);
+                }
+            }
         };
     });
     app.controller('mainController', function ($scope, $Icarus) {

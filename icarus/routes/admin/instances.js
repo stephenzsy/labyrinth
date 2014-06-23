@@ -13,9 +13,45 @@ module.exports = router;
         return;
     }
 
+    function validateInstanceType(params) {
+        var instanceType = params['InstanceType'];
+        if (!instanceType || ['t1.micro', 'm1.small'].indexOf(instanceType)) {
+            throw new IcarusUtil.ValidationException("Invalid or forbidden instance type: " + instanceType);
+        }
+        return instanceType;
+    }
+
+    function validateSubnet(params) {
+        var subnet = params['Subnet'];
+        if (!subnet || !subnet.match(/^subnet-[0-9a-f]+$/)) {
+            throw new IcarusUtil.ValidationException("Invalid subnet: " + subnet);
+        }
+        return subnet;
+    }
+
+    function validateSecurityGroups(params) {
+        var securityGroups = params['SecurityGroups'];
+        var sgIds = [];
+        if (!securityGroups) {
+            throw new IcarusUtil.ValidationException("Invalid Security Groups: " + securityGroups);
+        }
+        for (var sgId in securityGroups) {
+            if (securityGroups[sgId] && sgId.match(/^sg-[0-9a-f]+$/)) {
+                sgIds.push(sgId);
+            }
+        }
+        return sgIds;
+    }
+
     var ActionHandlers = {
         GetEc2Configuration: function (req, callback) {
             callback(Config.aws.ec2);
+        },
+        LaunchInstance: function (req, callback) {
+            var instanceType = validateInstanceType(req.body);
+            var subnet = validateSubnet(req.body);
+            var sgIds = validateSecurityGroups(req.body);
+            callback(req.body);
         }
     };
 
@@ -39,7 +75,13 @@ module.exports = router;
                 res.send(400, err);
                 return;
             }
-            res.send(data);
+            var instances = [];
+            data.Reservations.forEach(function (reservation) {
+                reservations.Instances.forEach(function (instance) {
+                    instances.push(instance);
+                });
+            });
+            res.send(instances);
         });
     });
 
@@ -57,6 +99,19 @@ module.exports = router;
     router.post('/ec2/DescribeSubnets', function (req, res) {
         var ec2 = IcarusUtil.aws.getEc2Client();
         ec2.describeSubnets({Filters: [
+            {Name: 'vpc-id', Values: [Config.aws.ec2.appVpc]}
+        ]}, function (err, data) {
+            if (err) {
+                res.send(400, err);
+                return;
+            }
+            res.send(data);
+        });
+    });
+
+    router.post('/ec2/DescribeSecurityGroups', function (req, res) {
+        var ec2 = IcarusUtil.aws.getEc2Client();
+        ec2.describeSecurityGroups({Filters: [
             {Name: 'vpc-id', Values: [Config.aws.ec2.appVpc]}
         ]}, function (err, data) {
             if (err) {
