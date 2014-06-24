@@ -11,6 +11,8 @@ var AWS = require('aws-sdk');
 var path = require('path');
 var fs = require('fs');
 var packageRepo = new (require('../../lib/package-repository'))();
+var Connection = require('ssh2');
+var PackageUtil = require('./package-util');
 
 (function () {
     'use strict';
@@ -162,11 +164,133 @@ var packageRepo = new (require('../../lib/package-repository'))();
         });
     }
 
-    function getBuiltPackageVersions(appId) {
-        var s3 = IcarusUtil.aws.getS3Client();
+    // SSH - begin
+
+    function ssh_connect(server, onReady, onError, onClose) {
+        var c = new Connection();
+        c.on('ready', function () {
+            log.debug('Connection :: ready');
+            onReady(c);
+        });
+        c.on('error', function (err) {
+            log.debug('Connection :: error :: ' + err);
+            onError(err);
+        });
+        c.on('end', function () {
+            log.debug('Connection :: end');
+        });
+        c.on('close', function (had_error) {
+            log.debug('Connection :: close');
+            onClose();
+        });
+        c.connect({
+            host: server,
+            port: 22,
+            username: 'ec2-user',
+            privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
+        });
     }
 
+    function exec_ssh_cmds(server, cmds, options) {
+        var cmd = cmds.map(function (cmd) {
+            return cmd.join(" ");
+        }).join(";\n");
+        log.debug("Commands: " + cmd);
+        return new Q.Promise(function (resolve, reject, notify) {
+            ssh_connect(server, function (c) {
+                c.exec(cmd, options, function (err, stream) {
+                    if (err) throw err;
+                    stream.on('data', function (data, extended) {
+                        if (extended === 'stderr') {
+                            notify({stderr: data.toString()});
+                        }
+                        else {
+                            notify({stdout: data.toString()});
+                        }
+                    });
+                    stream.on('end', function () {
+                        log.debug('Stream :: EOF');
+                    });
+                    stream.on('close', function () {
+                        log.debug('Stream :: close');
+                    });
+                    stream.on('exit', function (code, signal) {
+                        log.debug('Stream :: exit :: code: ' + code + ', signal: ' + signal);
+                        c.end();
+                    });
+                });
+            }, reject, resolve);
+        });
+    }
+
+
+    function bootstrap(server, p) {
+        log.info('Bootstrap server: ' + server);
+        return new Q.Promise(function (resolve, reject, notify) {
+            return exec_ssh_cmds(server, [
+                ['mkdir' , '-p', p.remotePackageDir],
+                ['aws', '--region', p.region, 's3api', 'get-object', '--bucket', p.s3Bucket, '--key', p.s3Key, p.remotePackagePath], // download
+                ['mkdir', '-p', p.remoteApplicationPath]
+            ]).then(function () {
+                log.info('Download completed');
+                notify({status: "Download completed"});
+                return exec_ssh_cmds(server, [
+                    ['cd', p.remoteApplicationPath ],
+                    ['tar', 'xzvf', p.remoteArtifactPath], // unpack
+                    ['mkdir', '-p', p.appDirectoryParent],
+                    ['ln', '-snf', p.remoteApplicationPath, p.appDirectory]
+                ]);
+            }).then(function () {
+                log.info('Flip completed');
+                notify({status: "Flip completed"});
+                return exec_ssh_cmds(server, [
+                    ['cd', p.appDirectory],
+                    ['mkdir', '-p', p.nodeModulesPath],
+                    ['ln', '-snf', p.nodeModulesPath, path.join(p.appDirectory, 'node_modules')],
+                    ['npm', 'install'], // update packages
+                    ['mkdir', '-p', p.nginx.directory], // nginx conf
+                    ['mkdir', '-p', path.join(p.appDirectory, 'config')]
+                ]);
+            }).then(function () {
+                log.info("Package update completed");
+                notify({status: "Package update completed"});
+                return sftp_write_file(server, path.join(p.appDirectory, 'config', 'config.js'), printConfig() + "\n");
+            }).then(function () {
+                log.info("Config deployed");
+                notify({status: "Config deployed"});
+                return sftp_write_file(server, p.nginx.path, printStanza(Config.nginx.stanza, 0, []).join("\n") + "\n");
+            }).then(function () {
+                log.info('Nginx config pushed');
+                notify({status: 'Nginx config pushed'});
+                return exec_ssh_cmds(server, [
+                    ['sudo', 'ln', '-sf', p.nginx.path, '/opt/nginx/conf/nginx.conf'],
+                    ['sudo', 'service', 'nginx', 'restart']
+                ], {pty: true});
+            }).then(function () {
+                log.info('Nginx started');
+                notify({status: 'Nginx started'});
+                resolve();
+            }, reject, notify);
+        });
+    }
+
+
+    // SSH - end
+
     var ActionHandlers = {
+        BootstrapServer: function (req, callback) {
+            var appId = req.body.AppId;
+            var commitId = req.body.CommitId;
+            bootstrap(req.body.Server, {
+                region: Config.aws.region,
+                s3Bucket: Config.aws.s3.deploy.bucket,
+                s3Key: PackageUtil.getPackageS3Key(appId, commitId),
+                remotePackageDir: path.join('/home/ec2-user/deploy/_package', appId),
+                remotePackagePath: path.join('/home/ec2-user/deploy/_package', appId, PackageUtil.getPackageFilename(appId, commitId))
+            }).done(function (data) {
+                callback(data);
+            });
+        },
         GetBootstrapPackages: function (req, callback) {
             var promises = [];
             for (var appId in Config.packages) {

@@ -18,7 +18,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="v in p.versions">
+            <tr ng-repeat="v in p.versions" ng-class="{active: bootstrapPackage[p.appId] === v.commitId}">
                 <td><i class="fa fa-file-archive-o" ng-show="v.status === 'Available'"></i></td>
                 <td>{{v.commitId}}</td>
                 <td>{{v.date}}</td>
@@ -30,7 +30,8 @@
                     <a class="btn btn-link"
                        ng-show="v.status === 'NotFound'"
                        ng-click="buildPackage(p.appId, v.commitId)">Build</a>
-                    <a class="btn btn-link" ng-show="v.status === 'Available'">Bootstrap</a>
+                    <a class="btn btn-link" ng-show="v.status === 'Available'"
+                       ng-click="selectBootstrapPackageVersion(p.appId, v.commitId)">Bootstrap</a>
                 </td>
             </tr>
             </tbody>
@@ -45,18 +46,10 @@
         <a href="/admin/instances" class="btn btn-link">Manage Instances</a>
     </div>
 </div>
+<hr>
+<div>
+    <button class="btn btn-primary" type="button" ng-click="startBootstrap()">Start Bootstrap</button>
+</div>
 <div>
     <h2>Debug</h2>
-
-    <h3>Instances</h3>
-    <pre>{{instances}}</pre>
-
-    <h3>Images</h3>
-    <pre>{{images}}</pre>
-
-    <h3>Subnets</h3>
-    <pre>{{subnets}}</pre>
-
-    <h3>Vpcs</h3>
-    <pre>{{vpcs}}</pre>
 </div>

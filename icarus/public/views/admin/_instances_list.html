@@ -13,7 +13,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="instance in instances">
+            <tr ng-repeat="instance in instances" ng-class="{active: bootstrapInstance().InstanceId === instance.InstanceId}">
                 <td>{{instance.InstanceId}}</td>
                 <td>{{instance.InstanceType}}</td>
                 <td><a class="btn btn-link" data-toggle="modal"
@@ -25,7 +25,8 @@
                          title="Instance: {{instance.InstanceId}}"></div>
                 </td>
                 <td>
-                    <a class="btn btn-link" ng-show="instanceActions.bootstrap">Bootstrap</a>
+                    <a class="btn btn-link" ng-show="instanceActions.bootstrap"
+                       ng-click="bootstrapInstance(instance)">Bootstrap</a>
                 </td>
             </tr>
             </tbody>

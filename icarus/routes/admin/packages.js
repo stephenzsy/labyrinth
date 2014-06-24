@@ -11,6 +11,7 @@ var AWS = require('aws-sdk');
 var path = require('path');
 var fs = require('fs');
 var packageRepo = new (require('../../lib/package-repository'))();
+var PackageUtil = require('./package-util');
 
 (function () {
     'use strict';
@@ -62,14 +63,6 @@ var packageRepo = new (require('../../lib/package-repository'))();
         }));
     }
 
-    function getPackageFilename(appId, commitId) {
-        return appId + '-' + commitId + '.tar.gz';
-    }
-
-    function getPackageS3Key(appId, commitId) {
-        return  Config.aws.s3.deploy.prefix + appId + '/commit/' + getPackageFilename(appId, commitId);
-    }
-
     function spawn(command, args, options) {
         var stdout = '';
         var stderr = '';
@@ -113,7 +106,7 @@ var packageRepo = new (require('../../lib/package-repository'))();
             var stream = fs.createReadStream(localPath);
             s3.putObject({
                 Bucket: Config.aws.s3.deploy.bucket,
-                Key: getPackageS3Key(appId, commitId),
+                Key: PackageUtil.getPackageS3Key(appId, commitId),
                 Body: stream}, function (err, data) {
                 if (err) {
                     e(err);

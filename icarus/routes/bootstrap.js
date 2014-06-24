@@ -30,62 +30,6 @@ if (Config.roles.icarus.bootstrap) {
                 throw new ValidationException("Null AppID");
         }
 
-        function ssh_connect(server, onReady, onError, onClose) {
-            var c = new Connection();
-            c.on('ready', function () {
-                logger.debug('Connection :: ready');
-                onReady(c);
-            });
-            c.on('error', function (err) {
-                logger.debug('Connection :: error :: ' + err);
-                onError(err);
-            });
-            c.on('end', function () {
-                logger.debug('Connection :: end');
-            });
-            c.on('close', function (had_error) {
-                logger.debug('Connection :: close');
-                onClose();
-            });
-            c.connect({
-                host: server,
-                port: 22,
-                username: 'ec2-user',
-                privateKey: fs.readFileSync(Config.aws.ec2.keyPath)
-            });
-        }
-
-        function exec_ssh_cmds(server, cmds, options) {
-            var cmd = cmds.map(function (cmd) {
-                return cmd.join(" ");
-            }).join(";\n");
-            return new Q.Promise(function (resolve, reject, notify) {
-                ssh_connect(server, function (c) {
-                    c.exec(cmd, options, function (err, stream) {
-                        if (err) throw err;
-                        stream.on('data', function (data, extended) {
-                            if (extended === 'stderr') {
-                                notify({stderr: data.toString()});
-                            }
-                            else {
-                                notify({stdout: data.toString()});
-                            }
-                        });
-                        stream.on('end', function () {
-                            logger.debug('Stream :: EOF');
-                        });
-                        stream.on('close', function () {
-                            logger.debug('Stream :: close');
-                        });
-                        stream.on('exit', function (code, signal) {
-                            logger.debug('Stream :: exit :: code: ' + code + ', signal: ' + signal);
-                            c.end();
-                        });
-                    });
-                }, reject, resolve);
-            });
-        }
-
         function expandIndent(indent) {
             var whitespace = '';
             for (var i = 0; i < indent; ++i) {
