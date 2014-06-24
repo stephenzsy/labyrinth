@@ -3,6 +3,32 @@
         No instances available.
     </div>
     <div ng-show="instances">
-        <table></table>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Instance ID</th>
+                <th>Instance Type</th>
+                <th>Details</th>
+                <th ng-show="instanceActions.bootstrap">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="instance in instances">
+                <td>{{instance.InstanceId}}</td>
+                <td>{{instance.InstanceType}}</td>
+                <td><a class="btn btn-link" data-toggle="modal"
+                       data-target=".modal-instance[data-instance-id='{{instance.InstanceId}}']">Details</a>
+
+                    <div icarus-admin-key-value-modal="instance"
+                         class="modal-instance"
+                         data-instance-id="{{instance.InstanceId}}"
+                         title="Instance: {{instance.InstanceId}}"></div>
+                </td>
+                <td>
+                    <a class="btn btn-link" ng-show="instanceActions.bootstrap">Bootstrap</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>

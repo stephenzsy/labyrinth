@@ -10,11 +10,10 @@
             });
 
             $AdminInstances.DescribeInstances().success(function (data) {
-                console.log(data);
                 $scope.instances = data;
             });
 
-        }).controller('adminInstancesLaunchController', function ($scope, $AdminInstances) {
+        }).controller('adminInstancesLaunchController', function ($scope, $AdminInstances, $location) {
             $scope.navs = [
                 {text: 'Admin', noLink: true},
                 {text: 'Instances', href: '/admin/instances'},
@@ -25,6 +24,7 @@
                 $scope.ec2Config = data;
             });
 
+            $scope.ec2SubnetSelector = {};
             $AdminInstances.DescribeSubnets().success(function (data) {
                 var subnets = data.Subnets;
                 $scope.ec2SubnetSelector = {
@@ -33,11 +33,19 @@
                 };
             });
 
+            $scope.ec2SecurityGroupsSelector = {};
             $AdminInstances.DescribeSecurityGroups().success(function (data) {
                 var securityGroups = data.SecurityGroups;
                 $scope.ec2SecurityGroupsSelector = {
                     securityGroups: securityGroups,
                     selected: {}
+                };
+            });
+
+            $AdminInstances.DescribeImages().success(function (data) {
+                var images = data.Images;
+                $scope.ec2ImageSelector = {
+                    images: images
                 };
             });
 
@@ -47,18 +55,26 @@
                 console.log($scope.selectedInstanceType);
                 console.log($scope.ec2SecurityGroupsSelector.selected);
                 console.log($scope.ec2SubnetSelector.selected);
+                var selectedSecurityGroups = [];
+                for (var key in $scope.ec2SecurityGroupsSelector.selected) {
+                    if ($scope.ec2SecurityGroupsSelector.selected[key]) {
+                        selectedSecurityGroups.push(key);
+                    }
+                }
+
                 $AdminInstances.request({
                     Action: 'LaunchInstance',
+                    ImageId: $scope.ec2ImageSelector.selected,
                     InstanceType: $scope.selectedInstanceType,
                     Subnet: $scope.ec2SubnetSelector.selected,
-                    SecurityGroups: $scope.ec2SecurityGroupsSelector.selected
+                    SecurityGroups: selectedSecurityGroups
                 }).success(function (data) {
                     console.log(data);
+                    $location.url('/admin/instances');
                 }).error(function (data) {
                     console.log(data);
                 });
-            }
-
+            };
         }).directive('icarusInstancesList', function () {
             return {
                 restrict: 'A',

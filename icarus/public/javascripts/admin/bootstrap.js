@@ -40,36 +40,12 @@
             };
 
             $AdminInstances.DescribeInstances().success(function (data) {
-                var instances = [];
-                data.Reservations.forEach(function (reservation) {
-                    reservation.Instances.forEach(function (instance) {
-                        instances.push(instance);
-                    });
-                });
-                $scope.instances = instances;
-            });
-
-            $AdminInstances.DescribeImages().success(function (data) {
-                $scope.images = data.Images;
-            });
-            $AdminInstances.DescribeVpcs().success(function (data) {
-                $scope.vpcs = data.Vpcs;
-            });
-            $AdminInstances.DescribeSubnets().success(function (data) {
-                $scope.subnets = data.Subnets;
+                $scope.instances = data;
             });
 
 
-            $scope.launchInstanceModal = function (imageId) {
-                $scope.launchInstanceOptions = {
-                    imageId: imageId,
-                    instanceType: 't1.micro'
-                };
-                $("#launchInstanceModal").modal();
-            };
-
-            $scope.launchInstance = function (options) {
-                console.log(options);
+            $scope.instanceActions = {
+                bootstrap: true
             };
 
         }).service('$AdminBootstrap', function ($http) {

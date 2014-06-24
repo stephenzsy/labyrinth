@@ -24,34 +24,68 @@ module.exports = router;
     function validateSubnet(params) {
         var subnet = params['Subnet'];
         if (!subnet || !subnet.match(/^subnet-[0-9a-f]+$/)) {
-            throw new IcarusUtil.ValidationException("Invalid subnet: " + subnet);
+            throw new IcarusUtil.ValidationException("Invalid Subnet: " + subnet);
         }
         return subnet;
     }
 
     function validateSecurityGroups(params) {
         var securityGroups = params['SecurityGroups'];
-        var sgIds = [];
         if (!securityGroups) {
             throw new IcarusUtil.ValidationException("Invalid Security Groups: " + securityGroups);
         }
-        for (var sgId in securityGroups) {
-            if (securityGroups[sgId] && sgId.match(/^sg-[0-9a-f]+$/)) {
-                sgIds.push(sgId);
+        securityGroups.forEach(function (sgId) {
+            if (!sgId.match(/^sg-[0-9a-f]+$/)) {
+                throw new IcarusUtil.ValidationException("Invalid Security Group: " + sgId);
             }
+        });
+        return securityGroups;
+    }
+
+    function validateImageId(params) {
+        var imageId = params['ImageId'];
+        if (!imageId || !imageId.match(/^ami-[0-9a-f]+$/)) {
+            throw new IcarusUtil.ValidationException("Invalid Image Id: " + imageId);
         }
-        return sgIds;
+        return imageId;
     }
 
     var ActionHandlers = {
         GetEc2Configuration: function (req, callback) {
             callback(Config.aws.ec2);
         },
-        LaunchInstance: function (req, callback) {
+        LaunchInstance: function (req, callback, error) {
             var instanceType = validateInstanceType(req.body);
             var subnet = validateSubnet(req.body);
             var sgIds = validateSecurityGroups(req.body);
-            callback(req.body);
+            var imageId = validateImageId(req.body);
+            var parameters = {
+                ImageId: imageId,
+                MaxCount: 1,
+                MinCount: 1,
+                IamInstanceProfile: {
+                    Arn: Config.aws.ec2.instance.iam_instance_profile.arn
+                },
+                InstanceType: instanceType,
+                KeyName: Config.aws.ec2.instance.key_name,
+                Monitoring: {
+                    Enabled: false
+                },
+                NetworkInterfaces: [{
+                    DeviceIndex : 0,
+                    AssociatePublicIpAddress: true,
+                    Groups: sgIds,
+                    SubnetId: subnet
+                }]
+            };
+            var ec2 = IcarusUtil.aws.getEc2Client();
+            ec2.runInstances(parameters, function(err, data){
+                if(err) {
+                    error(err);
+                    return;
+                }
+                callback(data);
+            });
         }
     };
 
@@ -77,7 +111,7 @@ module.exports = router;
             }
             var instances = [];
             data.Reservations.forEach(function (reservation) {
-                reservations.Instances.forEach(function (instance) {
+                reservation.Instances.forEach(function (instance) {
                     instances.push(instance);
                 });
             });
