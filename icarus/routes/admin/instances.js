@@ -15,7 +15,7 @@ module.exports = router;
 
     function validateInstanceType(params) {
         var instanceType = params['InstanceType'];
-        if (!instanceType || ['t1.micro', 'm1.small'].indexOf(instanceType)) {
+        if (!instanceType || ['t1.micro', 'm1.small'].indexOf(instanceType) < 0) {
             throw new IcarusUtil.ValidationException("Invalid or forbidden instance type: " + instanceType);
         }
         return instanceType;

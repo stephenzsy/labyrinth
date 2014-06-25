@@ -13,6 +13,9 @@ var fs = require('fs');
 var packageRepo = new (require('../../lib/package-repository'))();
 var Connection = require('ssh2');
 var PackageUtil = require('./package-util');
+var BootstrapHelper = {
+    icarus: require('./bootstrap/icarus')
+};
 
 (function () {
     'use strict';
@@ -279,8 +282,12 @@ var PackageUtil = require('./package-util');
 
     var ActionHandlers = {
         BootstrapServer: function (req, callback) {
-            var appId = req.body.AppId;
+            var appId = IcarusUtil.validateAppId(req);
             var commitId = req.body.CommitId;
+            var bootstrapHelper = new (BootstrapHelper[appId])();
+            callback(bootstrapHelper.printBootstrapScript());
+            return;
+
             bootstrap(req.body.Server, {
                 region: Config.aws.region,
                 s3Bucket: Config.aws.s3.deploy.bucket,
