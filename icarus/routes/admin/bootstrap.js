@@ -285,7 +285,10 @@ var BootstrapHelper = {
             var appId = IcarusUtil.validateAppId(req);
             var commitId = req.body.CommitId;
             var bootstrapHelper = new (BootstrapHelper[appId])();
-            callback(bootstrapHelper.printBootstrapScript());
+
+            bootstrapHelper.testExecuteBootstrapScript({
+                commitId: commitId
+            }, callback);
             return;
 
             bootstrap(req.body.Server, {

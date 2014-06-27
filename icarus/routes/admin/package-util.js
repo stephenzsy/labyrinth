@@ -3,16 +3,24 @@ var Config = require('../../config/config');
 (function () {
     'use strict';
 
-    function getPackageFilename(appId, commitId) {
-        return appId + '-' + commitId + '.tar.gz';
+    if (!Config.roles.icarus.admin) {
+        module.exports = null;
+        return;
     }
 
-    module.exports = {
+    function PackageUtil() {
 
-        getPackageFilename: getPackageFilename,
+        function getPackageFilename(appId, commitId) {
+            return appId + '-' + commitId + '.tar.gz';
+        }
 
-        getPackageS3Key: function (appId, commitId) {
+        function getPackageS3Key(appId, commitId) {
             return  Config.aws.s3.deploy.prefix + appId + '/commit/' + getPackageFilename(appId, commitId);
         }
-    };
+
+        this.getPackageFilename = getPackageFilename;
+        this.getPackageS3Key = getPackageS3Key;
+    }
+
+    module.exports = new PackageUtil();
 })();

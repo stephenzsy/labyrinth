@@ -72,7 +72,7 @@
                 for (var appId in $scope.bootstrapPackage) {
                     var commitId = $scope.bootstrapPackage[appId];
                     $AdminBootstrap.BootstrapServer($scope.bootstrapInstance(), appId, commitId).success(function (data) {
-                        console.log(data);
+                        $scope.bootstrapTest = data;
                     });
                 }
             }

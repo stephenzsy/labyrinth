@@ -164,7 +164,7 @@ var PackageUtil = require('./package-util');
             validateCommitId(req, appId)
                 .then(function (commitId) {
                     gCommitId = commitId;
-                    outputPath = path.join(Config.build.path, getPackageFilename(appId, commitId));
+                    outputPath = path.join(Config.build.path, PackageUtil.getPackageFilename(appId, commitId));
                     return spawn('git', ['archive', commitId, '--format=tar.gz', '--output', outputPath], {cwd: Config.packages[appId].repo.path});
                 }).then(function (result) {
                     if (result.code != 0)
@@ -194,6 +194,7 @@ var PackageUtil = require('./package-util');
                     res.send(400, e.message);
                 } else {
                     console.warn(e);
+                    console.log(e.stack);
                     res.send(500, e);
                 }
             });
@@ -202,6 +203,7 @@ var PackageUtil = require('./package-util');
                 res.send(400, e.message);
             } else {
                 console.warn(e);
+                console.log(e.stack);
                 res.send(500, e);
             }
         }
