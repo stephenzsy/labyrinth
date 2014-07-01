@@ -5,39 +5,37 @@ var child_process = require('child_process');
 var Q = require('q');
 var log = require('log4js').getLogger('Icarus');
 
-function ValidationException(message) {
-    this.message = message;
-}
 
-var IcarusUtil = {
+module.exports = new (function () {
 
-    ValidationException: ValidationException,
+    this.ValidationException = function (message) {
+        this.message = message;
+    };
 
-    validateAction: function (req, mapping) {
+    this.validateAction = function (req, mapping) {
         if (!req.body.Action || !mapping[req.body.Action]) {
             throw new ValidationException("Invalid Action: " + req.body.Action);
         }
         return mapping[req.body.Action];
-    },
+    };
 
-    validateAppId: function (req) {
+    this.validateAppId = function (req) {
         var appId = req.body.AppId;
         if (!appId || !Config.packages[appId]) {
             throw new ValidationException("Invalid AppId: " + appId);
         }
         return appId;
-    },
+    };
 
-    validateMajorVersion: function (req, appId) {
+    this.validateMajorVersion = function (req, appId) {
         var majorVersion = req.body.MajorVersion;
         if (!majorVersion || !Config.packages[appId].majorVersions.indexOf(majorVersion) < 0) {
             throw new ValidationException("Invalid MajorVersion: " + majorVersion);
         }
         return majorVersion;
-    },
+    };
 
-
-    spawnCommand: function spawn(command, args, options) {
+    this.spawnCommand = function spawn(command, args, options) {
         var stdout = '';
         var stderr = '';
         var handle = child_process.spawn(command, args, options);
@@ -55,27 +53,37 @@ var IcarusUtil = {
                 e(err);
             })
         });
-    },
+    };
 
-    aws: {
-        getS3Client: function () {
+    this.aws = new (function () {
+
+        function getCredentialsProviderChain() {
+            var providers = [];
+            if (Config.aws.credentials) {
+                providers.push(new AWS.Credentials(Config.aws.credentials['accessKeyId'], Config.aws.credentials['secretAccessKey']));
+            }
+            providers.push(new AWS.EC2MetadataCredentials());
+            return new AWS.CredentialProviderChain(providers);
+        }
+
+        this.getS3Client = function () {
             return new AWS.S3({
                 endpoint: new AWS.Endpoint(Config['aws']['s3']['endpoint']),
                 region: Config.aws.region,
-                credentials: new AWS.Credentials(Config['aws']['credentials']['accessKeyId'], Config['aws']['credentials']['secretAccessKey']),
-                logger: process.stdout
+                credentialProvider: getCredentialsProviderChain()
             });
-        },
-        getEc2Client: function () {
+        };
+
+        this.getEc2Client = function () {
             return  new AWS.EC2({
                 endpoint: new AWS.Endpoint(Config['aws']['ec2']['endpoint']),
                 region: Config['aws']['region'],
-                credentials: new AWS.Credentials(Config['aws']['credentials']['accessKeyId'], Config['aws']['credentials']['secretAccessKey'])
+                credentialProvider: getCredentialsProviderChain()
             });
-        }
-    },
+        };
+    })();
 
-    getActionHandler: function (ActionHandlers) {
+    this.getActionHandler = function (ActionHandlers) {
         return function (req, res) {
             log.debug("REQ: " + JSON.stringify(req.body));
             try {
@@ -100,7 +108,6 @@ var IcarusUtil = {
                 }
             }
         }
-    }
-};
-
-module.exports = IcarusUtil;
+    };
+})
+();

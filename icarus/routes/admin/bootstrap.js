@@ -281,25 +281,17 @@ var BootstrapHelper = {
     // SSH - end
 
     var ActionHandlers = {
-        BootstrapServer: function (req, callback) {
+        BootstrapServer: function (req, callback, error) {
             var appId = IcarusUtil.validateAppId(req);
             var commitId = req.body.CommitId;
             var bootstrapHelper = new (BootstrapHelper[appId])();
+
+            fs.writeFileSync(path.join(Config.build.path, 'config', 'config.js'), bootstrapHelper.printConfig());
 
             bootstrapHelper.testExecuteBootstrapScript({
                 commitId: commitId
             }, callback);
             return;
-
-            bootstrap(req.body.Server, {
-                region: Config.aws.region,
-                s3Bucket: Config.aws.s3.deploy.bucket,
-                s3Key: PackageUtil.getPackageS3Key(appId, commitId),
-                remotePackageDir: path.join('/home/ec2-user/deploy/_package', appId),
-                remotePackagePath: path.join('/home/ec2-user/deploy/_package', appId, PackageUtil.getPackageFilename(appId, commitId))
-            }).done(function (data) {
-                callback(data);
-            });
         },
         GetBootstrapPackages: function (req, callback) {
             var promises = [];
@@ -401,6 +393,7 @@ var BootstrapHelper = {
                     res.send(400, e.message);
                 } else {
                     console.warn(e);
+                    console.warn(e.stack);
                     res.send(500, e);
                 }
             });
@@ -409,6 +402,7 @@ var BootstrapHelper = {
                 res.send(400, e.message);
             } else {
                 console.warn(e);
+                console.warn(e.stack);
                 res.send(500, e);
             }
         }

@@ -17,6 +17,9 @@
                 }).when('/admin/bootstrap', {
                     templateUrl: 'views/admin/bootstrap.html',
                     controller: 'adminBootstrapController'
+                }).when('/packages',{
+                    templateUrl: 'views/packages.html',
+                    controller: 'packagesController'
                 }).otherwise({templateUrl: 'views/error.html'});
         });
     app.directive('icarusHeader', function () {
