@@ -1,6 +1,6 @@
 {
     "name": "icarus",
-    "version": "0.0.1-021b00d",
+    "version": "0.0.2-0",
     "private": true,
     "scripts": {
         "start": "node ./bin/www"
