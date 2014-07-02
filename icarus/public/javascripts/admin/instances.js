@@ -9,9 +9,28 @@
                 $scope.ec2Config = data;
             });
 
-            $AdminInstances.DescribeInstances().success(function (data) {
-                $scope.instances = data;
-            });
+            function refreshInstancesList() {
+                return $AdminInstances.DescribeInstances().success(function (data) {
+                    $scope.instances = data;
+                });
+            }
+
+            $scope.instanceActions = {
+                terminate: true
+            };
+
+            refreshInstancesList();
+
+            $scope.terminateInstance = function (instance) {
+                $AdminInstances.request({
+                    Action: 'TerminateInstance',
+                    InstanceId: instance.InstanceId
+                }).success(function (data) {
+                    refreshInstancesList();
+                }).error(function (data) {
+                    console.log(data);
+                });
+            };
 
         }).controller('adminInstancesLaunchController', function ($scope, $AdminInstances, $location) {
             $scope.navs = [
@@ -49,7 +68,7 @@
                 };
             });
 
-            $scope.selectedInstanceType = 't1.micro';
+            $scope.selectedInstanceType = 't2.micro';
 
             $scope.launchInstance = function () {
                 console.log($scope.selectedInstanceType);
@@ -75,6 +94,7 @@
                     console.log(data);
                 });
             };
+
         }).directive('icarusInstancesList', function () {
             return {
                 restrict: 'A',

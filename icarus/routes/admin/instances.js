@@ -15,7 +15,11 @@ module.exports = router;
 
     function validateInstanceType(params) {
         var instanceType = params['InstanceType'];
-        if (!instanceType || ['t1.micro', 'm1.small'].indexOf(instanceType) < 0) {
+        if (!instanceType || [
+            't2.micro',
+            't1.micro',
+            'm1.small'
+        ].indexOf(instanceType) < 0) {
             throw new IcarusUtil.ValidationException("Invalid or forbidden instance type: " + instanceType);
         }
         return instanceType;
@@ -54,6 +58,16 @@ module.exports = router;
         GetEc2Configuration: function (req, callback) {
             callback(Config.aws.ec2);
         },
+        TerminateInstance: function (req, callback, error) {
+            var ec2 = IcarusUtil.aws.getEc2Client();
+            ec2.terminateInstances({InstanceIds: [req.body.InstanceId]}, function (err, data) {
+                if (err) {
+                    error(err);
+                    return;
+                }
+                callback(data);
+            });
+        },
         LaunchInstance: function (req, callback, error) {
             var instanceType = validateInstanceType(req.body);
             var subnet = validateSubnet(req.body);
@@ -71,16 +85,18 @@ module.exports = router;
                 Monitoring: {
                     Enabled: false
                 },
-                NetworkInterfaces: [{
-                    DeviceIndex : 0,
-                    AssociatePublicIpAddress: true,
-                    Groups: sgIds,
-                    SubnetId: subnet
-                }]
+                NetworkInterfaces: [
+                    {
+                        DeviceIndex: 0,
+                        AssociatePublicIpAddress: true,
+                        Groups: sgIds,
+                        SubnetId: subnet
+                    }
+                ]
             };
             var ec2 = IcarusUtil.aws.getEc2Client();
-            ec2.runInstances(parameters, function(err, data){
-                if(err) {
+            ec2.runInstances(parameters, function (err, data) {
+                if (err) {
                     error(err);
                     return;
                 }

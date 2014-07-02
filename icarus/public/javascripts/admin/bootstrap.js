@@ -57,7 +57,8 @@
 
 
             $scope.instanceActions = {
-                bootstrap: true
+                bootstrap: true,
+                terminate: false
             };
 
             var bootstrapInstance_ = null;

@@ -8,14 +8,17 @@
             <tr>
                 <th>Instance ID</th>
                 <th>Instance Type</th>
+                <th>State</th>
                 <th>Details</th>
-                <th ng-show="instanceActions.bootstrap">Actions</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat="instance in instances" ng-class="{active: bootstrapInstance().InstanceId === instance.InstanceId}">
+            <tr ng-repeat="instance in instances"
+                ng-class="{active: bootstrapInstance().InstanceId === instance.InstanceId}">
                 <td>{{instance.InstanceId}}</td>
                 <td>{{instance.InstanceType}}</td>
+                <td>{{instance.State.Name}}</td>
                 <td><a class="btn btn-link" data-toggle="modal"
                        data-target=".modal-instance[data-instance-id='{{instance.InstanceId}}']">Details</a>
 
@@ -27,6 +30,8 @@
                 <td>
                     <a class="btn btn-link" ng-show="instanceActions.bootstrap"
                        ng-click="bootstrapInstance(instance)">Bootstrap</a>
+                    <a class="btn btn-link" ng-show="instanceActions.terminate"
+                       ng-click="terminateInstance(instance)">Terminate</a>
                 </td>
             </tr>
             </tbody>

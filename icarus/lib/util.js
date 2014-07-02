@@ -6,18 +6,22 @@ var Q = require('q');
 var log = require('log4js').getLogger('Icarus');
 
 
-module.exports = new (function () {
+function IcarusUtil() {
 
-    this.ValidationException = function (message) {
+    function ValidationException(message) {
         this.message = message;
-    };
+    }
 
-    this.validateAction = function (req, mapping) {
+    this.ValidationException = ValidationException;
+
+    function validateAction(req, mapping) {
         if (!req.body.Action || !mapping[req.body.Action]) {
             throw new ValidationException("Invalid Action: " + req.body.Action);
         }
         return mapping[req.body.Action];
-    };
+    }
+
+    this.validateAction = validateAction;
 
     this.validateAppId = function (req) {
         var appId = req.body.AppId;
@@ -83,16 +87,16 @@ module.exports = new (function () {
         };
     })();
 
-    this.getActionHandler = function (ActionHandlers) {
+    this.getActionHandler = function (actionHandlers) {
         return function (req, res) {
             log.debug("REQ: " + JSON.stringify(req.body));
             try {
-                var handler = IcarusUtil.validateAction(req, ActionHandlers);
+                var handler = validateAction(req, actionHandlers);
                 handler(req, function (result) {
                     log.debug("RES: " + JSON.stringify(result));
                     res.send(result);
                 }, function (e) {
-                    if (e instanceof IcarusUtil.ValidationException) {
+                    if (e instanceof ValidationException) {
                         res.send(400, e.message);
                     } else {
                         console.warn(e);
@@ -100,7 +104,7 @@ module.exports = new (function () {
                     }
                 });
             } catch (e) {
-                if (e instanceof IcarusUtil.ValidationException) {
+                if (e instanceof ValidationException) {
                     res.send(400, e.message);
                 } else {
                     console.warn(e);
@@ -109,5 +113,6 @@ module.exports = new (function () {
             }
         }
     };
-})
-();
+}
+
+module.exports = new IcarusUtil();
