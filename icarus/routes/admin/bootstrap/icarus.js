@@ -1,4 +1,5 @@
 var path = require('path');
+var Q = require('q');
 
 var Config = require('../../../config/config');
 var IcarusUtil = require('../../../lib/util');
@@ -6,6 +7,8 @@ var PackageUtil = require('../package-util');
 
 (function () {
     'use strict';
+
+    var APP_ID = 'icarus';
 
     if (!Config.roles.icarus.bootstrap) {
         module.exports = null;
@@ -68,5 +71,36 @@ var PackageUtil = require('../package-util');
         this.printBootstrapScript = printBootstrapScript;
 
         this.printConfig = printConfig;
+
+        this.beginBootstrapWorkflow = function (params) {
+            var sshParams = {
+                host: params.server,
+                port: 22,
+                username: 'ec2-user',
+                privateKey: require('fs').readFileSync(Config.aws.ec2.keyPath)
+            };
+            return IcarusUtil.sshConnect(sshParams).then(function (conn) {
+                return IcarusUtil.sftp(conn).then(function (sftp) {
+                    return Q.Promise(function (c, e, p) {
+                        sftp.readdir('/home/ec2-user', function (err, list) {
+                            if (err) throw err;
+                            console.dir(list);
+                            c();
+                        });
+                    });
+                }).then(function () {
+                    return IcarusUtil.executeSshCommands(conn, [
+                        ['uname', '-a'],
+                        ['node', '--version']
+                    ]);
+                }).then(function (exitStatus) {
+                    conn.end();
+                    return exitStatus;
+                });
+            }).then(function (exitStatus) {
+                console.log(exitStatus);
+                return 'ok'
+            });
+        }
     };
 })();

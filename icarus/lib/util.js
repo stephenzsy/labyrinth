@@ -3,10 +3,12 @@ var Config = require('../config/config');
 var AWS = require('aws-sdk');
 var child_process = require('child_process');
 var Q = require('q');
-var log = require('log4js').getLogger('Icarus');
+var log = require('log4js').getLogger('IcarusUtils');
+var Connection = require('ssh2');
 
 
 function IcarusUtil() {
+    'use strict';
 
     function ValidationException(message) {
         this.message = message;
@@ -112,6 +114,82 @@ function IcarusUtil() {
                 }
             }
         }
+    };
+
+    // SSH
+    this.executeSshCommands = function (conn, cmds) {
+        var commands = cmds.map(function (cmd) {
+            return cmd.join(' ');
+        }).join(";\n");
+        log.info("Execute Commands:\n==============\n" + commands);
+        return Q.Promise(function (c, e, p) {
+            conn.exec(commands, function (err, stream) {
+                var stdout = '';
+                var stderr = '';
+                var execCode = null;
+                var execSignal = null;
+                if (err) {
+                    e(err);
+                    return;
+                }
+                stream.on('data', function (data, extended) {
+                    if (extended === 'stderr') {
+                        stderr += data.toString();
+                        return;
+                    }
+                    stdout += data.toString();
+                });
+                stream.on('end', function () {
+                    log.debug('Stream :: EOF');
+                    c({code: execCode, signal: execSignal, stdout: stdout, stderr: stderr});
+                });
+                stream.on('close', function () {
+                    log.debug('Stream :: close');
+                });
+                stream.on('exit', function (code, signal) {
+                    log.debug('Stream :: exit :: code: ' + code + ', signal: ' + signal);
+                    execCode = code;
+                    execSignal = signal;
+                });
+            });
+        });
+    };
+
+    function sshConnect(params) {
+        var conn = new Connection();
+        return Q.Promise(function (c, e, p) {
+            conn.on('ready', function () {
+                log.info('Connection : ' + params.host + ' : ready');
+                c(conn);
+            });
+            conn.on('error', function (err) {
+                log.info('Connection : ' + params.host + ' : error :' + err);
+                e(err);
+            });
+            conn.on('end', function () {
+                log.info('Connection : ' + params.host + ' : end');
+            });
+            conn.on('close', function (had_error) {
+                log.info('Connection : ' + params.host + ' : close');
+            });
+            conn.connect({
+                host: params.host,
+                port: params.port,
+                username: params.username,
+                privateKey: params.privateKey
+            });
+        });
+    }
+
+    this.sshConnect = sshConnect;
+
+    this.sftp = function (conn) {
+        return Q.Promise(function (c, e, p) {
+            conn.sftp(function (err, sftp) {
+                if (err) throw err;
+                c(sftp);
+            });
+        });
     };
 }
 

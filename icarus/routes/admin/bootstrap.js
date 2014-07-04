@@ -229,6 +229,7 @@ var BootstrapHelper = {
 
     function bootstrap(server, p) {
         log.info('Bootstrap server: ' + server);
+
         return new Q.Promise(function (resolve, reject, notify) {
             return exec_ssh_cmds(server, [
                 ['mkdir' , '-p', p.remotePackageDir],
@@ -285,7 +286,11 @@ var BootstrapHelper = {
             var appId = IcarusUtil.validateAppId(req);
             var commitId = req.body.CommitId;
             var bootstrapHelper = new (BootstrapHelper[appId])();
-
+            bootstrapHelper.beginBootstrapWorkflow({
+                server: req.body.Server,
+                commitId: commitId
+            }).done(callback, error);
+            return;
             fs.writeFileSync(path.join(Config.build.path, 'config', 'config.js'), bootstrapHelper.printConfig());
 
             bootstrapHelper.testExecuteBootstrapScript({
