@@ -141,10 +141,10 @@ function IcarusUtil() {
                 });
                 stream.on('end', function () {
                     log.debug('Stream :: EOF');
-                    c({code: execCode, signal: execSignal, stdout: stdout, stderr: stderr});
                 });
                 stream.on('close', function () {
                     log.debug('Stream :: close');
+                    c({code: execCode, signal: execSignal, stdout: stdout, stderr: stderr});
                 });
                 stream.on('exit', function (code, signal) {
                     log.debug('Stream :: exit :: code: ' + code + ', signal: ' + signal);

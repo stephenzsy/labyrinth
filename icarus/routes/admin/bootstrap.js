@@ -6,7 +6,6 @@ var IcarusUtil = require('../../lib/util');
 var child_process = require('child_process');
 var https = require('https');
 var Q = require('q');
-var jsdom = require('jsdom');
 var AWS = require('aws-sdk');
 var path = require('path');
 var fs = require('fs');

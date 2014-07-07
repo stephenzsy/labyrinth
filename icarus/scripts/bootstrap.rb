@@ -20,8 +20,8 @@ OptionParser.new do |opts|
     options[:package_url] = v
   end
 
-  opts.on('--icarus-config-url URL', "Icarus Config URL") do |v|
-    options[:icarus_config_url] = v
+  opts.on('--icarus-config-path PATH', "Icarus Config URL") do |v|
+    options[:icarus_config_path] = v
   end
 
 end.parse!
@@ -29,6 +29,7 @@ end.parse!
 raise "Missing argument: --app-id" unless options[:app_id]
 raise "Missing argument: --app-deployment-dir" unless options[:app_dir]
 raise "Missing argument: --package-url" unless options[:package_url]
+raise "Missing argument: --icarus-config-path" unless options[:package_url]
 
 stdout_str, stderr_str, status = Open3.capture3('npm', 'install', options[:package_url], :chdir => options[:app_dir])
 puts stdout_str
@@ -42,7 +43,7 @@ end
 File.symlink(File.join(options[:app_dir], 'node_modules', options[:app_id]), app_symlink)
 
 puts "Preparing config ...."
-FileUtils.cp(options[:icarus_config_url], File.join(app_symlink, 'config'))
+FileUtils.ln_sf(options[:icarus_config_path], File.join(app_symlink, 'config', 'config.js'))
 
 puts "Preparing passenger files ...."
 app_temp_dir = File.join(app_symlink, 'tmp')
