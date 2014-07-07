@@ -30,28 +30,6 @@ if (Config.roles.icarus.bootstrap) {
                 throw new ValidationException("Null AppID");
         }
 
-        function expandIndent(indent) {
-            var whitespace = '';
-            for (var i = 0; i < indent; ++i) {
-                whitespace += '  ';
-            }
-            return whitespace;
-        }
-
-        function printStanza(stanza, indent, lines) {
-            for (var key in stanza) {
-                var value = stanza[key];
-                if (typeof(value) === 'object') {
-                    lines.push(expandIndent(indent) + key + " {");
-                    printStanza(value, indent + 1, lines);
-                    lines.push(expandIndent(indent) + "}");
-                } else {
-                    lines.push(expandIndent(indent) + key + ' ' + value + ";");
-                }
-            }
-            return lines;
-        }
-
         function sftp_write_file(server, path, content) {
             return new Q.Promise(function (resolve, reject, notify) {
                 ssh_connect(server, function (conn) {

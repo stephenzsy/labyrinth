@@ -71,6 +71,29 @@ var PackageUtil = require('../package-util');
 
         this.printConfig = printConfig;
 
+
+        function expandIndent(indent) {
+            var whitespace = '';
+            for (var i = 0; i < indent; ++i) {
+                whitespace += '  ';
+            }
+            return whitespace;
+        }
+
+        function printStanza(stanza, indent, lines) {
+            for (var key in stanza) {
+                var value = stanza[key];
+                if (typeof(value) === 'object') {
+                    lines.push(expandIndent(indent) + key + " {");
+                    printStanza(value, indent + 1, lines);
+                    lines.push(expandIndent(indent) + "}");
+                } else {
+                    lines.push(expandIndent(indent) + key + ' ' + value + ";");
+                }
+            }
+            return lines;
+        }
+
         this.beginBootstrapWorkflow = function (params) {
             var sshParams = {
                 host: params.server,
@@ -87,6 +110,8 @@ var PackageUtil = require('../package-util');
                 Bucket: Config.aws.s3.deploy.bucket,
                 Key: PackageUtil.getPackageS3Key('icarus', params.commitId),
                 Expires: 900});
+            var nginxConfig = printStanza(Config.nginx.stanza, 0, []).join("\n");
+            var nginxConfigRemotePath = '/var/app/_config/nginx/nginx.conf';
 
             return IcarusUtil.sshConnect(sshParams).then(function (conn) {
                 return IcarusUtil.sftp(conn).then(function (sftp) {
@@ -101,6 +126,12 @@ var PackageUtil = require('../package-util');
                         ws.end();
                     }
 
+                    function scpNginxConfig() {
+                        var ws = sftp.createWriteStream(nginxConfigRemotePath);
+                        ws.write(nginxConfig);
+                        ws.end();
+                    }
+
                     function remoteMkdir(path) {
                         return Q.ninvoke(sftp, 'mkdir', path);
                     }
@@ -109,11 +140,14 @@ var PackageUtil = require('../package-util');
                         .then(scpBootstrapScript, scpBootstrapScript) // copy bootstrap script to remote destination
                         .then(remoteMkdir('/var/app/_config'))
                         .then(remoteMkdir('/var/app/_config/icarus'), remoteMkdir('/var/app/_config/icarus'))
+                        .then(remoteMkdir('/var/app/_config/nginx'), remoteMkdir('/var/app/_config/nginx'))
                         .then(remoteMkdir('/var/app/_package'), remoteMkdir('/var/app/_package'))
                         .then(remoteMkdir('/var/app/_package/icarus'), remoteMkdir('/var/app/_package/icarus'))
-                        .then(scpConfig, scpConfig); // scpConfig
+                        .then(scpConfig, scpConfig) // scp Config
+                        .then(scpNginxConfig, scpNginxConfig); // scp Nginx Config
+
                 }).then(function () {
-                    return IcarusUtil.executeSshCommands(conn, [
+                    return IcarusUtil.executeSshCommands(conn, {pty: false}, [
                         // ['uname', '-a'],
                         // ['node', '--version'],
                         ['rbenv', 'global', '2.1.2'],
@@ -123,15 +157,21 @@ var PackageUtil = require('../package-util');
                             '--app-id', APP_ID,
                             '--app-deployment-dir', '/var/app/_package/icarus',
                             '--package-url', "'" + package_url + "'",
-                            '--icarus-config-path', configRemotePath
-                        ]
+                            '--icarus-config-path', configRemotePath,
+                            '--nginx-config-path', nginxConfigRemotePath
+                        ],
                     ]);
                 }).then(function (exitStatus) {
+                    console.log(exitStatus);
+                    return IcarusUtil.executeSshCommands(conn, {pty: true}, [
+                        ['sudo', 'service', 'nginx', 'restart']
+                    ]);
+                }).then(function (exitStatus) {
+                    console.log(exitStatus);
                     conn.end();
                     return exitStatus;
                 });
             }).then(function (exitStatus) {
-                console.log(exitStatus);
                 return 'ok'
             });
         }

@@ -117,13 +117,13 @@ function IcarusUtil() {
     };
 
     // SSH
-    this.executeSshCommands = function (conn, cmds) {
+    this.executeSshCommands = function (conn, opts, cmds) {
         var commands = cmds.map(function (cmd) {
             return cmd.join(' ');
         }).join(";\n");
-        log.info("Execute Commands:\n==============\n" + commands);
+        log.info("Execute Commands:\n" + commands);
         return Q.Promise(function (c, e, p) {
-            conn.exec(commands, function (err, stream) {
+            conn.exec(commands, opts, function (err, stream) {
                 var stdout = '';
                 var stderr = '';
                 var execCode = null;

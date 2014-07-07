@@ -24,12 +24,17 @@ OptionParser.new do |opts|
     options[:icarus_config_path] = v
   end
 
+  opts.on('--nginx-config-path PATH', "Nginx Config URL") do |v|
+    options[:nginx_config_path] = v
+  end
+
 end.parse!
 
 raise "Missing argument: --app-id" unless options[:app_id]
 raise "Missing argument: --app-deployment-dir" unless options[:app_dir]
 raise "Missing argument: --package-url" unless options[:package_url]
 raise "Missing argument: --icarus-config-path" unless options[:package_url]
+raise "Missing argument: --nginx-config-path" unless options[:package_url]
 
 stdout_str, stderr_str, status = Open3.capture3('npm', 'install', options[:package_url], :chdir => options[:app_dir])
 puts stdout_str
@@ -44,6 +49,12 @@ File.symlink(File.join(options[:app_dir], 'node_modules', options[:app_id]), app
 
 puts "Preparing config ...."
 FileUtils.ln_sf(options[:icarus_config_path], File.join(app_symlink, 'config', 'config.js'))
+
+puts "Preparing nginx config"
+FileUtils.ln_sf(options[:nginx_config_path], File.join('/opt/nginx/conf', 'nginx.conf'))
+if (File.exists? '/opt/nginx/html/index.html')
+  File.delete '/opt/nginx/html/index.html'
+end
 
 puts "Preparing passenger files ...."
 app_temp_dir = File.join(app_symlink, 'tmp')
