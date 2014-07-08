@@ -98,7 +98,7 @@
     });
 
     // Controller for single instance
-    app.controller('adminInstanceController', function ($scope, $AdminInstances, $route) {
+    app.controller('adminInstanceController', function ($scope, $AdminInstances, $AdminPackages, $route) {
         var instanceId = $route.current.params.instanceId;
 
         $scope.navs = [
@@ -108,12 +108,16 @@
         ];
 
         $scope.instanceId = instanceId;
+        $scope.instancePackages = [];
+
+        $AdminPackages.ListPackages().success(function (data) {
+            $scope.allPackages = data;
+        });
 
         $AdminInstances.ListPackages(instanceId).success(function (data) {
-            console.log(data);
+            $scope.instancePackages = data.Packages;
         });
     });
-
 
     app.directive('icarusInstancesList', function () {
         return {

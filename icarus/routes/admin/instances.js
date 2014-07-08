@@ -107,13 +107,41 @@ module.exports = router;
             var dynamodb = IcarusUtil.aws.getDynamoDbClient();
             var table = Config.aws.dynamodb.icarus.table;
             var instanceId = req.body.InstanceId;
+            var r = {
+                InstanceId: instanceId,
+                Packages: []
+            };
+
             dynamodb.getItem({
                 TableName: table,
                 Key: { 'key': { S: 'i#' + instanceId}}
             }, function (err, data) {
-                console.log(data);
+                if (err) {
+                    error(err);
+                    return;
+                }
+                if (data.Item) {
+                    if (data.Item.packages && data.Item.packages.SS) {
+                        r['Packages'] = data.Item.packages.SS;
+                    }
+                    callback(r);
+                } else {
+                    dynamodb.putItem({
+                        Item: {
+                            'key': { S: 'i#' + instanceId},
+                            'version': {N: '1'}
+                        },
+                        TableName: table,
+                        Expected: {'key': {Exists: false}}
+                    }, function (err, data) {
+                        if (err) {
+                            error(err);
+                            return;
+                        }
+                        callback(r);
+                    });
+                }
             });
-            callback('ok');
         }
     };
 
