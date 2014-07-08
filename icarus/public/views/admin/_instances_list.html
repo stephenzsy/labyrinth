@@ -16,7 +16,7 @@
             <tbody>
             <tr ng-repeat="instance in instances"
                 ng-class="{active: bootstrapInstance().InstanceId === instance.InstanceId}">
-                <td>{{instance.InstanceId}}</td>
+                <td><a class="btn btn-link" href="/admin/instance/{{instance.InstanceId}}">{{instance.InstanceId}}</a></td>
                 <td>{{instance.InstanceType}}</td>
                 <td>{{instance.State.Name}}</td>
                 <td><a class="btn btn-link" data-toggle="modal"

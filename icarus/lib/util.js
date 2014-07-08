@@ -87,6 +87,14 @@ function IcarusUtil() {
                 credentialProvider: getCredentialsProviderChain()
             });
         };
+
+        this.getDynamoDbClient = function () {
+            return new AWS.DynamoDB({
+                endpoint: new AWS.Endpoint(Config.aws.dynamodb.endpoint),
+                region: Config.aws.region,
+                credentialProvider: getCredentialsProviderChain()
+            });
+        };
     })();
 
     this.getActionHandler = function (actionHandlers) {

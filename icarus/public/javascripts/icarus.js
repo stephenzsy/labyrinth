@@ -14,12 +14,16 @@
                 }).when('/admin/instances/launch', {
                     templateUrl: 'views/admin/instances_launch.html',
                     controller: 'adminInstancesLaunchController'
+                }).when('/admin/instance/:instanceId',{
+                    templateUrl: 'views/admin/instance.html',
+                    controller: 'adminInstanceController'
                 }).when('/admin/bootstrap', {
                     templateUrl: 'views/admin/bootstrap.html',
                     controller: 'adminBootstrapController'
-                }).when('/packages',{
+                }).when('/packages', {
                     templateUrl: 'views/packages.html',
                     controller: 'packagesController'
+
                 }).otherwise({templateUrl: 'views/error.html'});
         });
     app.directive('icarusHeader', function () {
@@ -68,9 +72,6 @@
         return {
             ListRoles: function () {
                 return $http({method: 'POST', url: '/', data: {Action: 'ListRoles', AppId: 'icarus'}});
-            },
-            PassengerStatus: function () {
-                return $http({method: 'POST', url: '/', data: {Action: 'PassengerStatus'}});
             }
         }
     });

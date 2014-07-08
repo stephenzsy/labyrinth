@@ -102,6 +102,18 @@ module.exports = router;
                 }
                 callback(data);
             });
+        },
+        ListPackages: function (req, callback, error) {
+            var dynamodb = IcarusUtil.aws.getDynamoDbClient();
+            var table = Config.aws.dynamodb.icarus.table;
+            var instanceId = req.body.InstanceId;
+            dynamodb.getItem({
+                TableName: table,
+                Key: { 'key': { S: 'i#' + instanceId}}
+            }, function (err, data) {
+                console.log(data);
+            });
+            callback('ok');
         }
     };
 
