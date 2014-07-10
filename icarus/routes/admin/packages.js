@@ -90,7 +90,7 @@ var PackageUtil = require('./package-util');
         if (!/^[A-Fa-f0-9]+$/.test(commitId)) {
             throw new IcarusUtil.ValidationException("Invalid CommitId: " + commitId);
         }
-        return spawn('git', ['show', '-s', commitId], {cwd: Config.packages[appId].repo.path })
+        return spawn('git', ['show', '-s', commitId], {cwd: Config.packages[appId].build['git-archive'].path })
             .then(function (result) {
                 if (result.code != 0) {
                     throw new IcarusUtil.ValidationException("Invalid CommitID: " + commitId);
@@ -164,7 +164,7 @@ var PackageUtil = require('./package-util');
                 .then(function (commitId) {
                     gCommitId = commitId;
                     outputPath = path.join(Config.build.path, PackageUtil.getPackageFilename(appId, commitId));
-                    return spawn('git', ['archive', commitId, '--format=tar.gz', '--output', outputPath, '--prefix', appId + '/'], {cwd: Config.packages[appId].repo.path});
+                    return spawn('git', ['archive', commitId, '--format=tar.gz', '--output', outputPath, '--prefix', appId + '/'], {cwd: Config.packages[appId].build['git-archive'].path });
                 }).then(function (result) {
                     if (result.code != 0)
                         throw result;

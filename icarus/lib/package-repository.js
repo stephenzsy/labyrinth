@@ -3,17 +3,24 @@ var IcarusUtil = require('./util');
 var Q = require('q');
 var child_process = require('child_process');
 var path = require('path');
+var fs = require('fs');
 
 'use strict';
 
 module.exports = function () {
     var s3 = IcarusUtil.aws.getS3Client();
 
-    function getPackageS3Key(appId, version) {
-        if (Config.packages[appId].versionSchema === 'GitCommitId') {
-            return Config.aws.s3.deploy.prefix + appId + '/commit/' + appId + '-' + version + '.tar.gz';
+    function getPackageS3Key(appId, commitId) {
+        var versionConfig = Config.packages[appId].version;
+        var v = '';
+        if (versionConfig.secondary) {
+            if (versionConfig.secondary === 'git') {
+                v = v + commitId;
+            } else {
+                throw "Invalid secondary version";
+            }
         }
-        return '';
+        return Config.aws.s3.deploy.prefix + appId + '/commit/' + appId + '-' + v + '.tar.gz';
     }
 
     function describePackageCommits(appId, commits) {
