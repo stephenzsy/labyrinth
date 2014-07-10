@@ -2,34 +2,3 @@
 <div class="page-header">
     <h1>Package: {{packageId}}</h1>
 </div>
-<div>
-    <h2>Packages</h2>
-
-    <table class="table">
-        <thead>
-        <th>Package ID</th>
-        <th>Package Name</th>
-        <th>Deployed Version</th>
-        <th>Latest Version</th>
-        <th>Details</th>
-        </thead>
-        <tbody>
-        <tr ng-repeat="(packageId, package_) in allPackages">
-            <td><a class="btn-link" href="/admin/package/{{packageId}}">{{packageId}}</a></td>
-            <td>{{package_.name}}</td>
-            <td></td>
-            <td></td>
-            <td>
-                <a class="btn-link" data-toggle="modal" data-target=".modal-package[data-package-id='{{packageId}}']">Details</a>
-
-                <div icarus-admin-key-value-modal="package_"
-                     class="modal-package"
-                     data-package-id="{{packageId}}"
-                     title="Package: {{packageId}}"></div>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-</div>
-

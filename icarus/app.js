@@ -33,6 +33,7 @@ app.use('/api', api);
 app.use('/admin/packages', adminPackages);
 app.use('/admin/bootstrap', adminBootstrap);
 app.use('/admin/instances', adminInstances);
+app.use('/status', require('./routes/status'));
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {

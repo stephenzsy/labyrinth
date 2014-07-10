@@ -3,7 +3,9 @@
 
     angular.module('icarus')
         .controller('indexController', function ($scope, $Icarus) {
-            $scope.ready = true;
+            $Icarus.GetStatus().success(function (data) {
+                $scope.status = data;
+            });
         });
 
     /*

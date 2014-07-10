@@ -74,6 +74,9 @@
         return {
             ListRoles: function () {
                 return $http({method: 'POST', url: '/', data: {Action: 'ListRoles', AppId: 'icarus'}});
+            },
+            GetStatus: function () {
+                return $http({method: 'POST', url: '/status', data: {Action: 'GetStatus'}});
             }
         }
     });
