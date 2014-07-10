@@ -2,6 +2,7 @@ var Config = require('../config/config');
 var IcarusUtil = require('./util');
 var Q = require('q');
 var child_process = require('child_process');
+var path = require('path');
 
 'use strict';
 
@@ -37,7 +38,7 @@ module.exports = function () {
 
     this.getPackageRepoCommits = function (appId) {
         var p = Config.packages[appId];
-        return IcarusUtil.spawnCommand('git', ['log', '-5', '--pretty=format:%h,%cd,%s'], {cwd: p.repo.path})
+        return IcarusUtil.spawnCommand('git', ['log', '-5', '--pretty=format:%h,%cd,%s'], {cwd: p.build['git-archive'].path})
             .then(function (result) {
                 var stdout = result.stdout;
                 var commits = [];
