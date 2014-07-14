@@ -117,6 +117,14 @@
         $AdminInstances.ListPackages(instanceId).success(function (data) {
             $scope.instancePackages = data.Packages;
         });
+
+        $AdminInstances.DescribeInstances({InstanceIds: [instanceId]}).success(function (data) {
+            $scope.instanceDescription = data[0];
+            $AdminInstances.GetServerStatus("http://" + $scope.instanceDescription.PublicIpAddress + ":9000/status")
+                .success(function (data) {
+                    $scope.instanceStatus = data;
+                });
+        });
     });
 
     app.directive('icarusInstancesList', function () {
@@ -143,8 +151,8 @@
             GetEc2Configuration: function () {
                 return $http({method: 'POST', url: '/admin/instances/', data: {Action: 'GetEc2Configuration'}});
             },
-            DescribeInstances: function () {
-                return $http({method: 'POST', url: '/admin/instances/ec2/DescribeInstances'});
+            DescribeInstances: function (params) {
+                return $http({method: 'POST', url: '/admin/instances/ec2/DescribeInstances', data: params});
             },
             DescribeImages: function () {
                 return $http({method: 'POST', url: '/admin/instances/ec2/DescribeImages'});
@@ -160,6 +168,9 @@
             },
             ListPackages: function (instanceId) {
                 return $http({method: 'POST', url: '/admin/instances/', data: {Action: 'ListPackages', InstanceId: instanceId}});
+            },
+            GetServerStatus: function (url) {
+                return $http({method: 'POST', url: url, data: {Action: 'GetStatus'}});
             }
         }
     });

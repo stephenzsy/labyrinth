@@ -160,7 +160,11 @@ module.exports = router;
 
     router.post('/ec2/DescribeInstances', function (req, res) {
         var ec2 = IcarusUtil.aws.getEc2Client();
-        ec2.describeInstances({}, function (err, data) {
+        var params = req.body;
+        if(!params) {
+            params = {};
+        }
+        ec2.describeInstances(params, function (err, data) {
             if (err) {
                 res.send(400, err);
                 return;

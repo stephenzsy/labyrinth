@@ -10,3 +10,7 @@
     padding: 1em;
     border-bottom: solid thin #d3d3d3;
 }
+
+.inline-block {
+    display: inline-block;
+}
