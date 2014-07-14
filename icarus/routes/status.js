@@ -23,8 +23,9 @@ var fs = require('fs');
 
     router.post('/', APISupport.getActionHandler(ActionHandlers));
     router.options('/', function (req, res) {
-        res.header('Access-Control-Allow-Origin', '*')
+        res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Methods', 'POST');
+        res.header('Access-Control-Allow-Headers', 'content-type');
         req.send(200);
     });
 
