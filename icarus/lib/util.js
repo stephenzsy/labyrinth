@@ -3,7 +3,7 @@ var Config = require('../config/config');
 var AWS = require('aws-sdk');
 var child_process = require('child_process');
 var Q = require('q');
-var log = require('log4js').getLogger('IcarusUtils');
+var log = require('log4js').getLogger('IcarusUtil');
 var Connection = require('ssh2');
 
 
@@ -95,6 +95,13 @@ function IcarusUtil() {
                 credentialProvider: getCredentialsProviderChain()
             });
         };
+
+        this.getRoute53Client = function () {
+            return new AWS.Route53({
+                endpoint: new AWS.Endpoint(Config.aws.route53.endpoint),
+                credentialProvider: getCredentialsProviderChain()
+            });
+        }
     })();
 
     this.getActionHandler = function (actionHandlers) {

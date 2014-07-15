@@ -1,4 +1,5 @@
 var express = require('express');
+
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
@@ -35,6 +36,8 @@ app.use('/api', api);
 app.use('/admin/packages', adminPackages);
 app.use('/admin/bootstrap', adminBootstrap);
 app.use('/admin/instances', adminInstances);
+app.use('/admin/dns', require('./routes/admin/dns'));
+
 app.use('/status', require('./routes/status'));
 
 

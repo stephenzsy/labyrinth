@@ -23,6 +23,9 @@
                 }).when('/admin/package/:packageId', {
                     templateUrl: 'views/admin/package.html',
                     controller: 'adminPackageController'
+                }).when('/admin/dns', {
+                    templateUrl: 'views/admin/dns.html',
+                    controller: 'adminDnsController'
                 }).when('/packages', {
                     templateUrl: 'views/packages.html',
                     controller: 'packagesController'
