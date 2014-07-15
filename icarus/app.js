@@ -28,6 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //app.use('/', routes);
+app.use(cors());
 app.use('/', icarus);
 app.use('/bootstrap', bootstrap);
 app.use('/api', api);
@@ -36,7 +37,6 @@ app.use('/admin/bootstrap', adminBootstrap);
 app.use('/admin/instances', adminInstances);
 app.use('/status', require('./routes/status'));
 
-app.options('*', cors());
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {
