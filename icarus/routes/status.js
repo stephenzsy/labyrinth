@@ -5,7 +5,6 @@ var APISupport = require('./api-support');
 var router = express.Router();
 var path = require('path');
 var fs = require('fs');
-var cors = require('cors');
 
 (function () {
     'use strict';
@@ -23,7 +22,6 @@ var cors = require('cors');
     };
 
     router.post('/', APISupport.getActionHandler(ActionHandlers));
-    router.options('/', cors());
 
     module.exports = router;
 })();

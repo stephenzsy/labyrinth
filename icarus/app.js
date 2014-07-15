@@ -14,6 +14,7 @@ var adminPackages = require('./routes/admin/packages');
 var adminBootstrap = require('./routes/admin/bootstrap');
 var adminInstances = require('./routes/admin/instances');
 var app = express();
+var cors = require('cors');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,6 +35,8 @@ app.use('/admin/packages', adminPackages);
 app.use('/admin/bootstrap', adminBootstrap);
 app.use('/admin/instances', adminInstances);
 app.use('/status', require('./routes/status'));
+
+app.options('*', cors());
 
 /// catch 404 and forward to error handler
 app.use(function (req, res, next) {
