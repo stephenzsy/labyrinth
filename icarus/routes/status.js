@@ -5,6 +5,7 @@ var APISupport = require('./api-support');
 var router = express.Router();
 var path = require('path');
 var fs = require('fs');
+var cors = require('cors');
 
 (function () {
     'use strict';
@@ -22,12 +23,7 @@ var fs = require('fs');
     };
 
     router.post('/', APISupport.getActionHandler(ActionHandlers));
-    router.options('/', function (req, res) {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'POST');
-        res.header('Access-Control-Allow-Headers', 'content-type');
-        req.send(200);
-    });
+    router.options('/', cors());
 
     module.exports = router;
 })();
