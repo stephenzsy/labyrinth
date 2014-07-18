@@ -1,5 +1,6 @@
 var path = require('path');
 var Q = require('q');
+var fs = require('fs');
 
 var Config = require('../../../config/config');
 var IcarusUtil = require('../../../lib/util');
@@ -102,6 +103,10 @@ var PackageUtil = require('../package-util');
                 privateKey: require('fs').readFileSync(Config.aws.ec2.keyPath)
             };
             var bootstrapScriptPath = path.resolve('scripts/bootstrap.rb');
+            var sign_certificate_path = path.resolve('scripts/sign_certificate.rb');
+            var csr_remote_path = path.join('/var/app', '.keys', 'csr.pem');
+            var cert_remote_path = path.join('/var/app', '.keys', 'cert.pem');
+            var ca_cert_remote_path = path.join('/var/app', '.keys', 'rootCA.pem');
             var bootstrapScriptRemotePath = path.join('/var/app/_bootstrap', 'bootstrap.rb');
 
             var configRemotePath = path.join('/var/app/_config/icarus', 'config.js');
@@ -123,13 +128,13 @@ var PackageUtil = require('../package-util');
                         var ws = sftp.createWriteStream(configRemotePath);
                         var config = printConfig();
                         ws.write(config);
-                        ws.end();
+                        ws.close();
                     }
 
                     function scpNginxConfig() {
                         var ws = sftp.createWriteStream(nginxConfigRemotePath);
                         ws.write(nginxConfig);
-                        ws.end();
+                        ws.close();
                     }
 
                     function remoteMkdir(path) {
@@ -158,11 +163,50 @@ var PackageUtil = require('../package-util');
                             '--app-deployment-dir', '/var/app/_package/icarus',
                             '--package-url', "'" + package_url + "'",
                             '--icarus-config-path', configRemotePath,
-                            '--nginx-config-path', nginxConfigRemotePath
+                            '--nginx-config-path', nginxConfigRemotePath,
+                            '--cert-subject', '"' + Config.security.certSubject + '"'
                         ],
                     ]);
                 }).then(function (exitStatus) {
                     console.log(exitStatus);
+                    return IcarusUtil.sftp(conn).then(function (sftp) {
+                        function downloadCSR() {
+                            var result = '';
+                            var r = sftp.createReadStream(csr_remote_path);
+
+                            return Q.Promise(function (c, e, p) {
+                                r.on('readable', function () {
+                                    var chunk;
+                                    while (null !== (chunk = r.read())) {
+                                        result += chunk;
+                                    }
+                                });
+                                r.on('end', function () {
+                                    c(result);
+                                })
+                            });
+
+                        }
+
+                        function scpCert(path, content) {
+                            var ws = sftp.createWriteStream(path);
+                            ws.write(content);
+                            ws.close();
+                        }
+
+                        return downloadCSR()
+                            .then(function (csr) {
+                                return IcarusUtil.spawnCommand(sign_certificate_path, [
+                                    '--csr-content', csr,
+                                    '--ca-cert-path', Config.security.caCertPath,
+                                    '--ca-key-path', Config.security.caPKeyPath
+                                ]);
+                            }).then(function (status) {
+                                scpCert(cert_remote_path, status.stdout);
+                                scpCert(ca_cert_remote_path, fs.readFileSync(Config.security.caCertPath))
+                            });
+                    });
+                }).then(function () {
                     return IcarusUtil.executeSshCommands(conn, {pty: true}, [
                         ['sudo', 'service', 'nginx', 'restart']
                     ]);

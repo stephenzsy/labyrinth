@@ -2,24 +2,28 @@
 var config = {
     aws: {
         credentials: {
-            accessKeyId: 'TO_BE_CONFIGURED',
-            secretAccessKey: 'TO_BE_CONFIGURED'
+            accessKeyId: 'String',
+            secretAccessKey: 'String'
         },
-        region: 'TO_BE_CONFIGURED',
+        region: 'String',
         ec2: {
-            endpoint: 'TO_BE_CONFIGURED'
+            endpoint: 'Endpoint'
         },
         s3: {
-            endpoint: 'TO_BE_CONFIGURED'
+            endpoint: 'Endpoint'
         }
     },
     apps: {
         appId: {
-            localPath: 'TO_BE_CONFIGURED',
+            localPath: 'Path',
             artifact: {
-                artifactDirectory: 'TO_BE_CONFIGURED'
+                artifactDirectory: 'Path'
             }
         }
+    }, security: {
+        certSubject: 'String',
+        caCertPath: 'Path',
+        caPKeyPath: 'Path'
     }
 };
 
