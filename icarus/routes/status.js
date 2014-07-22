@@ -21,7 +21,7 @@ var fs = require('fs');
         }
     };
 
-    router.post('/', APISupport.getActionHandler(ActionHandlers));
+    router.post('/', APISupport.getActionHandler(ActionHandlers, {logHeaders: true}));
 
     module.exports = router;
 })();

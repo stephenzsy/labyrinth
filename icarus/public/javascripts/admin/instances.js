@@ -118,12 +118,8 @@
             $scope.instancePackages = data.Packages;
         });
 
-        $AdminInstances.DescribeInstances({InstanceIds: [instanceId]}).success(function (data) {
-            $scope.instanceDescription = data[0];
-            $AdminInstances.GetServerStatus("http://" + $scope.instanceDescription.PublicIpAddress + ":9000/status")
-                .success(function (data) {
-                    $scope.instanceStatus = data;
-                });
+        $AdminInstances.request({Action: 'GetServerStates', InstanceIds: [instanceId], RemoteStatus: true}).success(function (data) {
+            $scope.instanceState = data[0];
         });
     });
 
@@ -168,9 +164,6 @@
             },
             ListPackages: function (instanceId) {
                 return $http({method: 'POST', url: '/admin/instances/', data: {Action: 'ListPackages', InstanceId: instanceId}});
-            },
-            GetServerStatus: function (url) {
-                return $http({method: 'POST', url: url, data: {Action: 'GetStatus'}});
             }
         }
     });

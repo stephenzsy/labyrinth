@@ -6,7 +6,7 @@
          data-target=".modal-instance[data-instance-id='{{instanceId}}']">Details
     </div>
     <div ng-if="instanceDescription"
-         icarus-admin-key-value-modal="instanceDescription"
+         icarus-admin-key-value-modal="instanceState"
          class="modal-instance"
          data-instance-id="{{instanceId}}"
          title="Instance: {{instanceId}}"></div>
@@ -17,19 +17,19 @@
     <div class="container">
         <div class="row">
             <div class="col-sm-2"><strong>Public DNS Name</strong></div>
-            <div class="col-sm-10">{{instanceDescription.PublicDnsName}}</div>
+            <div class="col-sm-10">{{instanceState.PublicDnsName}}</div>
         </div>
         <div class="row">
             <div class="col-sm-2"><strong>Public IP</strong></div>
-            <div class="col-sm-10">{{instanceDescription.PublicIpAddress}}</div>
+            <div class="col-sm-10">{{instanceState.PublicIpAddress}}</div>
         </div>
         <div class="row">
             <div class="col-sm-2"><strong>Icarus Portal</strong></div>
-            <div class="col-sm-10"><a href="http://{{instanceDescription.PublicIpAddress}}:9000">http://{{instanceDescription.PublicIpAddress}}:9000</a></div>
+            <div class="col-sm-10"><a href="https://{{instanceState.PublicIpAddress}}:9443">https://{{instanceState.PublicIpAddress}}:9443</a></div>
         </div>
         <div class="row">
             <div class="col-sm-2"><strong>Version</strong></div>
-            <div class="col-sm-10">{{instanceStatus.version}}</div>
+            <div class="col-sm-10">{{instanceState.version}}</div>
         </div>
     </div>
 </div>

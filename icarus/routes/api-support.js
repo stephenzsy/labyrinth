@@ -17,8 +17,11 @@ var log = require('log4js').getLogger('APISupport');
     module.exports = {
         ValidationException: ValidationException,
 
-        getActionHandler: function (actionHandlers) {
+        getActionHandler: function (actionHandlers, options) {
             return function (req, res) {
+                if (options && options.logHeaders) {
+                    log.debug("REQH: " + JSON.stringify(req.headers));
+                }
                 log.debug("REQ: " + JSON.stringify(req.body));
                 try {
                     var handler = validateAction(req, actionHandlers);

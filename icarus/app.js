@@ -15,7 +15,6 @@ var adminPackages = require('./routes/admin/packages');
 var adminBootstrap = require('./routes/admin/bootstrap');
 var adminInstances = require('./routes/admin/instances');
 var app = express();
-var cors = require('cors');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -29,7 +28,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //app.use('/', routes);
-app.use(cors());
 app.use('/', icarus);
 app.use('/bootstrap', bootstrap);
 app.use('/api', api);
