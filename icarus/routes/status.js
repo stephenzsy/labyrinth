@@ -5,6 +5,7 @@ var APISupport = require('./api-support');
 var router = express.Router();
 var path = require('path');
 var fs = require('fs');
+var Config = require('../config/config');
 
 (function () {
     'use strict';
@@ -21,7 +22,15 @@ var fs = require('fs');
         }
     };
 
-    router.post('/', APISupport.getActionHandler(ActionHandlers, {logHeaders: true}));
+    var authParams = null;
+    if(!Config.roles.icarus.admin) {
+        authParams =  {
+            required: true,
+            subjectDN: Config.security.adminClientCertSubjectDN
+        };
+    }
+
+    router.post('/', APISupport.getActionHandler(ActionHandlers, {logHeaders: true, auth: authParams}));
 
     module.exports = router;
 })();

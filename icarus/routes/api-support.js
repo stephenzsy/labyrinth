@@ -18,9 +18,22 @@ var log = require('log4js').getLogger('APISupport');
         ValidationException: ValidationException,
 
         getActionHandler: function (actionHandlers, options) {
+            var opt = {};
+            if (options) {
+                opt = options;
+            }
             return function (req, res) {
-                if (options && options.logHeaders) {
+                if (opt.logHeaders) {
                     log.debug("REQH: " + JSON.stringify(req.headers));
+                }
+                if (opt.auth && opt.auth.required) {
+                    if (req.get('x-ssl-client-verify') === 'SUCCESS' && opt.auth.subjectDN === req.get('x-ssl-client-s-dn')) {
+                        log.debug("REQ: Authenticate Success");
+                    } else {
+                        log.debug("REQ: Authenticate Fail");
+                        res.send(403, 'Access Denied.');
+                        return;
+                    }
                 }
                 log.debug("REQ: " + JSON.stringify(req.body));
                 try {

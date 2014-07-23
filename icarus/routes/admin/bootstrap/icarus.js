@@ -49,7 +49,11 @@ var PackageUtil = require('../package-util');
                         endpoint: Config.aws.s3.endpoint,
                         deploy: Config.aws.s3.deploy
                     }
-                }};
+                },
+                security: {
+                    adminClientCertSubjectDN: Config.security.adminClientCertSubjectDN
+                }
+            };
             return "module.exports=" + JSON.stringify(config) + ";\n";
         }
 
