@@ -1,6 +1,7 @@
 var path = require('path');
 var Q = require('q');
 var fs = require('fs');
+var util = require('util');
 
 var Config = require('../../../config/config');
 var IcarusUtil = require('../../../lib/util');
@@ -84,7 +85,17 @@ var PackageUtil = require('../package-util');
         function printStanza(stanza, indent, lines) {
             for (var key in stanza) {
                 var value = stanza[key];
-                if (typeof(value) === 'object') {
+                if (util.isArray(value)) {
+                    value.forEach(function (entry) {
+                        if (typeof(entry) === 'object') {
+                            lines.push(expandIndent(indent) + key + " {");
+                            printStanza(entry, indent + 1, lines);
+                            lines.push(expandIndent(indent) + "}");
+                        } else {
+                            lines.push(expandIndent(indent) + key + ' ' + entry + ";");
+                        }
+                    });
+                } else if (typeof(value) === 'object') {
                     lines.push(expandIndent(indent) + key + " {");
                     printStanza(value, indent + 1, lines);
                     lines.push(expandIndent(indent) + "}");
@@ -196,10 +207,17 @@ var PackageUtil = require('../package-util');
 
                         return downloadCSR()
                             .then(function (csr) {
+                                function getLatestSerial() {
+                                    var latest = parseInt(fs.readFileSync(Config.security.latestSerialPath));
+                                    fs.writeFileSync(Config.security.latestSerialPath, (latest + 1).toString());
+                                    return latest;
+                                }
+
                                 return IcarusUtil.spawnCommand(sign_certificate_path, [
                                     '--csr-content', csr,
                                     '--ca-cert-path', Config.security.caCertPath,
-                                    '--ca-key-path', Config.security.caPKeyPath
+                                    '--ca-key-path', Config.security.caPKeyPath,
+                                    '--serial', getLatestSerial() + 1
                                 ]);
                             }).then(function (status) {
                                 scpCert(cert_remote_path, status.stdout);

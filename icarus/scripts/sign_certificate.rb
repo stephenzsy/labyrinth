@@ -19,11 +19,16 @@ OptionParser.new do |opts|
   opts.on('--ca-key-path PATH', 'CA Key Path') do |v|
     options[:ca_key_path] = v
   end
+
+  opts.on('--serial SERIAL', 'Certificate Serial') do |v|
+    options[:serial] = v
+  end
 end.parse!
 
 raise "Missing argument: --csr-content" unless options[:csr_content]
 raise "Missing argument: --ca-cert-path" unless options[:ca_cert_path]
 raise "Missing argument: --ca-key-path" unless options[:ca_key_path]
+raise "Missing argument: --serial" unless options[:serial]
 
 csr = OpenSSL::X509::Request.new(options[:csr_content])
 raise 'CSR can not be verified' unless csr.verify csr.public_key
@@ -32,7 +37,7 @@ ca_cert = OpenSSL::X509::Certificate.new File.read(options[:ca_cert_path])
 ca_key = OpenSSL::PKey::RSA.new File.read(options[:ca_key_path])
 
 csr_cert = OpenSSL::X509::Certificate.new
-csr_cert.serial = 0
+csr_cert.serial = options[:serial].to_i
 csr_cert.version = 2
 csr_cert.not_before = Time.now
 csr_cert.not_after = Time.now + 86400 * 180

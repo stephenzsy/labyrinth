@@ -69,7 +69,7 @@ begin
 
   dh = OpenSSL::PKey::DH.new 1024
   File.open(File.join(keys_dir, 'dhparam.pem'), 'w') do |io|
-    io.write dh.to_pem
+    io.write(dh.to_pem)
   end
 end
 
