@@ -38,6 +38,11 @@
         </table>
     </div>
 </div>
+<hr>
+<div ng-show="roles.develop">
+    <h2>Developer Instances</h2>
+</div>
+<hr>
 <div>
     <h2>Instances</h2>
 
@@ -53,8 +58,14 @@
 <div>
     <h2>Debug</h2>
     <ul>
-        <li>Code <pre>{{bootstrapTest.code}}</pre></li>
-        <li>stdout <pre>{{bootstrapTest.stdout}}</pre></li>
-        <li>stderr <pre>{{bootstrapTest.stderr}}</pre></li>
+        <li>Code
+            <pre>{{bootstrapTest.code}}</pre>
+        </li>
+        <li>stdout
+            <pre>{{bootstrapTest.stdout}}</pre>
+        </li>
+        <li>stderr
+            <pre>{{bootstrapTest.stderr}}</pre>
+        </li>
     </ul>
 </div>

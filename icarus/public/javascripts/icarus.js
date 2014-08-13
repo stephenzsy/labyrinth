@@ -1,36 +1,36 @@
 (function () {
     'use strict';
 
-    var app = angular.module('icarus', ['ngRoute'])
-        .config(function ($routeProvider, $locationProvider) {
-            $locationProvider.html5Mode(true);
-            $routeProvider
-                .when('/', {
-                    templateUrl: 'views/index.html',
-                    controller: 'indexController'
-                }).when('/admin/instances', {
-                    templateUrl: 'views/admin/instances.html',
-                    controller: 'adminInstancesController'
-                }).when('/admin/instances/launch', {
-                    templateUrl: 'views/admin/instances_launch.html',
-                    controller: 'adminInstancesLaunchController'
-                }).when('/admin/instance/:instanceId', {
-                    templateUrl: 'views/admin/instance.html',
-                    controller: 'adminInstanceController'
-                }).when('/admin/bootstrap', {
-                    templateUrl: 'views/admin/bootstrap.html',
-                    controller: 'adminBootstrapController'
-                }).when('/admin/package/:packageId', {
-                    templateUrl: 'views/admin/package.html',
-                    controller: 'adminPackageController'
-                }).when('/admin/dns', {
-                    templateUrl: 'views/admin/dns.html',
-                    controller: 'adminDnsController'
-                }).when('/packages', {
-                    templateUrl: 'views/packages.html',
-                    controller: 'packagesController'
-                }).otherwise({templateUrl: 'views/error.html'});
-        });
+    var app = angular.module('icarus', ['ngRoute']);
+    app.config(function ($routeProvider, $locationProvider) {
+        $locationProvider.html5Mode(true);
+        $routeProvider
+            .when('/', {
+                templateUrl: 'views/index.html',
+                controller: 'indexController'
+            }).when('/admin/instances', {
+                templateUrl: 'views/admin/instances.html',
+                controller: 'adminInstancesController'
+            }).when('/admin/instances/launch', {
+                templateUrl: 'views/admin/instances_launch.html',
+                controller: 'adminInstancesLaunchController'
+            }).when('/admin/instance/:instanceId', {
+                templateUrl: 'views/admin/instance.html',
+                controller: 'adminInstanceController'
+            }).when('/admin/bootstrap', {
+                templateUrl: 'views/admin/bootstrap.html',
+                controller: 'adminBootstrapController'
+            }).when('/admin/package/:packageId', {
+                templateUrl: 'views/admin/package.html',
+                controller: 'adminPackageController'
+            }).when('/admin/dns', {
+                templateUrl: 'views/admin/dns.html',
+                controller: 'adminDnsController'
+            }).when('/packages', {
+                templateUrl: 'views/packages.html',
+                controller: 'packagesController'
+            }).otherwise({templateUrl: 'views/error.html'});
+    });
     app.directive('icarusHeader', function () {
         return {
             restrict: 'A',
@@ -69,6 +69,7 @@
         };
     });
     app.controller('mainController', function ($scope, $Icarus) {
+        var mainController = this;
         $Icarus.ListRoles().success(function (roles) {
             $scope.roles = roles;
         });

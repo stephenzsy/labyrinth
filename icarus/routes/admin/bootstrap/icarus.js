@@ -159,6 +159,7 @@ var PackageUtil = require('../package-util');
                     return Q.ninvoke(remoteMkdir('/var/app/_bootstrap'))
                         .then(scpBootstrapScript, scpBootstrapScript) // copy bootstrap script to remote destination
                         .then(remoteMkdir('/var/app/_config'))
+                        .then(remoteMkdir('/var/app/_logs/icarus'), remoteMkdir('/var/app/_logs/icarus'))
                         .then(remoteMkdir('/var/app/_config/icarus'), remoteMkdir('/var/app/_config/icarus'))
                         .then(remoteMkdir('/var/app/_config/nginx'), remoteMkdir('/var/app/_config/nginx'))
                         .then(remoteMkdir('/var/app/_package'), remoteMkdir('/var/app/_package'))
