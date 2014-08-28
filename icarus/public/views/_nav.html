@@ -1,9 +1,0 @@
-<div>
-    <ol class="breadcrumb">
-        <li><a href="/">Home</a></li>
-        <li ng-repeat="element in navs" ng-class="{active: element.active}">
-            <span ng-if="element.noLink">{{element.text}}</span>
-            <a ng-if="!element.noLink" ng-href="{{element.href}}">{{element.text}}</a>
-        </li>
-    </ol>
-</div>

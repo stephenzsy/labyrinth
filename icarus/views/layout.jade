@@ -1,19 +1,7 @@
 doctype html
 html
-    head
-        | <base href="/"/>
-        | <title>Icarus</title>
-        | <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-        | <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-        | <script type="text/javascript" src="/jquery/latest/jquery.min.js"></script>
-        | <script type="text/javascript" src="/bootstrap/latest/js/bootstrap.min.js"></script>
-        | <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.11/angular.min.js"></script>
-        | <script type="text/javascript" src="/angular/latest/angular-route.min.js"></script>
-        | <script type="text/javascript" src="/javascripts/icarus.js"></script>
-        block scripts
-
-    body.container(ng-app="icarus")
-        div(ng-controller="headerController")
-            div(my-header)
-        block content
-
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    block content

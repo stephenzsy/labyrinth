@@ -1,21 +1,18 @@
 {
     "name": "icarus",
-    "version": "0.0.12",
+    "version": "0.0.1",
     "private": true,
     "scripts": {
         "start": "node ./bin/www"
     },
     "dependencies": {
-        "express": "~4.3.2",
-        "static-favicon": "~1.0.0",
-        "morgan": "~1.0.0",
-        "cookie-parser": "~1.0.1",
-        "body-parser": "~1.0.0",
-        "debug": "~0.7.4",
-        "jade": "~1.3.0",
-        "aws-sdk": ">=2.0.7",
-        "ssh2": ">=0.2.24",
-        "q": "~1.0.1",
-        "log4js": "~0.6.14"
+        "express": "~4.8.5",
+        "serve-favicon": "~2.1.0",
+        "morgan": "~1.2.3",
+        "cookie-parser": "~1.3.2",
+        "body-parser": "~1.6.5",
+        "debug": "~1.0.4",
+        "aws-sdk": "2.0.15",
+        "jade": "~1.5.0"
     }
 }

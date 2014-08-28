@@ -6,7 +6,7 @@ var path = require('path');
     'use strict';
     var INDEX_PATH = path.resolve('public/index.html');
 
-    router.get(/^(.*)$/, function (req, res) {
+    router.post(/^(.*)$/, function (req, res) {
         res.sendfile(INDEX_PATH);
     });
 })();
