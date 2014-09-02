@@ -1,3 +1,8 @@
-/**
- * Created by stephen on 8/28/14.
- */
+module.exports = function ActionHandler(name, handler, exceptions) {
+
+    this.action_name = name;
+
+    this.handle_action = handler;
+
+    this.exceptions = exceptions;
+};

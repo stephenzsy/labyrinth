@@ -13,11 +13,20 @@
                 controller: 'packageManagerController'
             }).otherwise({templateUrl: 'views/error.html'});
     });
+
     app.controller('mainController', function ($scope) {
     });
+
     app.service('API', function ($http) {
         return function (service, action, params) {
-            return $http({method: 'POST', url: '/' + service, data: params});
+            return $http({
+                method: 'POST',
+                url: '/' + service,
+                data: params,
+                headers: {
+                    'x-icarus-action': action
+                }
+            });
         };
     });
 })();

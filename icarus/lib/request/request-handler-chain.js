@@ -26,13 +26,13 @@ module.exports = function RequestHandlerChain(chainOfHandlers) {
      * @param index
      */
     function chain_handle_request(context, index) {
-        if (index > chain_length) {
+        if (index >= chain_length) {
             return;
         }
         var handler = chain[index];
         try {
             handler.handle_message(context);
-            apply_chain(context, index + 1);
+            chain_handle_request(context, index + 1);
         } catch (e) {
             handler.handle_fault(context, e);
         } finally {
