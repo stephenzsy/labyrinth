@@ -1,8 +1,17 @@
-module.exports = function ActionHandler(name, handler, exceptions) {
+'use strict';
 
-    this.action_name = name;
-
+module.exports = function ActionHandler(handler, opt) {
     this.handle_action = handler;
 
-    this.exceptions = exceptions;
+    var modelSpec = require(opt.model.path);
+
+    this.validateInput = function validateInput(input) {
+
+    };
+
+    this.handleAction = handler;
+
+    this.handleException = function handleException(exception) {
+
+    }
 };

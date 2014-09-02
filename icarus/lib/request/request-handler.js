@@ -2,15 +2,15 @@
 
 module.exports = function RequestHandler() {
 
-    this.handle_message = function handle_message(context) {
+    this.handleMessage = function (context) {
         // do nothing
     };
 
-    this.handle_fault = function handle_fault(context, fault) {
+    this.handleFault = function (context, fault) {
         // do nothing
     };
 
-    this.close = function close(context) {
+    this.close = function (context) {
         // do nothing
     };
 };

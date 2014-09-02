@@ -1,0 +1,35 @@
+{
+    "namespace": "icarus.package_manager",
+    "actions": {
+        "ListPackages": {},
+        "CreatePackage": {
+            "input": {
+                "Name": {
+                    "type": "string",
+                    "required": true
+                },
+                "BuildSystem": {
+                    "target": "PackageBuildSystem",
+                    "required": true
+                }
+            }
+        }
+    },
+    "structures": {
+        "PackageBuildSystem": {
+            "type": "enum",
+            "valueType": "object",
+            "values": {
+                "git-export": {
+                    "BuildParameters": {
+                        "target": "GitExportBuildParameters",
+                        "required": true
+                    }
+                }
+            }
+        },
+        "GitExportBuildParameters": {
+            "type": "object"
+        }
+    }
+}

@@ -25,16 +25,16 @@ module.exports = function RequestHandlerChain(chainOfHandlers) {
      * @param context
      * @param index
      */
-    function chain_handle_request(context, index) {
+    function chainHandleRequest(context, index) {
         if (index >= chain_length) {
             return;
         }
         var handler = chain[index];
         try {
-            handler.handle_message(context);
-            chain_handle_request(context, index + 1);
+            handler.handleMessage(context);
+            chainHandleRequest(context, index + 1);
         } catch (e) {
-            handler.handle_fault(context, e);
+            handler.handleFault(context, e);
         } finally {
             handler.close();
         }
@@ -50,6 +50,6 @@ module.exports = function RequestHandlerChain(chainOfHandlers) {
             req: req,
             res: res
         };
-        chain_handle_request(context, 0);
+        chainHandleRequest(context, 0);
     }
 };
