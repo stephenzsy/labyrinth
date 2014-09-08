@@ -20,10 +20,10 @@
     app.controller('mainController', function ($scope) {
     });
 
-    function buildModelObject(modelSpec, model) {
+    function buildObject(spec) {
         var obj = {};
-        for (var key in model) {
-            var value = model[key];
+        for (var key in spec) {
+            var value = spec[key];
             obj[key] = null;
         }
         return obj;
@@ -47,9 +47,9 @@
                     if (namespace != modelSpec.namespace) {
                         throw "Invalid namespace '" + namespace + "' for model '" + service + "'";
                     }
-                    var modelTarget = modelSpec.actions[action].input;
-                    scope.formInputModel = modelTarget;
-                    scope.formInputObject = buildModelObject(modelTarget);
+                    var spec = modelSpec.actions[action].input;
+                    scope.spec = spec;
+                    scope.model = buildObject(spec);
                 });
             }
         };
