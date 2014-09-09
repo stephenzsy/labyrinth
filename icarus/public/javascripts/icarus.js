@@ -9,11 +9,23 @@
                 templateUrl: 'views/index.html',
                 controller: 'indexController'
             }).when('/package-manager', {
-                templateUrl: 'views/package-manager.html',
+                templateUrl: 'views/package-manager/index.html',
                 controller: 'packageManagerController'
             }).when('/package-manager/create', {
-                templateUrl: 'views/package-manager/_create.html',
+                templateUrl: 'views/package-manager/create.html',
                 controller: 'createPackageManagerController'
+            }).when('/environments', {
+                templateUrl: 'views/environments/index.html',
+                controller: 'environmentsController'
+            }).when('/environments/create', {
+                templateUrl: 'views/environments/create.html',
+                controller: 'environmentsController'
+            }).when('/configurations', {
+                templateUrl: 'views/configurations/index.html',
+                controller: 'configurationsController'
+            }).when('/configurations/create', {
+                templateUrl: 'views/configurations/create.html',
+                controller: 'createConfigurationSetController'
             }).otherwise({templateUrl: 'views/error.html'});
     });
 
@@ -29,27 +41,70 @@
         return obj;
     }
 
-    app.directive('icarusApiForm', function (IcarusModels) {
+    app.directive('icarusApiForm', function ($compile, IcarusModels) {
         return {
             restrict: 'E',
-            templateUrl: 'views/_api_support/_form_template.html',
             replace: true,
             scope: {
                 namespace: "&",
                 service: "&",
-                action: "&"
+                path: "&",
+                model: "&",
+                value: "="
             },
-            link: function (scope) {
+            link: function (scope, element) {
+                scope.displayName = function (spec) {
+                    if (spec.display) {
+                        return spec.display;
+                    }
+                    return spec.key;
+                };
+
+                function getSpec(obj, specPath) {
+                    var p = specPath.shift();
+                    if (p) {
+                        return getSpec(obj[p], specPath);
+                    }
+                    return obj;
+                }
+
                 var namespace = scope.namespace();
                 var service = scope.service();
-                var action = scope.action();
                 IcarusModels(service, function (modelSpec) {
                     if (namespace != modelSpec.namespace) {
                         throw "Invalid namespace '" + namespace + "' for model '" + service + "'";
                     }
-                    var spec = modelSpec.actions[action].input;
+
+                    var spec = null;
+
+                    if (scope.model()) {
+                        spec = scope.model();
+                    } else if (scope.path()) {
+                        spec = getSpec(modelSpec, scope.path().split('.'));
+                    } else {
+                        throw "Either model or path must be specified";
+                    }
                     scope.spec = spec;
-                    scope.model = buildObject(spec);
+
+                    var template = '<div ng-switch="spec.type">' +
+
+                        '<div ng-when="object" class="form-group container" ng-repeat="memberSpec in spec.members">' +
+                        '<label class="col-sm-2 control-label">{{displayName(memberSpec)}}' +
+                        '<span ng-if="memberSpec.required" class="text-danger">*</span></label>' +
+                        '<icarus-api-form class="col-sm-10" namespace="namespace()" service="service()" model="memberSpec"></icarus-api-form>' +
+                        '</div>' +
+
+                        '<div ng-when="object" class="form-group container" ng-repeat="memberSpec in spec.members">' +
+                        '<label class="col-sm-2 control-label">{{displayName(memberSpec)}}' +
+                        '<span ng-if="memberSpec.required" class="text-danger">*</span></label>' +
+                        '<icarus-api-form class="col-sm-10" namespace="namespace()" service="service()" model="memberSpec"></icarus-api-form>' +
+                        '</div>' +
+
+                        '</div>';
+
+                    var newElement = angular.element(template);
+                    $compile(newElement)(scope);
+                    element.replaceWith(newElement);
                 });
             }
         };

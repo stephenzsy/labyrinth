@@ -2,16 +2,9 @@
     {{spec}}
     <div ng-if="spec.type === 'object'">
         <div ng-repeat="memberSpec in spec.members">
-            <div class="form-group">
-                <label class="col-sm-2 control-label">{{memberSpec.key}} <span ng-if="memberSpec.required"
-                                                                               class="text-danger">*</span></label>
-
-                <div ng-if="memberSpec.type === 'string'" class="col-sm-10">
-                    <input ng-model="model[memberSpec.key]" type="text" class="form-control" ng-required="memberSpec.required">
-                </div>
-                <div ng-if="memberSpec.type === 'enum'" class="col-sm-10">
-                    <select ng-model="enumValue" ng-options="valueSpec.key for valueSpec in memberSpec.values"></select>
-                </div>
+            <div class="form-group container">
+                <label class="col-sm-2 control-label">{{displayName(memberSpec)}} <span ng-if="memberSpec.required"
+                                                                                        class="text-danger">*</span></label>
             </div>
         </div>
     </div>

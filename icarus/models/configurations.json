@@ -1,0 +1,52 @@
+{
+    "namespace": "icarus.configurations",
+    "actions": {
+        "CreateConfigurationSet": {
+            "input": {
+                "type": "object",
+                "members": [
+                    {
+                        "key": "Name",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "key": "KeyValues",
+                        "display": "Key-Values",
+                        "type": "list",
+                        "members": {
+                            "type": "object",
+                            "members": [
+                                {
+                                    "key": "Key",
+                                    "type": "string",
+                                    "required": true
+                                },
+                                {
+                                    "key": "Type",
+                                    "type": "enum",
+                                    "required": true,
+                                    "values": [
+                                        {
+                                            "key": "string",
+                                            "display": "String",
+                                            "members": [
+                                                {
+                                                    "key": "Value",
+                                                    "type": "string",
+                                                    "required": true
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "structures": {
+    }
+}

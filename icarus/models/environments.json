@@ -1,0 +1,53 @@
+{
+    "namespace": "icarus.environments",
+    "actions": {
+        "CreateEnvironment": {
+            "input": {
+                "type": "object",
+                "members": [
+                    {
+                        "key": "Name",
+                        "type": "string",
+                        "required": true
+                    },
+                    {
+                        "key": "BuildSystem",
+                        "type": "enum",
+                        "valueType": "object",
+                        "values": [
+                            {
+                                "key": "git-export",
+                                "members": [
+                                    {
+                                        "key": "BuildParameters",
+                                        "type": "object",
+                                        "members": [
+                                            {
+                                                "key": "HostParameters",
+                                                "type": "map",
+                                                "memberKeyType": "string",
+                                                "memberValue": {
+                                                    "type": "object",
+                                                    "members": [
+                                                        {
+                                                            "key": "RepositoryPath",
+                                                            "type": "string",
+                                                            "required": true
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "required": true
+                    }
+                ]
+            }
+        }
+    },
+    "structures": {
+    }
+}

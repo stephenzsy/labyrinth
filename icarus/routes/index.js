@@ -6,6 +6,10 @@ var path = require('path');
     'use strict';
     var INDEX_PATH = path.resolve('public/index.html');
 
+    router.get(/^\/api\/models\/.*/, function (req, res) {
+        res.status(404).send();
+    });
+
     router.get(/^(.*)$/, function (req, res) {
         res.sendFile(INDEX_PATH);
     });
