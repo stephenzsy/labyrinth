@@ -1,12 +1,16 @@
-<div class="form-horizontal" role="form">
+<div class="form-horizontal" role="form" ng-switch="spec.type">
     {{spec}}
-    <div ng-if="spec.type === 'object'">
+    <div ng-switch-when="object">
         <div ng-repeat="memberSpec in spec.members">
             <div class="form-group container">
                 <label class="col-sm-2 control-label">{{displayName(memberSpec)}} <span ng-if="memberSpec.required"
                                                                                         class="text-danger">*</span></label>
+                <icarus-api-form namespace="namespace()" service="service()" model="memberSpec"></icarus-api-form>
             </div>
         </div>
+    </div>
+    <div ng-switch-when="string">
+        <input type="text">
     </div>
 </div>
 

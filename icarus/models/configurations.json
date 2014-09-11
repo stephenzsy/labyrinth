@@ -12,7 +12,6 @@
                     },
                     {
                         "key": "KeyValues",
-                        "display": "Key-Values",
                         "type": "list",
                         "members": {
                             "type": "object",
