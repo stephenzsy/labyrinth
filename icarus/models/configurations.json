@@ -1,51 +1,88 @@
 {
     "namespace": "icarus.configurations",
     "actions": {
-        "CreateConfigurationSet": {
+        "CreateConfigurationDefinition": {
             "input": {
                 "type": "object",
-                "members": [
-                    {
-                        "key": "Name",
-                        "type": "string",
-                        "required": true
-                    },
-                    {
-                        "key": "KeyValues",
-                        "type": "list",
-                        "members": {
-                            "type": "object",
-                            "members": [
-                                {
-                                    "key": "Key",
-                                    "type": "string",
-                                    "required": true
-                                },
-                                {
-                                    "key": "Type",
-                                    "type": "enum",
-                                    "required": true,
-                                    "values": [
-                                        {
-                                            "key": "string",
-                                            "display": "String",
-                                            "members": [
-                                                {
-                                                    "key": "Value",
-                                                    "type": "string",
-                                                    "required": true
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                ]
+                "members": {
+                    "Name": "#ConfigurationDefinition.Name",
+                    "Definitions": "#ConfigurationDefinition.Definitions"
+                }
             }
         }
     },
     "structures": {
+        "ConfigurationDefinition": {
+            "type": "object",
+            "members": {
+                "Name": {
+                    "type": "string",
+                    "required": true,
+                    "limits": {
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "regex": "[\\w-\\.]+"
+                    }
+                },
+                "Definitions": {
+                    "type": "map",
+                    "keyLimits": {
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "regex": "[\\w-\\.]+"
+                    },
+                    "values": {
+                        "type": "object",
+                        "members": {
+                            "Type": {
+                                "type": "enum",
+                                "required": true,
+                                "values": [
+                                    "string",
+                                    "string-set",
+                                    "number",
+                                    "number-set"
+                                ]
+                            },
+                            "Required": {
+                                "type": "boolean"
+                            },
+                            "DefaultValue": "#ConfigurationEntryValue"
+                        }
+                    }
+                },
+                "Metadata": {
+                    "LastModified": {
+                        "type": "timestamp"
+                    },
+                    "Version": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "ConfigurationEntryValue": {
+            "type": "object",
+            "members": {
+                "S": {
+                    "type": "string"
+                },
+                "SS": {
+                    "type": "set",
+                    "members": {
+                        "type": "string"
+                    }
+                },
+                "N": {
+                    "type": "integer"
+                },
+                "NS": {
+                    "type": "set",
+                    "members": {
+                        "type": "integer"
+                    }
+                }
+            }
+        }
     }
 }

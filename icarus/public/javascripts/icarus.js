@@ -23,8 +23,8 @@
             }).when('/configurations', {
                 templateUrl: 'views/configurations/index.html',
                 controller: 'configurationsController'
-            }).when('/configurations/create', {
-                templateUrl: 'views/configurations/create.html',
+            }).when('/configurations/create_set', {
+                templateUrl: 'views/configurations/create_set.html',
                 controller: 'createConfigurationSetController'
             }).otherwise({templateUrl: 'views/error.html'});
     });
@@ -32,91 +32,85 @@
     app.controller('mainController', function ($scope) {
     });
 
-    function buildObject(spec) {
-        var obj = {};
-        for (var key in spec) {
-            var value = spec[key];
-            obj[key] = null;
+    function parseTarget(target, spec) {
+        if (!target) {
+            return spec;
         }
-        return obj;
+        var parts = /^([@\.#!])(\w+)(.*)$/.exec(target);
+        if (parts) {
+            var d = parts[1];
+            var n = parts[2];
+            var r = parts[3];
+            if (d === '@') {
+                spec = spec.actions[n];
+            } else if (d === '#') {
+                spec = spec.structures[n];
+            } else if (d === '.') {
+                spec = spec.members[n];
+            } else if (d === '!') {
+                spec = spec[n];
+            }
+            target = r;
+        } else {
+            throw "Unrecognized target for spec: " + target;
+        }
+        return parseTarget(target, spec);
     }
 
-    app.directive('icarusApiForm', function ($q, $compile, IcarusModels, IcarusTemplates) {
-        return {
-            restrict: 'E',
-            scope: {
-                namespace: "&",
-                service: "&",
-                inputAction: "&",
-                model: "&",
-                value: "="
-            },
-            link: function (scope, element) {
-                scope.displayName = function (spec) {
-                    if (spec.display) {
-                        return spec.display;
-                    }
-                    return spec.key;
-                };
-
-                function getSpec(obj, specPath) {
-                    var p = specPath.shift();
-                    if (p) {
-                        return getSpec(obj[p], specPath);
-                    }
-                    return obj;
+    function buildModel(spec, serviceSpec) {
+        if (angular.isUndefined(spec)) {
+            return undefined;
+        }
+        if (angular.isString(spec)) {
+            spec = parseTarget(spec, serviceSpec)
+        }
+        switch (spec.type) {
+            case 'object':
+                var obj = {};
+                for (var key in spec.members) {
+                    obj[key] = buildModel(spec.members[key], serviceSpec);
                 }
+                return obj;
+            case 'map':
+                return {};
+            case 'string':
+                return null;
+            default:
+                throw "Undefined type for spec: " + spec.type;
+        }
+    }
 
-                var namespace = scope.namespace();
-                var service = scope.service();
-                $q.all([
-                    IcarusModels(service),
-                    IcarusTemplates('/views/_api_support/_form_template.html')
-                ]).then(function (result) {
-                    var spec = result[0];
-                    var template = result[1];
+    app.directive('icarusApiForm', function ($q, $compile, IcarusModels) {
+        return {
+            restrict: 'A',
+            transclude: true,
+            scope: {
+                namespace: "@",
+                service: "@",
+                target: "@",
+                model: "=icarusApiForm"
+            },
+            //   templateUrl: '/views/_api_support/_form_template.html',
+            link: function (scope) {
+                IcarusModels(scope.service)
+                    .then(function (serviceSpec) {
+                        // validate namespace
+                        if (serviceSpec.namespace !== serviceSpec.namespace) {
+                            throw "Namespace mismatch, ModelSpec: " + serviceSpec.namespace + ", Provided: " + scope.namespace;
+                        }
 
-                    // validate namespace
-                    if (spec.namespace !== scope.namespace()) {
-                        throw "Namespace mismatch, ModelSpec: " + spec.namespace + ", Provided: " + scope.namespace();
-                    }
-                    console.log(scope.inputAction(), scope.model());
-
-
-                    if (scope.inputAction()) {
-                        scope.spec = spec.actions[scope.inputAction()].input;
-                    } else if (scope.model()) {
-                        scope.spec = scope.model();
-                    }
-
-                    var newElement = $compile(template)(scope);
-                    element.append(newElement);
-                });
+                        var spec = scope.target;
+                        while (angular.isString(spec)) {
+                            spec = parseTarget(spec, serviceSpec);
+                        }
+                        scope.model = buildModel(spec, serviceSpec);
+                        scope.spec = spec;
+                    });
             }
         };
     });
 
-    var TEMPLATES_CACHE = {};
     var MODELS_CACHE = {};
-
-    app.service('IcarusTemplates', function ($q, $http) {
-        return function (url) {
-            if (TEMPLATES_CACHE[url]) {
-                return $q(function () {
-                    return TEMPLATES_CACHE[url];
-                });
-            } else {
-                var deferred = $q.defer();
-                $http.get(url).success(function (data) {
-                    TEMPLATES_CACHE[url] = data;
-                    deferred.resolve(data);
-                }).error(function (error) {
-                    deferred.reject(error);
-                });
-                return deferred.promise;
-            }
-        }
-    });
 
     app.service('IcarusModels', function ($q, $http) {
         return function (service) {
