@@ -80,10 +80,9 @@
         }
     }
 
-    app.directive('icarusApiForm', function ($q, $compile, IcarusModels) {
+    app.directive('icarusApiForm', function ($q, $compile, IcarusApiTemplate) {
         return {
-            restrict: 'A',
-            transclude: true,
+            restrict: 'E',
             scope: {
                 namespace: "@",
                 service: "@",
@@ -92,36 +91,29 @@
             },
             //   templateUrl: '/views/_api_support/_form_template.html',
             link: function (scope) {
-                IcarusModels(scope.service)
-                    .then(function (serviceSpec) {
-                        // validate namespace
-                        if (serviceSpec.namespace !== serviceSpec.namespace) {
-                            throw "Namespace mismatch, ModelSpec: " + serviceSpec.namespace + ", Provided: " + scope.namespace;
-                        }
-
-                        var spec = scope.target;
-                        while (angular.isString(spec)) {
-                            spec = parseTarget(spec, serviceSpec);
-                        }
-                        scope.model = buildModel(spec, serviceSpec);
-                        scope.spec = spec;
+                IcarusApiTemplate(scope.service, jQuery.param({namespace: scope.namespace}))
+                    .then(function (template) {
+                        console.log(template);
+                    }, function (err) {
+                        console.err(err);
                     });
             }
         };
     });
 
-    var MODELS_CACHE = {};
+    var TEMPLATE_CACHE = {};
 
-    app.service('IcarusModels', function ($q, $http) {
-        return function (service) {
-            if (MODELS_CACHE[service]) {
+    app.service('IcarusApiTemplate', function ($q, $http) {
+        return function (service, url) {
+            url = service + '?' + url;
+            if (TEMPLATE_CACHE[url]) {
                 return $q(function () {
-                    return MODELS_CACHE[service];
+                    return TEMPLATE_CACHE[url];
                 });
             } else {
                 var deferred = $q.defer();
-                $http.get('/api/models/' + service + '.json').success(function (data) {
-                    MODELS_CACHE[service] = data;
+                $http.get('/api-form/' + url).success(function (data) {
+                    //TEMPLATE_CACHE[url] = data;
                     deferred.resolve(data);
                 }).error(function (error) {
                     deferred.reject(error);

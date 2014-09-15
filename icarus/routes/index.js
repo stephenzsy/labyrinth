@@ -6,8 +6,9 @@ var path = require('path');
     'use strict';
     var INDEX_PATH = path.resolve('public/index.html');
 
-    router.get(/^\/api\/models\/.*/, function (req, res) {
-        res.status(404).send();
+    router.get('/api-form/:service', function (req, res) {
+        console.log(req.params);
+        res.render('../views/api-form');
     });
 
     router.get(/^(.*)$/, function (req, res) {

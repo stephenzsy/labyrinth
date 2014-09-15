@@ -2,12 +2,34 @@
     <div class="page-header">
         <h1>Create a new configuration set</h1>
     </div>
-    <form role="form" icarus-api-form="input" namespace="icarus.configurations" service="configurations"
-          target="@CreateConfigurationDefinition!input" ng-transclude>
-        <div class="form-control-group">
-            <label>Name</label>
-            <input type="text" class="form-control" ng-model="input.Name" placeholder="Enter configuration set name">
+    <icarus-api-form role="form" namespace="icarus.configurations" service="configurations"
+                     target="@CreateConfigurationDefinition!input"></icarus-api-form>
+    <div ng-init="input = {}"></div>
+    <div class="form-control-group">
+        <label>Name</label>
+        <input type="text" class="form-control" ng-model="input.Name" placeholder="Enter configuration set name">
+    </div>
+    <div class="form-control-group">
+        <label>Definitions</label>
+
+        <div ng-repeat="(key, values) in input.Definitions"></div>
+        <div class="container">
+            <div class="form-control-group col-sm-2">
+                <label>Key</label>
+
+                <input class="form-control" type="text" ng-model="newDefinition.key" placeholder="Key">
+            </div>
+            <div class="col-sm-9 container">
+                <div class="form-control-group">
+                    <label>Type</label>
+                    <select class="form-control">
+                        <option>1</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-1 btn btn-link"><i class="fa fa-plus"></i> Add</div>
         </div>
-    </form>
+
+    </div>
     <div>Model: {{input}}</div>
 </div>
