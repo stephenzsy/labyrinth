@@ -80,20 +80,26 @@
         }
     }
 
-    app.directive('icarusApiForm', function ($q, $compile, IcarusApiTemplate) {
+    app.directive('icarusApiForm', function ($q, $compile, IcarusApiModel) {
         return {
             restrict: 'E',
             scope: {
                 namespace: "@",
                 service: "@",
                 target: "@",
-                model: "=icarusApiForm"
+                model: "="
             },
             //   templateUrl: '/views/_api_support/_form_template.html',
-            link: function (scope) {
-                IcarusApiTemplate(scope.service, jQuery.param({namespace: scope.namespace}))
+            link: function (scope, element) {
+                scope.model = {
+                    Name: 'empty'
+                };
+                IcarusApiModel(scope.service, jQuery.param({
+                    namespace: scope.namespace,
+                    target: scope.target
+                }))
                     .then(function (template) {
-                        console.log(template);
+                        element.append($compile(template)(scope));
                     }, function (err) {
                         console.err(err);
                     });
@@ -103,8 +109,8 @@
 
     var TEMPLATE_CACHE = {};
 
-    app.service('IcarusApiTemplate', function ($q, $http) {
-        return function (service, url) {
+    app.service('IcarusApiModel', function ($q, $http) {
+        return function (service) {
             url = service + '?' + url;
             if (TEMPLATE_CACHE[url]) {
                 return $q(function () {
@@ -112,7 +118,7 @@
                 });
             } else {
                 var deferred = $q.defer();
-                $http.get('/api-form/' + url).success(function (data) {
+                $http.get('/service/' + url).success(function (data) {
                     //TEMPLATE_CACHE[url] = data;
                     deferred.resolve(data);
                 }).error(function (error) {

@@ -3,8 +3,7 @@
         <h1>Create a new configuration set</h1>
     </div>
     <icarus-api-form role="form" namespace="icarus.configurations" service="configurations"
-                     target="@CreateConfigurationDefinition!input"></icarus-api-form>
-    <div ng-init="input = {}"></div>
+                     target="@CreateConfigurationDefinition!input" model="input"></icarus-api-form>
     <div class="form-control-group">
         <label>Name</label>
         <input type="text" class="form-control" ng-model="input.Name" placeholder="Enter configuration set name">
