@@ -1,19 +1,30 @@
-'use strict';
+var util = require('util');
 
-module.exports = function RequestException(namespace, type, message) {
-    var namespace = namespace;
-    var type = type;
-    var message = message;
+(function () {
+    'use strict';
 
-    this.getNamespace = function () {
-        return namespace;
-    };
+    function RequestException(namespace, code, message) {
+        Error.call(this);
 
-    this.getType = function () {
-        return type;
-    };
 
-    this.getMessage = function () {
-        return message;
-    };
-};
+        var namespace = namespace;
+        var code = code;
+        var message = message;
+
+        this.getNamespace = function () {
+            return namespace;
+        };
+
+        this.getCode = function () {
+            return code;
+        };
+
+        this.getMessage = function () {
+            return message;
+        };
+    }
+
+    util.inherits(RequestException, Error);
+
+    module.exports = RequestException;
+})();

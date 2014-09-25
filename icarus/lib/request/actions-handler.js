@@ -7,7 +7,7 @@ var RequestException = require('./request-exception');
 var ActionHandler = require('./action/action-handler');
 
 function InvalidActionException(actionName) {
-    RequestException.call(this, "icarus.request.action", "InvalidActionException", "InvalidAction: " + actionName);
+    RequestException.call(this, "icarus.request.action", "InvalidAction", "InvalidAction: " + actionName);
 }
 util.inherits(InvalidActionException, RequestException);
 
