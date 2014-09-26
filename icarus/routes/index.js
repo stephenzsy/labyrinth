@@ -38,13 +38,17 @@ var ModelUtil = require('../lib/request/model-util');
             req.status(400).send('Invalid service: ' + service);
             return;
         }
-        if (model.namespace !== req.query.namespace) {
-            req.status(400).send('Invalid namespace: ' + req.query.namespace + ', for service: ' + service);
+        if (model.namespace !== req.query.Namespace) {
+            req.status(400).send('Invalid namespace: ' + req.query.Namespace + ', for service: ' + service);
             return;
         }
         // parse target
-        var target = ModelUtil.findTarget(model, req.query.target);
-        res.render('../views/api-form', {target: target});
+        var target = ModelUtil.findTarget(model, req.query.Target);
+        res.render('../views/api-form', {
+            target: target,
+            ScopeAttributeName: req.query.ScopeAttributeName,
+            ScopeAttributeValue: req.query.ScopeAttributeValue
+        });
     });
 
     router.get(/^(.*)$/, function (req, res) {

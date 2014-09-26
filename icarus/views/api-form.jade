@@ -1,17 +1,25 @@
-mixin formElement(target)
-    case target.type
-        when 'object'
-            if(target.members)
-                each member, name in target.members
-                    div.form-group
-                        label #{name}
-                        +formElement(member)
-        when 'string'
-            input.form-control
-        default
-            p.alert.alert-danger Unknown target type: #{target.type}
+doctype html
+
+mixin formElement(target, modelValue)
+    - var rootAttributes = {};
+    - rootAttributes[ScopeAttributeName] = modelValue
+    form(ng-transclude)&attributes(rootAttributes)
+        // DEBUG: div PartialModel: {{#{modelValue}}}
+        case target.type
+            when 'object'
+                if(target.members)
+                    each member, name in target.members
+                        div.form-group
+                            label #{name}
+                            +formElement(member, modelValue + '[\'' + name + '\']')
+            when 'string'
+                input.form-control(ng-model=modelValue)
+            default
+                p.alert.alert-danger Unknown target type: #{target.type}
+                p.alert.alert-danger= JSON.stringify(target)
+
 
 // ----- API FORM START -----
-+formElement(target)
++formElement(target, ScopeAttributeValue)
 // ----- API FORM END -----
 div= JSON.stringify(target, model)
