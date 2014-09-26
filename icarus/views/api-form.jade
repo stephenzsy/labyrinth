@@ -1,3 +1,17 @@
-div API Form
-    div= JSON.stringify(service)
-    div {{model}}
+mixin formElement(target)
+    case target.type
+        when 'object'
+            if(target.members)
+                each member, name in target.members
+                    div.form-group
+                        label #{name}
+                        +formElement(member)
+        when 'string'
+            input.form-control
+        default
+            p.alert.alert-danger Unknown target type: #{target.type}
+
+// ----- API FORM START -----
++formElement(target)
+// ----- API FORM END -----
+div= JSON.stringify(target, model)

@@ -8,8 +8,7 @@ var RequestException = require('./request-exception');
         return stack.join('');
     }
 
-
-    function findPath(model, path) {
+    function findTarget(model, path) {
         if (!path) {
             return model;
         }
@@ -21,15 +20,19 @@ var RequestException = require('./request-exception');
         var name = m[2];
         var rest = m[3];
         switch (directive) {
+            case '!':
+                return findTarget(model[name], rest);
+            case '@':
+                return findTarget(model.actions[name], rest);
             case '#':
-                return findPath(model.structures[name], rest);
+                return findTarget(model.structures[name], rest);
             case '.':
                 if (model.type !== 'object') {
                     throw new Error("Invalid path on non-object: " + path);
                 }
-                return findPath(model.members[name], rest);
+                return findTarget(model.members[name], rest);
             default :
-                throw new Error("Not Implemented");
+                throw new Error("Unknown directive: " + directive);
         }
         throw new Error("Not Implemented");
     }
@@ -37,7 +40,7 @@ var RequestException = require('./request-exception');
     function expandObject(obj, serviceModel, nameStack, objStack) {
         objStack = objStack.concat(obj);
         if (typeof obj === 'string') {
-            return expandObject(findPath(serviceModel, obj), serviceModel, nameStack, objStack);
+            return expandObject(findTarget(serviceModel, obj), serviceModel, nameStack, objStack);
         }
         switch (obj.type) {
             case 'object':
@@ -79,6 +82,7 @@ var RequestException = require('./request-exception');
     }
 
     module.exports = {
-        validateAndBuildModel: validateAndBuildModel
+        validateAndBuildModel: validateAndBuildModel,
+        findTarget: findTarget
     };
 })();

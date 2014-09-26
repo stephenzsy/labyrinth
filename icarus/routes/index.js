@@ -23,17 +23,17 @@ var ModelUtil = require('../lib/request/model-util');
 
     router.get('/service/:service', function (req, res) {
         var service = req.param('service');
-        var model = MODELS[req.param('service')];
+        var model = MODELS[service];
         if (!model) {
             req.status(400).send('Invalid service: ' + service);
             return;
         }
-        req.send(model);
+        res.send(model);
     });
 
     router.get('/api-form/:service', function (req, res) {
         var service = req.param('service');
-        var model = MODELS[req.param('service')];
+        var model = MODELS[service];
         if (!model) {
             req.status(400).send('Invalid service: ' + service);
             return;
@@ -43,8 +43,8 @@ var ModelUtil = require('../lib/request/model-util');
             return;
         }
         // parse target
-        console.log(req.query);
-        res.render('../views/api-form', {service: model});
+        var target = ModelUtil.findTarget(model, req.query.target);
+        res.render('../views/api-form', {target: target});
     });
 
     router.get(/^(.*)$/, function (req, res) {

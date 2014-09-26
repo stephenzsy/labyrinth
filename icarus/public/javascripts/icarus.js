@@ -80,28 +80,23 @@
         }
     }
 
-    app.directive('icarusApiForm', function ($q, $compile, IcarusApiModel) {
+    app.directive('icarusApiForm', function ($q, $compile, IcarusApiModelTemplate) {
         return {
             restrict: 'E',
             scope: {
                 namespace: "@",
                 service: "@",
                 target: "@",
+                spec: "&",
                 model: "="
             },
-            //   templateUrl: '/views/_api_support/_form_template.html',
+            //templateUrl: '/views/_api_support/_form_template.html',
             link: function (scope, element) {
-                scope.model = {
-                    Name: 'empty'
-                };
-                IcarusApiModel(scope.service, jQuery.param({
-                    namespace: scope.namespace,
-                    target: scope.target
-                }))
+                IcarusApiModelTemplate(scope.service, scope.namespace, scope.target)
                     .then(function (template) {
                         element.append($compile(template)(scope));
                     }, function (err) {
-                        console.err(err);
+                        console.error(err);
                     });
             }
         };
@@ -109,17 +104,17 @@
 
     var TEMPLATE_CACHE = {};
 
-    app.service('IcarusApiModel', function ($q, $http) {
-        return function (service) {
-            url = service + '?' + url;
+    app.service('IcarusApiModelTemplate', function ($q, $http) {
+        return function (service, namespace, target) {
+            var url = service + "?" + jQuery.param({namespace: namespace, target: target});
             if (TEMPLATE_CACHE[url]) {
                 return $q(function () {
                     return TEMPLATE_CACHE[url];
                 });
             } else {
                 var deferred = $q.defer();
-                $http.get('/service/' + url).success(function (data) {
-                    //TEMPLATE_CACHE[url] = data;
+                $http.get('/api-form/' + url).success(function (data) {
+                    TEMPLATE_CACHE[url] = data;
                     deferred.resolve(data);
                 }).error(function (error) {
                     deferred.reject(error);

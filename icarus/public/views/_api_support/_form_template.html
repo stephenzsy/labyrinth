@@ -1,3 +1,14 @@
-<div ng-transclude>
-    {{spec}}
+<div ng-switch="spec().type">
+    <div ng-switch-when="object">
+        <div ng-repeat="(key, member) in spec().members">
+            <div class="form-group">
+                <label>key</label>
+                <icarus-api-form spec="member"></icarus-api-form>
+            </div>
+        </div>
+    </div>
+    <div ng-switch-default class="alert alert-danger">
+        Unknown spec type: {{spec().type}}.<br>
+        {{spec()}}
+    </div>
 </div>
