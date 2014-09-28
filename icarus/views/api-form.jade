@@ -1,22 +1,30 @@
 doctype html
-
 mixin formElement(target, modelValue)
-    - var rootAttributes = {};
-    - rootAttributes[ScopeAttributeName] = modelValue
-    form(ng-transclude)&attributes(rootAttributes)
-        // DEBUG: div PartialModel: {{#{modelValue}}}
+    div {{modelValue}}
+    div(icarus-api-form-model=modelValue)
+        div {{#{ScopeAttributeValue}}}
         case target.type
             when 'object'
                 if(target.members)
                     each member, name in target.members
                         div.form-group
                             label #{name}
-                            +formElement(member, modelValue + '[\'' + name + '\']')
+                            +formElement(member, ScopeAttributeValue + '[\'' + name + '\']')
             when 'string'
-                input.form-control(ng-model=modelValue)
+                input.form-control(ng-model=ScopeAttributeValue)
+            when 'map'
+                div.container.icarus-api-form-map-entry
+                    div.col-sm-3
+                        div.form-group
+                            label Key
+                            input.form-control
+                    div.col-sm-9
+                        div.form-group
+                            label Value
+                            //+formElement(target.values, '')
             default
-                p.alert.alert-danger Unknown target type: #{target.type}
-                p.alert.alert-danger= JSON.stringify(target)
+                div.alert.alert-danger Unknown target type: #{target.type}
+                    p= JSON.stringify(target)
 
 
 // ----- API FORM START -----

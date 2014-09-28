@@ -90,7 +90,7 @@
         }
     });
 
-    app.directive('icarusApiForm', function ($q, $compile, IcarusApiModelTemplate) {
+    app.directive('icarusApiForm', function ($q, $compile, IcarusApiModel) {
         return {
             restrict: 'E',
             scope: {
@@ -102,22 +102,49 @@
             },
             //templateUrl: '/views/_api_support/_form_template.html',
             link: function (scope, element) {
-                IcarusApiModelTemplate(scope.service, {
-                    Namespace: scope.namespace,
-                    Target: scope.target,
-                    ScopeAttributeName: 'icarus-api-form-model',
-                    ScopeAttributeValue: 'model'
-                }).then(function (template) {
-                    scope.model = {Name: null};
-                    element.append($compile(template)(scope));
+
+                function buildModel(target) {
+
+                }
+
+                function generateTemplate(target, model) {
+                    var template = $('<div></div>');
+                    template.append($('<div>{{model}}</div>'));
+                    switch (target.type) {
+                        case 'object':
+                            for (var key in target.members) {
+                                var member = target.members[key];
+                                var formGroup = $('<div class="form-group"></div>');
+                                formGroup.append($('<label></label>').append(key));
+                                formGroup.append(generateTemplate(member, model + "['" + key + "']"));
+                                template.append(formGroup);
+                            }
+                            template.append($('<div class="alert alert-warning">' + JSON.stringify(target) + '</div>'));
+                            break;
+                        case 'string':
+                            template.append($('<input>').addClass('form-control').attr('ng-model', 'model'));
+                        default:
+                            template.append($('<div class="alert alert-danger">Unknown target type: ' + target.type + '<br>' + JSON.stringify(target) + '</div>'));
+                    }
+                    return template;
+                }
+
+                scope.model = {'Name': null};
+
+                IcarusApiModel(scope.service).then(function (serviceSpec) {
+                    console.dir(serviceSpec);
+                    var target = parseTarget(scope.target, serviceSpec);
+                    element.append($compile(generateTemplate(target, 'model').html())(scope));
                 }, function (err) {
                     console.error(err);
                 });
+
             }
         };
     });
 
     var TEMPLATE_CACHE = {};
+    var MODEL_CACHE = {};
 
     app.service('IcarusApiModelTemplate', function ($q, $http) {
         return function (service, query) {
@@ -137,7 +164,25 @@
                 return deferred.promise;
             }
         }
+    });
 
+    app.service('IcarusApiModel', function ($q, $http) {
+        return function (service) {
+            if (MODEL_CACHE[service]) {
+                return $q(function () {
+                    return MODEL_CACHE[service];
+                });
+            } else {
+                var deferred = $q.defer();
+                $http.get('/service/' + service).success(function (data) {
+                    MODEL_CACHE[service] = data;
+                    deferred.resolve(data);
+                }).error(function (error) {
+                    deferred.reject(error);
+                });
+                return deferred.promise;
+            }
+        }
     });
 
     app.service('API', function ($http) {

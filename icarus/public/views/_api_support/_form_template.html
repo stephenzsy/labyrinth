@@ -1,9 +1,11 @@
 <div ng-switch="spec().type">
+    {{spec}}
     <div ng-switch-when="object">
         <div ng-repeat="(key, member) in spec().members">
             <div class="form-group">
-                <label>key</label>
-                <icarus-api-form spec="member"></icarus-api-form>
+                <label>{{key}}</label>
+                {{member}}
+                <icarus-api-form spec="member" model="model[key]"></icarus-api-form>
             </div>
         </div>
     </div>
