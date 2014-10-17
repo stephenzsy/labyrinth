@@ -1,16 +1,45 @@
-<div ng-switch="spec().type">
-    {{spec}}
+<div ng-switch="spec.type">
     <div ng-switch-when="object">
-        <div ng-repeat="(key, member) in spec().members">
+        <div ng-repeat="spec in expandObjectMemberSpecs(spec)">
             <div class="form-group">
-                <label>{{key}}</label>
-                {{member}}
-                <icarus-api-form spec="member" model="model[key]"></icarus-api-form>
+                <label>{{spec._key}}</label>
+                <ng-include src="'/views/_api_support/_form_template.html'"></ng-include>
             </div>
         </div>
     </div>
+    <div ng-switch-when="map">
+        <!-- new entry -->
+        <div class="container panel panel-default">
+            <div class="panel-body">
+                <div class="form-group col-sm-3">
+                    <label>Key</label>
+                    <input class="form-control" ng-model="spec.newModel.key" type="text">
+                </div>
+                <div class="form-group col-sm-9">
+                    <label>Value</label>
+                    <ng-include ng-repeat="spec in [spec.values]"
+                                src="'/views/_api_support/_form_template.html'"></ng-include>
+                </div>
+            </div>
+            <div class="panel-footer text-right">
+                <div class="btn btn-primary">Add</div>
+            </div>
+        </div>
+    </div>
+    <div ng-switch-when="enum">
+        <select class="form-group form-control" ng-model="spec.model" ng-options="value for value in getObjectKeys(spec.values)">
+        </select>
+
+        <div ng-repeat="(key,childSpec) in spec.values" ng-show="key == spec.model">
+            <ng-include ng-repeat="spec in [childSpec]" src="'/views/_api_support/_form_template.html'"></ng-include>
+        </div>
+    </div>
+    <div ng-switch-when="string">
+        <input class="form-control" ng-model="spec.model" type="text">
+    </div>
+    <div ng-switch-when="boolean">{{spec}}</div>
     <div ng-switch-default class="alert alert-danger">
-        Unknown spec type: {{spec().type}}.<br>
-        {{spec()}}
+        Unknown spec type: {{spec.type}}<br>
+        {{spec}}
     </div>
 </div>

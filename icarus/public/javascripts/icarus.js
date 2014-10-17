@@ -97,44 +97,34 @@
                 namespace: "@",
                 service: "@",
                 target: "@",
-                spec: "&",
                 model: "="
             },
-            //templateUrl: '/views/_api_support/_form_template.html',
+            templateUrl: '/views/_api_support/_form_template.html',
             link: function (scope, element) {
-
-                function buildModel(target) {
-
+                function getModel(spec) {
+                    return scope.model;
                 }
 
-                function generateTemplate(target, model) {
-                    var template = $('<div></div>');
-                    template.append($('<div>{{model}}</div>'));
-                    switch (target.type) {
-                        case 'object':
-                            for (var key in target.members) {
-                                var member = target.members[key];
-                                var formGroup = $('<div class="form-group"></div>');
-                                formGroup.append($('<label></label>').append(key));
-                                formGroup.append(generateTemplate(member, model + "['" + key + "']"));
-                                template.append(formGroup);
-                            }
-                            template.append($('<div class="alert alert-warning">' + JSON.stringify(target) + '</div>'));
-                            break;
-                        case 'string':
-                            template.append($('<input>').addClass('form-control').attr('ng-model', 'model'));
-                        default:
-                            template.append($('<div class="alert alert-danger">Unknown target type: ' + target.type + '<br>' + JSON.stringify(target) + '</div>'));
+                function expandObjectMemberSpecs(spec) {
+                    var results = [];
+                    for (var key in spec.members) {
+                        var member = spec.members[key];
+                        member['_key'] = key;
+                        results.push(member);
                     }
-                    return template;
+                    return results;
                 }
 
-                scope.model = {'Name': null};
+                scope.expandObjectMemberSpecs = expandObjectMemberSpecs;
+                scope.getModel = getModel;
+                scope.getObjectKeys = function (obj) {
+                    return Object.keys(obj);
+                };
 
                 IcarusApiModel(scope.service).then(function (serviceSpec) {
-                    console.dir(serviceSpec);
                     var target = parseTarget(scope.target, serviceSpec);
-                    element.append($compile(generateTemplate(target, 'model').html())(scope));
+                    scope.spec = target;
+                    scope.model = {};
                 }, function (err) {
                     console.error(err);
                 });

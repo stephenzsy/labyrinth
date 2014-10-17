@@ -37,17 +37,50 @@
                             "Type": {
                                 "type": "enum",
                                 "required": true,
-                                "values": [
-                                    "string",
-                                    "string-set",
-                                    "number",
-                                    "number-set"
-                                ]
+                                "values": {
+                                    "string": {
+                                        "type": "object",
+                                        "members": {
+                                            "DefaultValue": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    },
+                                    "string-set": {
+                                        "type": "object",
+                                        "members": {
+                                            "DefaultValue": {
+                                                "type": "set",
+                                                "members": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "number": {
+                                        "type": "object",
+                                        "members": {
+                                            "DefaultValue": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    },
+                                    "number-set": {
+                                        "type": "object",
+                                        "members": {
+                                            "DefaultValue": {
+                                                "type": "set",
+                                                "members": {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             },
                             "Required": {
                                 "type": "boolean"
-                            },
-                            "DefaultValue": "#ConfigurationEntryValue"
+                            }
                         }
                     }
                 },
