@@ -31,6 +31,7 @@
                         "maxLength": 128,
                         "regex": "[\\w-\\.]+"
                     },
+                    "required": true,
                     "values": {
                         "type": "object",
                         "members": {
@@ -79,7 +80,8 @@
                                 }
                             },
                             "Required": {
-                                "type": "boolean"
+                                "type": "boolean",
+                                "required": true
                             }
                         }
                     }

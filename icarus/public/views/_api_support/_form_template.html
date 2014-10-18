@@ -1,45 +1,102 @@
-<div ng-switch="spec.type">
+<div ng-switch="model.spec.type">
     <div ng-switch-when="object">
-        <div ng-repeat="spec in expandObjectMemberSpecs(spec)">
-            <div class="form-group">
-                <label>{{spec._key}}</label>
-                <ng-include src="'/views/_api_support/_form_template.html'"></ng-include>
-            </div>
-        </div>
+        <ng-include ng-repeat="model in model.children" src="'/views/_api_support/_form_template.html'"></ng-include>
     </div>
-    <div ng-switch-when="map">
-        <!-- new entry -->
-        <div class="container panel panel-default">
-            <div class="panel-body">
+    <div ng-switch-when="map" class="form-group">
+        <label>{{model._key}}
+            <icarus-required model="model"></icarus-required>
+        </label>
+
+        <div class="panel panel-default">
+            <div class="panel-body container" ng-repeat="model in model.children">
                 <div class="form-group col-sm-3">
-                    <label>Key</label>
-                    <input class="form-control" ng-model="spec.newModel.key" type="text">
+                    <label>Key
+                        <icarus-required></icarus-required>
+                    </label>
+                    <input class="form-control" ng-model="model.data.key" type="text">
                 </div>
-                <div class="form-group col-sm-9">
-                    <label>Value</label>
-                    <ng-include ng-repeat="spec in [spec.values]"
+                <div class="form-group col-sm-8">
+                    <label>Value
+                        <icarus-required></icarus-required>
+                    </label>
+                    <ng-include ng-repeat="model in model.children"
+                                src="'/views/_api_support/_form_template.html'"></ng-include>
+                </div>
+                <div class="col-sm-1"><i class="fa fa-times"></i></div>
+            </div>
+            <hr>
+            <!-- New entry -->
+            <div class="panel-body container" ng-repeat="model in [model.newChildModel]">
+                <div class="form-group col-sm-3">
+                    <label>Key
+                        <icarus-required></icarus-required>
+                    </label>
+                    <input class="form-control" ng-model="model.data.key" type="text">
+                </div>
+                <div class="form-group col-sm-8">
+                    <label>Value
+                        <icarus-required></icarus-required>
+                    </label>
+                    <ng-include ng-repeat="model in model.children"
                                 src="'/views/_api_support/_form_template.html'"></ng-include>
                 </div>
             </div>
-            <div class="panel-footer text-right">
-                <div class="btn btn-primary">Add</div>
+            <div class="panel-footer">
+                <div class="btn btn-primary" ng-click="addNewEntry(model)"><i class="fa fa-plus"></i> Add</div>
+            </div>
+        </div>
+    </div>
+    <div ng-switch-when="set">
+        <label>{{model._key}}
+            <icarus-required model="model"></icarus-required>
+        </label>
+
+        <div class="panel panel-default">
+            <ng-include ng-repeat="model in [model.newChildModel]"
+                        src="'/views/_api_support/_form_template.html'"></ng-include>
+            <div class="panel-footer">
+                <div class="btn btn-primary" ng-click="addNewEntry(model)"><i class="fa fa-plus"></i> Add</div>
             </div>
         </div>
     </div>
     <div ng-switch-when="enum">
-        <select class="form-group form-control" ng-model="spec.model" ng-options="value for value in getObjectKeys(spec.values)">
+        <label>{{model._key}}
+            <icarus-required model="model"></icarus-required>
+        </label>
+
+        <select class="form-group form-control" ng-model="model.data"
+                ng-options="model._key for model in model.children">
         </select>
 
-        <div ng-repeat="(key,childSpec) in spec.values" ng-show="key == spec.model">
-            <ng-include ng-repeat="spec in [childSpec]" src="'/views/_api_support/_form_template.html'"></ng-include>
+        <div ng-if="model.data">
+            <ng-include ng-repeat="model in [model.data]"
+                        src="'/views/_api_support/_form_template.html'"></ng-include>
         </div>
     </div>
-    <div ng-switch-when="string">
-        <input class="form-control" ng-model="spec.model" type="text">
+    <div ng-switch-when="boolean" class="form-inline">
+        <label>{{model._key}}:
+            <icarus-required model="model"></icarus-required>
+        </label>
+
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" ng-model="model.data">
+            </label>
+        </div>
     </div>
-    <div ng-switch-when="boolean">{{spec}}</div>
+    <div ng-switch-when="number">
+        <label>{{model._key}}
+            <icarus-required model="model"></icarus-required>
+        </label>
+        <input class="form-control" ng-model="model.data" type="text"></div>
+    <div ng-switch-when="string" class="form-group">
+        <label>{{model._key}}
+            <icarus-required model="model"></icarus-required>
+        </label>
+        <input class="form-control" ng-model="model.data" type="text">
+    </div>
     <div ng-switch-default class="alert alert-danger">
-        Unknown spec type: {{spec.type}}<br>
-        {{spec}}
+        Unknown spec type: {{model.spec.type}}<br>
+        {{model}}
     </div>
 </div>

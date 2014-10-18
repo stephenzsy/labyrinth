@@ -90,6 +90,20 @@
         }
     });
 
+    app.directive('icarusRequired', function () {
+        return {
+            restrict: 'E',
+            templateUrl: '/views/_api_support/_required_label.html',
+            scope: {
+                model: "="
+            }, link: function (scope) {
+                if (angular.isUndefined(scope.model)) {
+                    scope.isRequired = true;
+                }
+            }
+        };
+    });
+
     app.directive('icarusApiForm', function ($q, $compile, IcarusApiModel) {
         return {
             restrict: 'E',
@@ -101,6 +115,50 @@
             },
             templateUrl: '/views/_api_support/_form_template.html',
             link: function (scope, element) {
+                function generateFormModel(spec) {
+                    var r = {spec: spec, data: null};
+                    switch (spec.type) {
+                        case 'object':
+                            var children = [];
+                            for (var key in spec.members) {
+                                var member = spec.members[key];
+                                var value = generateFormModel(member);
+                                value['_key'] = key;
+                                children.push(value);
+                            }
+                            r['children'] = children;
+                            delete spec['members'];
+                            break;
+                        case 'set':
+                            var childModel = generateFormModel(spec.members);
+                            r['childModel'] = childModel;
+                            r['newChildModel'] = angular.copy(childModel);
+                            r['children'] = [];
+                            delete spec['members'];
+                            break;
+                        case 'map':
+                            var childModel = generateFormModel(spec.values);
+                            r['childModel'] = childModel;
+                            r['newChildModel'] = angular.copy(childModel);
+                            r['children'] = [];
+                            delete spec['values'];
+                            break;
+                        case 'enum':
+                            var children = [];
+                            for (var key in spec.values) {
+                                var member = spec.values[key];
+                                var value = generateFormModel(member);
+                                value['_key'] = key;
+                                children.push(value);
+                                children['parent'] = r;
+                            }
+                            r['children'] = children;
+                            delete spec['values'];
+                            break;
+                    }
+                    return r;
+                }
+
                 function getModel(spec) {
                     return scope.model;
                 }
@@ -115,16 +173,25 @@
                     return results;
                 }
 
+                function createModel(spec) {
+                    return angular.copy(spec);
+                }
+
                 scope.expandObjectMemberSpecs = expandObjectMemberSpecs;
                 scope.getModel = getModel;
                 scope.getObjectKeys = function (obj) {
                     return Object.keys(obj);
                 };
+                scope.createModel = createModel;
+                scope.addNewEntry = function (model) {
+                    // TODO validation
+                    model.children.push(model.newChildModel);
+                    model.newChildModel = angular.copy(model.childModel);
+                };
 
                 IcarusApiModel(scope.service).then(function (serviceSpec) {
                     var target = parseTarget(scope.target, serviceSpec);
-                    scope.spec = target;
-                    scope.model = {};
+                    scope.model = generateFormModel(angular.copy(target));
                 }, function (err) {
                     console.error(err);
                 });
@@ -133,35 +200,14 @@
         };
     });
 
-    var TEMPLATE_CACHE = {};
     var MODEL_CACHE = {};
-
-    app.service('IcarusApiModelTemplate', function ($q, $http) {
-        return function (service, query) {
-            var url = service + "?" + jQuery.param(query);
-            if (TEMPLATE_CACHE[url]) {
-                return $q(function () {
-                    return TEMPLATE_CACHE[url];
-                });
-            } else {
-                var deferred = $q.defer();
-                $http.get('/api-form/' + url).success(function (data) {
-                    TEMPLATE_CACHE[url] = data;
-                    deferred.resolve(data);
-                }).error(function (error) {
-                    deferred.reject(error);
-                });
-                return deferred.promise;
-            }
-        }
-    });
 
     app.service('IcarusApiModel', function ($q, $http) {
         return function (service) {
             if (MODEL_CACHE[service]) {
-                return $q(function () {
-                    return MODEL_CACHE[service];
-                });
+                var deferred = $q.defer();
+                deferred.resolve(MODEL_CACHE[service]);
+                return deferred.promise;
             } else {
                 var deferred = $q.defer();
                 $http.get('/service/' + service).success(function (data) {
