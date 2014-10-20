@@ -20,7 +20,7 @@ function ActionsHandler() {
         if (!handler instanceof ActionHandler) {
             throw "Action handler is not of type ActionHandler"
         }
-        actionHandlers[handler.action_name] = handler;
+        actionHandlers[handler.actionName] = handler;
     };
 
     this.handleMessage = function handleMessage(context) {

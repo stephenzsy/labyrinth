@@ -1,5 +1,3 @@
-var RequestException = require('./request-exception');
-
 (function () {
     'use strict';
     var NAMESPACE = 'request.model';

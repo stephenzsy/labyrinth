@@ -29,7 +29,37 @@
             }).otherwise({templateUrl: 'views/error.html'});
     });
 
-    app.controller('mainController', function ($scope) {
+    app.controller('mainController', function ($scope, API) {
+        function getModelData(model) {
+            if (model) {
+                switch (model.spec.type) {
+                    case 'object':
+                        var r = {};
+                        model.children.forEach(function (child) {
+                            r[child._key] = getModelData(child);
+                        });
+                        return r;
+                    case 'map':
+                        var r = {};
+                        model.children.forEach(function (child) {
+                            r[child.data._key] = getModelData(child);
+                        });
+                        return r;
+                    case 'enum':
+                        var r = {};
+                        r[model.data._key] = getModelData(model.data);
+                        return r;
+                    default:
+                        return model.data;
+                }
+            }
+        }
+
+        $scope.submitAPIForm = function (service, action, paramsModel) {
+            API(service, action, getModelData(paramsModel)).success(function (data) {
+                console.log(data);
+            });
+        };
     });
 
     function parseTarget(target, spec) {
@@ -159,33 +189,14 @@
                     return r;
                 }
 
-                function getModel(spec) {
-                    return scope.model;
-                }
-
-                function expandObjectMemberSpecs(spec) {
-                    var results = [];
-                    for (var key in spec.members) {
-                        var member = spec.members[key];
-                        member['_key'] = key;
-                        results.push(member);
-                    }
-                    return results;
-                }
-
-                function createModel(spec) {
-                    return angular.copy(spec);
-                }
-
-                scope.expandObjectMemberSpecs = expandObjectMemberSpecs;
-                scope.getModel = getModel;
-                scope.getObjectKeys = function (obj) {
-                    return Object.keys(obj);
+                scope.deleteFromList = function (arr, index) {
+                    arr.splice(index, 1);
                 };
-                scope.createModel = createModel;
+
                 scope.addNewEntry = function (model) {
                     // TODO validation
                     model.children.push(model.newChildModel);
+                    model.newChildModel['parent'] = model;
                     model.newChildModel = angular.copy(model.childModel);
                 };
 

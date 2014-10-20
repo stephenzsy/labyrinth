@@ -19,6 +19,7 @@ app.use('/api/models/', express.static(path.join(__dirname, 'models')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/configurations', require('./routes/configurations'));
 app.use('/package-manager', require('./routes/package-manager'));
 
 /// catch 404 and forward to error handler
