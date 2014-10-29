@@ -6,7 +6,9 @@
                 "type": "object",
                 "members": {
                     "Name": "#ConfigurationDefinition.Name",
-                    "Definitions": "#ConfigurationDefinition.Definitions"
+                    "Definitions": "#ConfigurationDefinition.Definitions",
+                    "MajorVersion": "#ConfigurationDefinition.Metadata.MajorVersion",
+                    "MinorVersion": "#ConfigurationDefinition.Metadata.MinorVersion"
                 }
             }
         }
@@ -87,11 +89,17 @@
                     }
                 },
                 "Metadata": {
-                    "LastModified": {
-                        "type": "timestamp"
-                    },
-                    "Version": {
-                        "type": "integer"
+                    "type": "object",
+                    "members": {
+                        "LastModified": {
+                            "type": "timestamp"
+                        },
+                        "MajorVersion": {
+                            "type": "integer"
+                        },
+                        "MinorVersion": {
+                            "type": "integer"
+                        }
                     }
                 }
             }

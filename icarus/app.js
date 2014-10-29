@@ -20,6 +20,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
 app.use('/configurations', require('./routes/configurations'));
+app.use('/environments', require('./routes/environments'));
 app.use('/package-manager', require('./routes/package-manager'));
 
 /// catch 404 and forward to error handler

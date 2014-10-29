@@ -1,51 +1,29 @@
 {
     "namespace": "icarus.package_manager",
     "actions": {
-        "ListPackages": {},
         "CreatePackage": {
             "input": {
                 "type": "object",
-                "members": [
-                    {
-                        "key": "Name",
+                "members": {
+                    "Name": {
                         "type": "string",
                         "required": true
                     },
-                    {
-                        "key": "BuildSystem",
+                    "BuildSystem": {
                         "type": "enum",
-                        "valueType": "object",
-                        "values": [
-                            {
-                                "key": "git-export",
-                                "members": [
-                                    {
-                                        "key": "BuildParameters",
-                                        "type": "object",
-                                        "members": [
-                                            {
-                                                "key": "HostParameters",
-                                                "type": "map",
-                                                "memberKeyType": "string",
-                                                "memberValue": {
-                                                    "type": "object",
-                                                    "members": [
-                                                        {
-                                                            "key": "RepositoryPath",
-                                                            "type": "string",
-                                                            "required": true
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        ]
+                        "values": {
+                            "git-export": {
+                                "type": "object",
+                                "members": {
+                                    "RepositoryDirectoryConfigurationKey": {
+                                        "type": "string",
+                                        "required": true
                                     }
-                                ]
+                                }
                             }
-                        ],
-                        "required": true
+                        }
                     }
-                ]
+                }
             }
         }
     },

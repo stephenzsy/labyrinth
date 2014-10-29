@@ -2,6 +2,11 @@
     <div class="page-header">
         <h1>Create a new package</h1>
     </div>
-    <icarus-api-form namespace="'icarus.package_manager'" service="'package-manager'"
-                     action="'CreatePackage'"></icarus-api-form>
+    <icarus-api-form role="form" namespace="icarus.package_manager" service="package-manager"
+                     target="@CreatePackage!input" model="input"></icarus-api-form>
+    <div>
+        <div class="btn btn-primary" ng-click="submitAPIForm('package-manager', 'CreatePackage', input)">
+            Submit
+        </div>
+    </div>
 </div>

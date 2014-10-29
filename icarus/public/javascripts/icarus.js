@@ -23,9 +23,15 @@
             }).when('/configurations', {
                 templateUrl: 'views/configurations/index.html',
                 controller: 'configurationsController'
-            }).when('/configurations/create_set', {
-                templateUrl: 'views/configurations/create_set.html',
+            }).when('/configurations/create_def', {
+                templateUrl: 'views/configurations/create_def.html',
                 controller: 'createConfigurationSetController'
+            }).when('/hosts', {
+                templateUrl: 'views/hosts/index.html',
+                controller: 'hostsController'
+            }).when('/hosts/create', {
+                templateUrl: 'views/hosts/create_def.html',
+                controller: 'createHostsController'
             }).otherwise({templateUrl: 'views/error.html'});
     });
 

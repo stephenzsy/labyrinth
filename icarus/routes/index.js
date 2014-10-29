@@ -18,14 +18,18 @@ var ModelUtil = require('../lib/request/model-util');
             }
         });
         return result;
-    })(['configurations']);
+    })([
+        'configurations',
+        'environments',
+        'package-manager'
+    ]);
 
 
     router.get('/service/:service', function (req, res) {
         var service = req.param('service');
         var model = MODELS[service];
         if (!model) {
-            req.status(400).send('Invalid service: ' + service);
+            res.status(400).send('Invalid service: ' + service);
             return;
         }
         res.send(model);
@@ -35,11 +39,11 @@ var ModelUtil = require('../lib/request/model-util');
         var service = req.param('service');
         var model = MODELS[service];
         if (!model) {
-            req.status(400).send('Invalid service: ' + service);
+            res.status(400).send('Invalid service: ' + service);
             return;
         }
         if (model.namespace !== req.query.Namespace) {
-            req.status(400).send('Invalid namespace: ' + req.query.Namespace + ', for service: ' + service);
+            res.status(400).send('Invalid namespace: ' + req.query.Namespace + ', for service: ' + service);
             return;
         }
         // parse target
